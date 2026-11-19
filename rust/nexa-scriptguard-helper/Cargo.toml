@@ -1,0 +1,8 @@
+[package]
+name = "nexa-scriptguard-helper"
+version = "0.1.0-alpha.1"
+edition = "2021"
+license = "MIT"
+description = "Experimental read-only Rust scanner for NEXA ScriptGuard"
+
+[dependencies]
