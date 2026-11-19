@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nexa-scriptguard"
+version = "0.4.0a1"
+description = "Experimental read-only shell-script static analyzer"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["rich>=13,<15"]
+license = "MIT"
+authors = [{name = "NextGenAI Infinity"}]
+
+[project.scripts]
+nexa-scriptguard = "nexa_scriptguard.__main__:main"
+
+[tool.setuptools]
+packages = ["nexa_scriptguard"]
+[tool.setuptools.package-data]
+nexa_scriptguard = ["bash.json"]
