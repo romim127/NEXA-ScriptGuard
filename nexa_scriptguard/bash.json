@@ -1,0 +1,57 @@
+[
+  {
+    "id": "SG-001",
+    "severity": "CRITICAL",
+    "title": "Descarga remota ejecutada en shell",
+    "pattern": "\\b(?:curl|wget)\\b[^\\n]*\\|\\s*(?:bash|sh|zsh)\\b",
+    "why": "Ejecuta contenido remoto sin revisión previa.",
+    "recommendation": "Descargar, verificar integridad y revisar antes de ejecutar.",
+    "checks": [
+      "Revisar URL, firma y hash del archivo"
+    ]
+  },
+  {
+    "id": "SG-002",
+    "severity": "CRITICAL",
+    "title": "Posible transferencia de secreto SSH",
+    "pattern": "\\b(?:curl|wget)\\b[^\\n]*(?:--data-binary\\s+@|--upload-file\\s+)[^\\n]*\\.ssh/id_(?:rsa|ed25519)",
+    "why": "Puede transferir una clave privada.",
+    "recommendation": "Investigar el destino y rotar claves si hubo exposición.",
+    "checks": [
+      "Revisar argumentos y destino sin ejecutar el comando"
+    ]
+  },
+  {
+    "id": "SG-003",
+    "severity": "HIGH",
+    "title": "Permisos demasiado amplios",
+    "pattern": "\\bchmod\\s+(?:-R\\s+)?777\\b",
+    "why": "Otorga lectura, escritura y ejecución a todos los usuarios.",
+    "recommendation": "Aplicar privilegios mínimos.",
+    "checks": [
+      "stat ruta_objetivo"
+    ]
+  },
+  {
+    "id": "SG-004",
+    "severity": "HIGH",
+    "title": "Posible borrado recursivo peligroso",
+    "pattern": "\\brm\\s+-[a-zA-Z]*r[a-zA-Z]*f\\b",
+    "why": "Borrado recursivo forzado; verificar alcance.",
+    "recommendation": "Revisar variables y ruta objetivo.",
+    "checks": [
+      "Revisar argumentos sin ejecutar"
+    ]
+  },
+  {
+    "id": "SG-005",
+    "severity": "HIGH",
+    "title": "Posible uso de eval",
+    "pattern": "\\beval\\s+",
+    "why": "Evalúa contenido como instrucciones shell.",
+    "recommendation": "Evitar eval con entradas no confiables.",
+    "checks": [
+      "Revisar origen de datos"
+    ]
+  }
+]
