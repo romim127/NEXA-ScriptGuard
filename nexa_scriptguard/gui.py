@@ -15,7 +15,7 @@ from .analysis import analyze
 from .ingestion import Source
 from .limits import ScanLimits
 from .redaction import prepare_report, sanitize_text
-from .reports import render_html, render_json, render_sarif, validate_report, validate_sarif
+from .reports import render_html, render_json, render_sarif, rules_for_report, validate_report, validate_sarif
 from .rules import RULES_PATH
 
 
@@ -130,7 +130,7 @@ class GuiHandler(BaseHTTPRequestHandler):
                     content_type = "text/html; charset=utf-8"
                 elif format_name == "sarif":
                     rules = json.loads(RULES_PATH.read_text(encoding="utf-8"))
-                    sarif = render_sarif(report, rules)
+                    sarif = render_sarif(report, rules_for_report(report, rules))
                     validate_sarif(sarif)
                     content = json.dumps(sarif, ensure_ascii=False, indent=2).encode("utf-8")
                     content_type = "application/sarif+json; charset=utf-8"
@@ -167,10 +167,10 @@ class GuiHandler(BaseHTTPRequestHandler):
         if (
             not name or len(name) > 255 or "/" in name or "\\" in name
             or any(ord(char) < 32 or ord(char) == 127 for char in name)
-            or not name.lower().endswith(".sh")
+            or not name.lower().endswith((".sh", ".py"))
         ):
             self.close_connection = True
-            return self.error_response(400, "Seleccione un archivo Bash con extensión .sh.")
+            return self.error_response(400, "Seleccione un archivo Bash (.sh) o Python (.py).")
         if not self.server.lock.acquire(blocking=False):
             self.close_connection = True
             return self.error_response(409, "Ya hay un análisis en curso.")

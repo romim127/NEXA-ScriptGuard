@@ -2,7 +2,7 @@
 
 **NextGenAI Infinity** · *AI assists. Human verifies. Human decides.*
 
-NEXA ScriptGuard es un analizador estático experimental de scripts Bash. No ejecuta el archivo inspeccionado ni los comandos que recomienda para investigarlo. Un análisis limpio **no** demuestra que el script sea seguro.
+NEXA ScriptGuard es un analizador estático experimental de scripts Bash y Python. No ejecuta ni importa el archivo inspeccionado ni ejecuta los comandos que recomienda para investigarlo. Un análisis limpio **no** demuestra que el script sea seguro.
 
 ## Instalación
 
@@ -26,7 +26,7 @@ Desde la raíz del repositorio y con las dependencias instaladas:
 .\.venv\Scripts\python.exe -m nexa_scriptguard.gui
 ```
 
-Se abre el navegador; si no ocurre, copie la URL privada que aparece en la consola. Seleccione un `.sh`, pulse **Analizar archivo** y revise el estado, las evidencias redactadas y las recomendaciones. Los botones exportan JSON, HTML y SARIF mediante descargas del navegador. La interfaz usa el motor existente, no ejecuta el script y conserva su estado incompleto. Mantenga la consola abierta; `Ctrl+C` detiene el servicio.
+Se abre el navegador; si no ocurre, copie la URL privada que aparece en la consola. Seleccione un `.sh` o `.py`, pulse **Analizar archivo** y revise el lenguaje, el estado, las evidencias redactadas y las recomendaciones. Los botones exportan JSON, HTML y SARIF mediante descargas del navegador. La interfaz usa el motor correspondiente, no ejecuta el script y conserva su estado incompleto. Mantenga la consola abierta; `Ctrl+C` detiene el servicio.
 
 El servidor escucha solo en `127.0.0.1`, en un puerto aleatorio, y utiliza un token de sesión: no comparta la URL ni la consola. Se conserva solo el último resultado; si otra pestaña inicia un análisis, la exportación anterior exige analizar de nuevo. El navegador decide el destino y cómo resolver colisiones al descargar; la garantía de no sobrescritura de la CLI no se aplica a estas descargas. La redacción es heurística, no garantiza eliminar todos los secretos. Los límites de la GUI usan los valores predeterminados descritos abajo y el tiempo/memoria no son cuotas duras. El helper opcional puede habilitarse con `--rust-helper` seguido de la ruta a un ejecutable Rust de confianza.
 
@@ -36,6 +36,7 @@ El servidor escucha solo en `127.0.0.1`, en un puerto aleatorio, y utiliza un to
 python -m nexa_scriptguard script.sh --view plain --json report.json
 python -m nexa_scriptguard script.sh --html report.html --sarif report.sarif
 python -m nexa_scriptguard script.sh --fail-on high
+python -m nexa_scriptguard script.py --json report.json --sarif report.sarif
 ```
 
 Los destinos de reporte deben ser nuevos. NEXA no reemplaza archivos existentes; la publicación crea cada destino atómicamente sin sobrescritura, pero un conjunto de varios formatos no es una transacción atómica frente a una caída abrupta. Cree el directorio de reportes antes de iniciar el análisis.
@@ -53,7 +54,7 @@ cargo build --manifest-path rust\nexa-scriptguard-helper\Cargo.toml
 python -m nexa_scriptguard script.sh --rust-helper rust\nexa-scriptguard-helper\target\debug\nexa-scriptguard-helper.exe
 ```
 
-Python envía por `stdin` los bytes ya acotados de la entrada y Rust devuelve resultados por el protocolo JSON `1.0` / `json-v1-stdin`; así ambos usan el mismo snapshot y hash sin crear una copia temporal de usuario. Rust cubre solo las señales SG-001 y SG-002 en una misma línea; no comparte el parser ni el análisis de flujo Python.
+Python envía por `stdin` los bytes ya acotados de la entrada Bash y Rust devuelve resultados por el protocolo JSON `1.0` / `json-v1-stdin`; así ambos usan el mismo snapshot y hash sin crear una copia temporal de usuario. Rust cubre solo las señales SG-001 y SG-002 en una misma línea; no comparte el parser ni el análisis de flujo Python. El helper no se aplica a archivos `.py`; el informe lo indica.
 
 ### Códigos de salida
 
@@ -67,6 +68,8 @@ Python envía por `stdin` los bytes ya acotados de la entrada y Rust devuelve re
 Se reconocen comandos Bash mediante la gramática Tree-sitter; se detectan las reglas del [catálogo](docs/RULES.md) y se correlacionan algunas asignaciones literales y múltiples saltos de variables con pipes/intérpretes y cargas de archivos. El flujo se marca como posible o indeterminado, no como prueba de ejecución.
 
 No se modelan por completo expansiones, valores de entorno, `source`, todos los ámbitos, todas las ramas, comandos externos, comportamiento del sistema operativo ni sintaxis dinámica. Los errores sintácticos de Tree-sitter y los constructs que no se puedan analizar dejan constancia de análisis incompleto; los constructs aceptados por la gramática aún pueden requerir revisión humana.
+
+Para `.py`, el módulo estándar `ast` analiza sintaxis soportada por la versión de Python que ejecuta NEXA. Se detectan ocho señales iniciales mediante AST y resolución limitada de alias; la correlación de red es local y aproximada. No se resuelven todos los ámbitos, ramas, tipos, flujo de datos, bibliotecas ni llamadas indirectas. Un error de sintaxis o límite se informa como incompleto. El parseo AST tampoco es interrumpible mediante el presupuesto cooperativo.
 
 ## Seguridad, arquitectura y contribución
 

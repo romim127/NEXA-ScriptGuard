@@ -1,6 +1,6 @@
 # Catálogo de reglas NEXA ScriptGuard
 
-Las reglas describen señales que requieren revisión; no determinan intención maliciosa ni ejecución. El catálogo versionado se encuentra en `nexa_scriptguard/bash.json`; IDs se consideran estables. Las reglas Python usan nodos de comando Bash excepto SG-001, que usa pipelines. Rust comparte únicamente SG-001 y SG-002 con su detector lineal y limitado.
+Las reglas describen señales que requieren revisión; no determinan intención maliciosa ni ejecución. Los catálogos se encuentran en `nexa_scriptguard/bash.json` y `nexa_scriptguard/python_rules.json`; sus IDs se consideran estables. Las reglas Bash usan nodos de comando excepto SG-001, que usa pipelines. Rust comparte únicamente SG-001 y SG-002 con su detector lineal y limitado.
 
 | ID | Severidad | Señal | Límites principales |
 |---|---|---|---|
@@ -20,6 +20,21 @@ Las reglas describen señales que requieren revisión; no determinan intención 
 | SG-FLOW-002 | Medium | Variable con ruta sensible en opción de carga | No resuelve filesystem, ámbito ni transferencia real. |
 
 Cada entrada del catálogo incluye explicación, recomendación y checks manuales. Las recomendaciones no se ejecutan. Los checks son puntos de revisión, no comandos garantizados ni universalmente seguros.
+
+## Reglas Python
+
+| ID | Severidad | Señal | Límites principales |
+|---|---|---|---|
+| PY-001 | High | `eval` o `exec` | No demuestra ejecución ni entrada no confiable; nombres ambiguos se omiten. |
+| PY-002 | High | `subprocess` con `shell=True` | Funciones y argumentos reconocidos de forma limitada. |
+| PY-003 | High | `pickle.load`/`loads` | La procedencia de los datos no está demostrada. |
+| PY-004 | High | Respuesta de red vinculada a `eval`/`exec` | Expresión directa o asignación simple; no prueba ejecución ni transferencia. |
+| PY-005 | Medium | Nombre de credencial asignado a literal | Puede ser ejemplo; redacción heurística, no exhaustiva. |
+| PY-006 | High | `os.system`, `os.popen` o `subprocess.getoutput`/`getstatusoutput` | No resuelve argumentos ni todas las funciones equivalentes. |
+| PY-007 | High | `execute`/`executemany` con SQL interpolado | No identifica el tipo del receptor ni demuestra inyección. |
+| PY-008 | High | Verificación TLS `verify=False` en llamadas HTTP reconocidas | No cubre sesiones, clientes ni todas las bibliotecas. |
+
+Los alias resueltos se invalidan cuando existen asignaciones conflictivas en el mismo ámbito. No se simulan imports, funciones ni comportamiento de ejecución. Las reglas pueden omitir casos o generar falsos positivos.
 
 ## Severidad y confianza
 

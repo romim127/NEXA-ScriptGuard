@@ -142,3 +142,26 @@ class GuiIntegrationTests(unittest.TestCase):
         self.assertIn(b"<svg", shield)
         self.assertIn(b"Infinity</text>", shield)
         self.assertIn(b"NEXTGENAI</text>", shield)
+
+    def test_python_selection_and_sarif_export(self):
+        status, body = self.upload(b"import pickle as p\np.loads(data)\n", "example.py")
+        self.assertEqual(status, 200)
+        report = json.loads(body)
+        self.assertEqual(report["parser"], "python-ast")
+        self.assertIn("PY-003", [item["rule_id"] for item in report["findings"]])
+        status, body = self.request("GET", "/export/sarif", headers={
+            "X-Nexa-Token": self.server.token, "X-Nexa-Result": self.result_id,
+        })
+        self.assertEqual(status, 200)
+        sarif = json.loads(body)
+        validate_sarif(sarif)
+        self.assertIn("PY-003", [item["id"] for item in sarif["runs"][0]["tool"]["driver"]["rules"]])
+
+    def test_python_incomplete_and_file_limit(self):
+        status, body = self.upload(b"def broken(:\n", "broken.py")
+        self.assertEqual(status, 200)
+        report = json.loads(body)
+        self.assertFalse(report["complete"])
+        self.assertTrue(report["incomplete_reasons"])
+        self.server.limits = ScanLimits(max_input_bytes=5)
+        self.assertEqual(self.upload(b"123456", "large.py")[0], 413)
