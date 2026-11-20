@@ -43,11 +43,23 @@ def analyze(
     source = source or read_source(path, limits)
     digest = hashlib.sha256(source.data).hexdigest()
 
+    extension = source.path.suffix.lower()
+    if extension not in {".sh", ".py"}:
+        raise ValueError("Unsupported file type; expected .sh or .py.")
     if len(source.data) > limits.max_memory_bytes:
         return _empty_report(
             source, digest, "not-started",
             f"Input size exceeds the configured memory budget ({limits.max_memory_bytes} bytes).",
         )
+    if extension == ".py":
+        if compatibility:
+            raise ValueError("Bash compatibility mode is not available for Python files.")
+        from .python_analysis import analyze_python
+
+        report = analyze_python(source, digest, limits, deadline)
+        if rust_helper is not None:
+            report.limitations.append("Rust helper supports Bash signals only and was not used for Python.")
+        return report
     if compatibility:
         report = analyze_compat(source.data, source.path, digest, limits, deadline)
         report.incomplete_reasons.append("Compatibility mode does not use a Bash parser.")

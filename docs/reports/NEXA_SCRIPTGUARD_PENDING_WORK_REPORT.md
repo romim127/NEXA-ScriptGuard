@@ -1,6 +1,7 @@
 # NEXA ScriptGuard — Informe de trabajo pendiente
 
-Fecha de corte: 20 de noviembre de 2026.
+Fecha de corte: 20 de noviembre de 2026. Para la evolución Bash/Python,
+véase también [NEXA_SCRIPTGUARD_PYTHON_EVOLUTION_REPORT.md](NEXA_SCRIPTGUARD_PYTHON_EVOLUTION_REPORT.md).
 
 ## Alcance y estado
 
@@ -18,10 +19,10 @@ están en el [informe de implementación](NEXA_SCRIPTGUARD_IMPLEMENTATION_REPORT
 
 | Prioridad | Pendiente | Criterio de aceptación |
 |---|---|---|
-| P0 | Ejecutar la CI del commit publicado en Windows, Linux y macOS con Python 3.10 y 3.12 y los trabajos Rust configurados. | Revisar los resultados reales de cada job y corregir fallos; no inferir resultados de la configuración. |
-| P0 | Probar symlinks en Windows con los permisos necesarios. | La prueba omitida localmente se ejecuta y verifica el rechazo del destino sin sobrescritura; registrar la configuración utilizada. |
+| P0 | CI de la evolución Bash/Python: los seis jobs Python y tres Rust aprobaron para `dcd0615`; ver enlaces en el informe de evolución. El usuario informó también aprobación para `725986e`. | Verificar los resultados reales de cualquier commit posterior antes de merge. |
+| P0 | Symlink de destino existente: la prueba omitida localmente pasó en el job Windows/Python 3.12 de CI de `dcd0615`, preservando el archivo objetivo. | Confirmar escenarios adicionales o el equipo local solo si se necesitan; no modificar configuración sin autorización. |
 | P0 | Comprobar la descarga física desde un navegador de usuario. | Guardar JSON, HTML y SARIF, abrirlos, comprobar contenido y estado, y verificar el comportamiento del navegador frente a un nombre existente. |
-| P0 | Revisar la interfaz y el escudo con la persona responsable del diseño. | Aprobar apariencia, escalado y legibilidad; el escudo implementado es una recreación, no el archivo gráfico original. |
+| P0 | Conservar el escudo aprobado visualmente por la persona responsable del diseño. | Mantener intacto el SVG aprobado y comprobar su presentación al ampliar la interfaz, sin volver a solicitar aprobación del diseño. |
 | P1 | Validar redacción y seguridad de las salidas compartidas. | Ampliar corpus sintético de secretos y rutas, controles, casos negativos y revisar resultados antes de compartir. La redacción actual es heurística. |
 | P1 | Validar SARIF con consumidores reales. | Importar reportes completos e incompletos en al menos un consumidor y comprobar ubicaciones, reglas y mensajes. La validación actual de esquema no garantiza interoperabilidad. |
 | P1 | Ampliar análisis y corpus Bash. | Cubrir por regla casos positivos, negativos y ambiguos; definir semántica y limitaciones de ámbitos, funciones, subshells, ramas, expansiones y `source`. |

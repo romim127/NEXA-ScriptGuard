@@ -49,10 +49,10 @@ class ReportSchemaTests(unittest.TestCase):
             sarif_schema, format_checker=FormatChecker()
         )
 
-    def run_scan(self, source, *extra):
+    def run_scan(self, source, *extra, suffix=".sh"):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            script = root / "sample ñ.sh"
+            script = root / ("sample ñ" + suffix)
             script.write_bytes(source.encode("utf-8"))
             report_path = root / "report.json"
             sarif_path = root / "report.sarif"
@@ -93,6 +93,14 @@ class ReportSchemaTests(unittest.TestCase):
         invalid_sarif = copy.deepcopy(sarif)
         invalid_sarif["runs"][0]["results"][0]["level"] = "not-a-sarif-level"
         self.assertFalse(self.sarif_validator.is_valid(invalid_sarif))
+
+    def test_python_complete_and_incomplete_report_schemas(self):
+        for source in ("import pickle\npickle.loads(data)\n", "def broken(:\n"):
+            with self.subTest(source=source):
+                report, sarif = self.run_scan(source, suffix=".py")
+                self.nexa_validator.validate(report)
+                self.sarif_validator.validate(sarif)
+                self.assertEqual(report["parser"], "python-ast")
 
     def test_sarif_declares_unicode_code_point_columns(self):
         source = "echo 😀; chmod 777 file\n"

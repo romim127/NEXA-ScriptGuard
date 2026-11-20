@@ -14,6 +14,7 @@ from .reports import (
     render_json,
     render_sarif,
     render_terminal,
+    rules_for_report,
     validate_report,
     validate_sarif,
 )
@@ -35,7 +36,7 @@ def _limits(args):
 
 def _make_parser():
     parser = argparse.ArgumentParser(
-        description="Read-only static Bash source analyzer; inspected scripts are never executed."
+        description="Read-only static Bash and Python analyzer; inspected scripts are never executed."
     )
     parser.add_argument("script", type=Path)
     for output_format in ("json", "html", "sarif"):
@@ -119,7 +120,7 @@ def main(argv=None):
             rendered[args.html_path] = render_html(report).encode("utf-8")
         if args.sarif_path:
             rules = json.loads(RULES_PATH.read_text(encoding="utf-8"))
-            sarif = render_sarif(report, rules)
+            sarif = render_sarif(report, rules_for_report(report, rules))
             validate_sarif(sarif)
             rendered[args.sarif_path] = json.dumps(
                 sarif, ensure_ascii=False, indent=2

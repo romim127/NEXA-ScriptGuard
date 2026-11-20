@@ -2,7 +2,7 @@
 
 **NextGenAI Infinity** · *AI assists. Human verifies. Human decides.*
 
-NEXA ScriptGuard is an experimental static analyzer for Bash scripts. It does not execute the inspected file or investigation commands it recommends. A clean analysis **does not** prove a script is safe.
+NEXA ScriptGuard is an experimental static analyzer for Bash and Python scripts. It does not execute or import the inspected file or execute investigation commands it recommends. A clean analysis **does not** prove a script is safe.
 
 ## Installation
 
@@ -26,7 +26,7 @@ From the repository root, after installing dependencies:
 .\.venv\Scripts\python.exe -m nexa_scriptguard.gui
 ```
 
-The browser opens automatically; otherwise use the private URL printed in the console. Select a `.sh` file, click **Analizar archivo**, and review the status, redacted evidence and recommendations. JSON, HTML and SARIF are offered as browser downloads. The existing analyzer does not execute the script and preserves incomplete status. Keep the console open; `Ctrl+C` stops the server.
+The browser opens automatically; otherwise use the private URL printed in the console. Select a `.sh` or `.py` file, click **Analizar archivo**, and review the detected language, status, redacted evidence and recommendations. JSON, HTML and SARIF are offered as browser downloads. The analyzer does not execute the script and preserves incomplete status. Keep the console open; `Ctrl+C` stops the server.
 
 The server binds only to `127.0.0.1` on a random port and uses a session token: do not share the URL or console. Only the latest result is retained; if another tab runs a scan, the previous tab must scan again to export. The browser chooses the download location and handles name collisions; CLI no-overwrite guarantees do not apply to downloads. Redaction is best-effort, not a guarantee. The GUI uses the default budgets described below; time and memory are not hard quotas. An optional trusted Rust executable can be enabled using `--rust-helper`.
 
@@ -36,6 +36,7 @@ The server binds only to `127.0.0.1` on a random port and uses a session token: 
 python -m nexa_scriptguard script.sh --view plain --json report.json
 python -m nexa_scriptguard script.sh --html report.html --sarif report.sarif
 python -m nexa_scriptguard script.sh --fail-on high
+python -m nexa_scriptguard script.py --json report.json --sarif report.sarif
 ```
 
 Report destinations must be new. NEXA does not replace existing files; each destination is atomically created without overwrite, but publishing multiple formats is not a transaction across abrupt process or system failure. Create the reports directory first.
@@ -53,13 +54,15 @@ cargo build --manifest-path rust\nexa-scriptguard-helper\Cargo.toml
 python -m nexa_scriptguard script.sh --rust-helper rust\nexa-scriptguard-helper\target\debug\nexa-scriptguard-helper.exe
 ```
 
-Python sends the already bounded input bytes over `stdin`; Rust returns findings using JSON protocol `1.0` / `json-v1-stdin`. Both engines therefore use the same snapshot and hash without a temporary copy of user input. Rust supports only SG-001 and SG-002 line-level signals; it does not share the Python parser or data-flow analysis.
+Python sends the already bounded Bash input bytes over `stdin`; Rust returns findings using JSON protocol `1.0` / `json-v1-stdin`. Both engines therefore use the same snapshot and hash without a temporary copy of user input. Rust supports only SG-001 and SG-002 line-level signals; it does not share the Python parser or data-flow analysis. It is not applied to `.py` files.
 
 ## Current scope
 
 Bash commands are parsed with the Tree-sitter grammar; the [rule catalog](docs/RULES.md) is applied and selected literal assignments and multi-hop variables are correlated with pipelines/interpreters and file uploads. Flows are labeled possible or indeterminate, not proof of execution.
 
 The analyzer does not fully model expansions, environment values, `source`, every scope, branch, external command, operating-system behavior, or dynamic syntax. Tree-sitter syntax errors and constructs it cannot parse mark analysis incomplete; accepted syntax may still require human review.
+
+For `.py` files, the standard-library `ast` parser uses the running Python version. Eight initial AST rules use limited alias resolution and local approximate network correlation; they do not model all scopes, branches, types, libraries, indirect calls or data flow. Syntax errors and budget exhaustion are reported as incomplete. AST parsing is not preemptible by the cooperative timeout.
 
 ## Security, architecture, and contribution
 
