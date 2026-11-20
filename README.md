@@ -2,61 +2,83 @@
 
 **NextGenAI Infinity** · *AI assists. Human verifies. Human decides.*
 
-Open-source **experimental** static analysis of shell scripts. This repository contains a Python CLI and a separate Rust helper prototype. **Neither engine executes the inspected script.**
+NEXA ScriptGuard es un analizador estático experimental de scripts Bash. No ejecuta el archivo inspeccionado ni los comandos que recomienda para investigarlo. Un análisis limpio **no** demuestra que el script sea seguro.
 
-## Install and run in VS Code
+## Instalación
 
-Python 3.10+:
+Requiere Python 3.10 o posterior. El paquete instala el runtime Tree-sitter y la gramática Bash oficial:
 
-```bash
-git clone https://github.com/romim127/NEXA-ScriptGuard.git
-cd NEXA-ScriptGuard
-code .
+```powershell
 python -m venv .venv
-# Linux/macOS:
-source .venv/bin/activate
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install -e .
+.\.venv\Scripts\Activate.ps1
+python -m pip install .
+```
+
+En Linux/macOS, activar el entorno con `source .venv/bin/activate`. La gramática [`tree-sitter-bash`](https://github.com/tree-sitter/tree-sitter-bash) está bajo MIT; su binding publica wheels para Windows, Linux y macOS. El parser ofrece árbol sintáctico y posiciones de origen, pero no interpreta toda la semántica de Bash ni ejecuta expansiones.
+
+## Uso
+
+```text
+python -m nexa_scriptguard script.sh --view plain --json report.json
+python -m nexa_scriptguard script.sh --html report.html --sarif report.sarif
+python -m nexa_scriptguard script.sh --fail-on high
+```
+
+Los destinos de reporte deben ser nuevos. NEXA no reemplaza archivos existentes; la publicación crea cada destino atómicamente sin sobrescritura, pero un conjunto de varios formatos no es una transacción atómica frente a una caída abrupta. Cree el directorio de reportes antes de iniciar el análisis.
+
+La redacción de secretos y rutas sensibles es best-effort y está activa por defecto en terminal y archivos. `--include-sensitive-evidence` es una opción explícita para incluir evidencia sin redacción; los controles de terminal se siguen escapando. Aun redactado, un hash SHA-256 puede permitir correlación con un archivo conocido. Revise los reportes antes de compartirlos.
+
+Los límites pueden ajustarse con `--max-input-bytes`, `--max-findings`, `--max-evidence-chars`, `--max-total-evidence-chars`, `--max-output-bytes`, `--max-memory-bytes`, `--max-ast-nodes` y `--timeout-seconds`. El parser Tree-sitter no es preemptible; el límite de memoria es una estimación, no una cuota dura de memoria nativa. Si se alcanza un límite, un error de parseo o falta el parser, el reporte indica `analysis_status: incomplete` y la CLI devuelve `3`; nunca equivale a un resultado limpio.
+
+### Compatibilidad y Rust
+
+`--compat-heuristics` habilita expresamente las heurísticas de regex previas; el resultado se etiqueta `legacy-regex-compatibility` y siempre es incompleto. El helper Rust es un proceso independiente, opcional:
+
+```powershell
+cargo build --manifest-path rust\nexa-scriptguard-helper\Cargo.toml
+python -m nexa_scriptguard script.sh --rust-helper rust\nexa-scriptguard-helper\target\debug\nexa-scriptguard-helper.exe
+```
+
+Python envía por `stdin` los bytes ya acotados de la entrada y Rust devuelve resultados por el protocolo JSON `1.0` / `json-v1-stdin`; así ambos usan el mismo snapshot y hash sin crear una copia temporal de usuario. Rust cubre solo las señales SG-001 y SG-002 en una misma línea; no comparte el parser ni el análisis de flujo Python.
+
+### Códigos de salida
+
+- `0`: análisis completo sin alcanzar el umbral `--fail-on`.
+- `2`: análisis completo con hallazgos que alcanzan `--fail-on`.
+- `3`: análisis incompleto, compatibilidad heurística, timeout o límite alcanzado.
+- `4`: error operativo de entrada, reporte o integración.
+
+## Alcance actual
+
+Se reconocen comandos Bash mediante la gramática Tree-sitter; se detectan las reglas del [catálogo](docs/RULES.md) y se correlacionan algunas asignaciones literales y múltiples saltos de variables con pipes/intérpretes y cargas de archivos. El flujo se marca como posible o indeterminado, no como prueba de ejecución.
+
+No se modelan por completo expansiones, valores de entorno, `source`, todos los ámbitos, todas las ramas, comandos externos, comportamiento del sistema operativo ni sintaxis dinámica. Los errores sintácticos de Tree-sitter y los constructs que no se puedan analizar dejan constancia de análisis incompleto; los constructs aceptados por la gramática aún pueden requerir revisión humana.
+
+## Seguridad, arquitectura y contribución
+
+- [Arquitectura y límites](docs/ARCHITECTURE.md)
+- [Catálogo de reglas](docs/RULES.md)
+- [Procedimiento para el instalador de Ollama](docs/Ollama-analysis.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Política de seguridad](SECURITY.md)
+- [Contribuciones](CONTRIBUTING.md)
+- [Cambios](CHANGELOG.md)
+- [English README](README.en.md)
+
+No ejecute `demo_example.sh`: contiene instrucciones deliberadamente sospechosas. Solo analícelo como texto.
+
+## Calidad
+
+En el repositorio, ejecute:
+
+```powershell
+python -m pip install ".[test]"
 python -m unittest discover -s tests -v
-nexa-scriptguard demo_example.sh --view neon --html report.html --json report.json --sarif report.sarif
+cargo test --manifest-path rust\nexa-scriptguard-helper\Cargo.toml
+cargo clippy --manifest-path rust\nexa-scriptguard-helper\Cargo.toml --all-targets -- -D warnings
 ```
 
-On Ubuntu use `python3` if needed. Do not execute `demo_example.sh`; it contains deliberately suspicious sample instructions.
-
-### Rust helper (independent prototype)
-
-```bash
-cd rust/nexa-scriptguard-helper
-cargo test
-cargo run -- ../../demo_example.sh
-```
-
-Rust currently flags only two basic patterns. The Python scanner currently ships **five example regex rules** plus two limited contextual correlations. The previous, broader local alpha is not yet fully synchronized with this repository; the next engineering milestone is to restore and review its remaining rules and tests. The two engines are **not yet integrated**.
-
-## Output formats
-
-```bash
-nexa-scriptguard script.sh --view plain
-nexa-scriptguard script.sh --redact --html report.html --json report.json --sarif report.sarif
-nexa-scriptguard script.sh --fail-on high
-```
-
-`--redact` covers only a limited set of credential patterns. Inspect all reports manually before sharing: source instructions and paths may contain sensitive information.
-
-## Security and scope
-
-- **Alpha**, not production ready. No complete Bash parser, interprocedural dataflow or comprehensive malicious-code detection.
-- False positives and false negatives are expected. No findings **does not** mean the script is safe.
-- Python CLI runs on supported Windows, Linux and macOS; analysis currently targets shell syntax, not PowerShell or other languages.
-- The input limit is 5 MiB. Analysis is read-only; verification commands are **not executed**.
-- The HTML report is self-contained and escapes source text.
-
-## Quality
-
-GitHub Actions includes Python tests on Windows, macOS and Linux and Rust tests/clippy on Ubuntu. A configured workflow is not evidence that all jobs have passed; check the Actions tab.
-
-## License
-
-MIT. See [LICENSE](LICENSE), [SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
+CI declara trabajos para Windows, Linux y macOS. Su configuración no demuestra por sí sola que cada ejecución remota haya pasado.
+La suite obtiene el esquema SARIF oficial por HTTPS y verifica su hash; para validación sin conexión se puede definir `NEXA_SARIF_SCHEMA_PATH` a una copia idéntica. JSON se valida contra un esquema versionado propio, no contra un estándar externo. Véase [Contribuciones](CONTRIBUTING.md).
 
 **THERE IS NO FINAL VERSION. THERE IS ONLY EVOLUTION.**

@@ -1,57 +1,133 @@
 [
   {
     "id": "SG-001",
-    "severity": "CRITICAL",
-    "title": "Descarga remota ejecutada en shell",
+    "severity": "HIGH",
+    "title": "Descarga de red conectada a un intérprete",
+    "matcher": "remote_pipeline",
     "pattern": "\\b(?:curl|wget)\\b[^\\n]*\\|\\s*(?:bash|sh|zsh)\\b",
-    "why": "Ejecuta contenido remoto sin revisión previa.",
-    "recommendation": "Descargar, verificar integridad y revisar antes de ejecutar.",
-    "checks": [
-      "Revisar URL, firma y hash del archivo"
-    ]
+    "why": "Un pipeline contiene un comando de red y un intérprete; el análisis estático no demuestra que el contenido llegue o se ejecute.",
+    "recommendation": "Revisar el origen, integridad, destino y contexto del pipeline antes de cualquier ejecución.",
+    "checks": ["Verificar URL y procedencia por un canal confiable", "Revisar el contenido descargado sin ejecutarlo"]
   },
   {
     "id": "SG-002",
-    "severity": "CRITICAL",
-    "title": "Posible transferencia de secreto SSH",
+    "severity": "HIGH",
+    "title": "Posible transferencia de archivo sensible",
+    "matcher": "sensitive_upload",
     "pattern": "\\b(?:curl|wget)\\b[^\\n]*(?:--data-binary\\s+@|--upload-file\\s+)[^\\n]*\\.ssh/id_(?:rsa|ed25519)",
-    "why": "Puede transferir una clave privada.",
-    "recommendation": "Investigar el destino y rotar claves si hubo exposición.",
-    "checks": [
-      "Revisar argumentos y destino sin ejecutar el comando"
-    ]
+    "why": "Un cliente de red usa una opción de carga junto con una ruta que parece sensible.",
+    "recommendation": "Confirmar el archivo, destino, autorización y exposición; no reproducir la transferencia.",
+    "checks": ["Revisar el destino y los registros de acceso disponibles", "Si se confirma exposición, aplicar el proceso interno de respuesta a incidentes"]
   },
   {
     "id": "SG-003",
     "severity": "HIGH",
-    "title": "Permisos demasiado amplios",
+    "title": "Permisos excesivamente amplios",
+    "matcher": "chmod_world_writable",
     "pattern": "\\bchmod\\s+(?:-R\\s+)?777\\b",
-    "why": "Otorga lectura, escritura y ejecución a todos los usuarios.",
-    "recommendation": "Aplicar privilegios mínimos.",
-    "checks": [
-      "stat ruta_objetivo"
-    ]
+    "why": "El modo indicado otorga permisos de escritura amplios.",
+    "recommendation": "Determinar propietario, destino y necesidad; preferir privilegio mínimo.",
+    "checks": ["Inspeccionar los metadatos del archivo por un canal autorizado"]
   },
   {
     "id": "SG-004",
     "severity": "HIGH",
-    "title": "Posible borrado recursivo peligroso",
+    "title": "Borrado recursivo forzado",
+    "matcher": "recursive_force_delete",
     "pattern": "\\brm\\s+-[a-zA-Z]*r[a-zA-Z]*f\\b",
-    "why": "Borrado recursivo forzado; verificar alcance.",
-    "recommendation": "Revisar variables y ruta objetivo.",
-    "checks": [
-      "Revisar argumentos sin ejecutar"
-    ]
+    "why": "La combinación de opciones puede borrar recursivamente sin confirmación.",
+    "recommendation": "Resolver estáticamente variables, comodines y directorio de trabajo antes de aprobar.",
+    "checks": ["Revisar el alcance de la ruta sin ejecutar el comando"]
   },
   {
     "id": "SG-005",
     "severity": "HIGH",
-    "title": "Posible uso de eval",
+    "title": "Evaluación dinámica mediante eval",
+    "matcher": "dynamic_eval",
     "pattern": "\\beval\\s+",
-    "why": "Evalúa contenido como instrucciones shell.",
-    "recommendation": "Evitar eval con entradas no confiables.",
-    "checks": [
-      "Revisar origen de datos"
-    ]
+    "why": "eval vuelve a interpretar argumentos como instrucciones de shell.",
+    "recommendation": "Trazar el origen de cada argumento y evitar entradas no confiables.",
+    "checks": ["Revisar origen, transformaciones y validación de los argumentos"]
+  },
+  {
+    "id": "SG-006",
+    "severity": "HIGH",
+    "title": "Shell dinámico con entrada expandida",
+    "matcher": "dynamic_shell",
+    "why": "Un argumento expandido se pasa a un intérprete mediante -c.",
+    "recommendation": "Evitar construir código shell desde datos; validar origen y alternativas sin eval.",
+    "checks": ["Trazar las expansiones que llegan al argumento -c"]
+  },
+  {
+    "id": "SG-007",
+    "severity": "HIGH",
+    "title": "Posible desactivación de controles de seguridad",
+    "matcher": "control_disable",
+    "why": "El comando parece reducir o detener un control de seguridad.",
+    "recommendation": "Verificar autorización, alcance, duración y controles compensatorios.",
+    "checks": ["Consultar el cambio aprobado y los registros de configuración"]
+  },
+  {
+    "id": "SG-008",
+    "severity": "MEDIUM",
+    "title": "Posible mecanismo de persistencia",
+    "matcher": "persistence",
+    "why": "El comando puede editar tareas programadas o habilitar un servicio persistente.",
+    "recommendation": "Confirmar propietario, propósito, revisión y autorización del mecanismo.",
+    "checks": ["Comparar la configuración propuesta con el inventario autorizado"]
+  },
+  {
+    "id": "SG-009",
+    "severity": "MEDIUM",
+    "title": "Modificación de configuración sensible",
+    "matcher": "sensitive_config",
+    "why": "Un comando de edición o copia referencia archivos sensibles de configuración.",
+    "recommendation": "Revisar el diff esperado, permisos y mecanismo de reversión.",
+    "checks": ["Inspeccionar el cambio propuesto sin aplicarlo"]
+  },
+  {
+    "id": "SG-010",
+    "severity": "HIGH",
+    "title": "Posible asignación de bit setuid",
+    "matcher": "setuid",
+    "why": "El modo de permisos puede habilitar ejecución con identidad del propietario.",
+    "recommendation": "Verificar necesidad, propietario, destino y aprobación de seguridad.",
+    "checks": ["Revisar metadatos y justificación de privilegios"]
+  },
+  {
+    "id": "SG-011",
+    "severity": "MEDIUM",
+    "title": "Posible credencial literal en instrucción",
+    "matcher": "credential_literal",
+    "why": "Una asignación parece contener una credencial literal; puede ser un valor ficticio.",
+    "recommendation": "No copiar el valor al ticket; comprobar de forma segura si es un secreto real y rotarlo si corresponde.",
+    "checks": ["Inspeccionar el valor localmente sin compartirlo"]
+  },
+  {
+    "id": "SG-012",
+    "severity": "HIGH",
+    "title": "Escritura a destino de alto impacto",
+    "matcher": "unsafe_redirect",
+    "why": "Una utilidad de escritura referencia un dispositivo o archivo crítico.",
+    "recommendation": "Verificar destino y autorización sin ejecutar la operación.",
+    "checks": ["Revisar la ruta y el contexto de ejecución previsto"]
+  },
+  {
+    "id": "SG-FLOW-001",
+    "severity": "HIGH",
+    "title": "Flujo posible de comando dinámico a intérprete",
+    "matcher": "flow_remote",
+    "why": "Una variable con contenido de red puede llegar a un intérprete; el flujo es una hipótesis estática.",
+    "recommendation": "Revisar las asignaciones, ámbitos y expansión hasta el intérprete.",
+    "checks": ["Inspeccionar cada asignación y el argumento del intérprete sin ejecutarlo"]
+  },
+  {
+    "id": "SG-FLOW-002",
+    "severity": "MEDIUM",
+    "title": "Flujo posible de ruta sensible a carga",
+    "matcher": "flow_sensitive_upload",
+    "why": "Una variable puede conectar una ruta sensible con una opción de transferencia.",
+    "recommendation": "Confirmar qué archivo representa la variable y revisar el destino sin transferirlo.",
+    "checks": ["Trazar asignaciones, expansiones y destino de red"]
   }
 ]

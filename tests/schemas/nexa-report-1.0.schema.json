@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NEXA ScriptGuard report contract 1.0",
+  "type": "object",
+  "required": ["schema_version", "tool", "version", "analyzed_at_utc", "file", "sha256", "lines", "complete", "analysis_status", "incomplete_reasons", "parser", "redaction_applied", "limitations", "findings"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "tool": {"const": "NEXA ScriptGuard"},
+    "version": {"type": "string", "minLength": 1},
+    "analyzed_at_utc": {"type": "string", "format": "date-time"},
+    "file": {"type": "string", "minLength": 1},
+    "sha256": {"$ref": "#/$defs/sha256"},
+    "lines": {"type": "integer", "minimum": 0},
+    "complete": {"type": "boolean"},
+    "analysis_status": {"enum": ["complete", "incomplete"]},
+    "incomplete_reasons": {"$ref": "#/$defs/strings"},
+    "parser": {"type": "string", "minLength": 1},
+    "redaction_applied": {"type": "boolean"},
+    "limitations": {"$ref": "#/$defs/strings"},
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"complete": {"const": true}}},
+      "then": {"properties": {"analysis_status": {"const": "complete"}, "incomplete_reasons": {"maxItems": 0}}},
+      "else": {"properties": {"analysis_status": {"const": "incomplete"}, "incomplete_reasons": {"minItems": 1}}}
+    },
+    {
+      "if": {"properties": {"redaction_applied": {"const": true}}},
+      "then": {"properties": {"findings": {"items": {"properties": {"evidence": {"not": {"required": ["original"]}, "properties": {"original_available_in_this_report": {"const": false}}}}}}}},
+      "else": {"properties": {"findings": {"items": {"properties": {"evidence": {"required": ["original"], "properties": {"original_available_in_this_report": {"const": true}}}}}}}}
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "strings": {"type": "array", "items": {"type": "string"}},
+    "point": {
+      "type": "object",
+      "required": ["line", "column"],
+      "properties": {
+        "line": {"type": "integer", "minimum": 1},
+        "column": {"type": "integer", "minimum": 1}
+      }
+    },
+    "location": {
+      "type": "object",
+      "required": ["start", "end"],
+      "properties": {"start": {"$ref": "#/$defs/point"}, "end": {"$ref": "#/$defs/point"}}
+    },
+    "context": {
+      "type": "object",
+      "required": ["before", "after"],
+      "properties": {"before": {"$ref": "#/$defs/strings"}, "after": {"$ref": "#/$defs/strings"}}
+    },
+    "finding": {
+      "type": "object",
+      "required": ["id", "rule", "rule_id", "title", "file", "sha256", "location", "line", "column", "end_line", "end_column", "instruction", "context", "context_before", "context_after", "severity", "confidence", "confidence_reason", "status", "evidence", "explanation", "recommendation", "verification_commands", "limitations", "engine"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "rule": {
+          "type": "object",
+          "required": ["id", "version"],
+          "properties": {"id": {"type": "string", "minLength": 1}, "version": {"type": "string", "minLength": 1}}
+        },
+        "rule_id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "file": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "location": {"$ref": "#/$defs/location"},
+        "line": {"type": "integer", "minimum": 1},
+        "column": {"type": "integer", "minimum": 1},
+        "end_line": {"type": "integer", "minimum": 1},
+        "end_column": {"type": "integer", "minimum": 1},
+        "instruction": {"type": "string"},
+        "context": {"$ref": "#/$defs/context"},
+        "context_before": {"$ref": "#/$defs/strings"},
+        "context_after": {"$ref": "#/$defs/strings"},
+        "severity": {"enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]},
+        "confidence": {"enum": ["low", "medium", "high"]},
+        "confidence_reason": {"type": "string"},
+        "status": {"type": "string", "minLength": 1},
+        "evidence": {
+          "type": "object",
+          "required": ["shared", "truncated", "correlation", "original_available_in_this_report"],
+          "properties": {
+            "shared": {"type": "string"},
+            "original": {"type": "string"},
+            "truncated": {"type": "boolean"},
+            "correlation": {"type": "array", "items": {"type": "object"}},
+            "original_available_in_this_report": {"type": "boolean"}
+          }
+        },
+        "explanation": {"type": "string"},
+        "recommendation": {"type": "string"},
+        "verification_commands": {"$ref": "#/$defs/strings"},
+        "limitations": {"$ref": "#/$defs/strings"},
+        "engine": {"enum": ["python", "rust", "compatibility"]}
+      }
+    }
+  }
+}
