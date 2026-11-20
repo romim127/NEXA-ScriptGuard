@@ -31,6 +31,8 @@ La suite valida JSON contra el contrato propio `tests/schemas/nexa-report-1.0.sc
 
 Los límites configurables cubren bytes de entrada, hallazgos, caracteres de evidencia por hallazgo y en total, expansión intermedia del flujo, nodos AST, tamaño de salida, tiempo y una estimación de memoria. Al superar la estimación tras construir el AST se detiene el análisis de reglas y se emite un resultado incompleto. El runtime Tree-sitter no permite interrumpir una llamada `parse` desde Python; el presupuesto de memoria no limita asignaciones nativas. La salida completa se serializa antes de publicar y el límite de bytes se verifica antes de escribir.
 
+El presupuesto temporal de `analyze` usa el reloj monotónico y considera agotado el plazo cuando el reloj alcanza o supera el deadline. Se comprueba nuevamente después de clasificar y construir el informe, antes de devolverlo. Es cooperativo: no interrumpe el parser ni operaciones bloqueantes. En la CLI, la lectura inicial del archivo ocurre antes de llamar a `analyze`, y la redacción, serialización y publicación ocurren después; estas etapas no están comprendidas en ese presupuesto.
+
 ## Parser y límites semánticos
 
 La dependencia es `tree-sitter>=0.25,<0.26` y `tree-sitter-bash==0.25.1` (MIT). Tree-sitter ofrece gramática Bash, recuperación de errores y rangos de origen byte precisos, convertidos aquí a columnas de caracteres Unicode. La gramática representa comandos, pipelines, redirecciones, palabras, asignaciones, sustituciones, heredocs y estructuras compuestas para las construcciones aceptadas. No resuelve funciones llamadas dinámicamente, `source`, entorno real, comandos externos ni comportamiento de runtime. El soporte efectivo queda limitado a la gramática y fixtures de `tests/test_parser.py`.

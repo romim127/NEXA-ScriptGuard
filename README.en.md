@@ -18,6 +18,20 @@ On Linux/macOS, activate with `source .venv/bin/activate`. The [`tree-sitter-bas
 
 ## Usage
 
+### Local graphical interface on Windows
+
+From the repository root, after installing dependencies:
+
+```powershell
+.\.venv\Scripts\python.exe -m nexa_scriptguard.gui
+```
+
+The browser opens automatically; otherwise use the private URL printed in the console. Select a `.sh` file, click **Analizar archivo**, and review the status, redacted evidence and recommendations. JSON, HTML and SARIF are offered as browser downloads. The existing analyzer does not execute the script and preserves incomplete status. Keep the console open; `Ctrl+C` stops the server.
+
+The server binds only to `127.0.0.1` on a random port and uses a session token: do not share the URL or console. Only the latest result is retained; if another tab runs a scan, the previous tab must scan again to export. The browser chooses the download location and handles name collisions; CLI no-overwrite guarantees do not apply to downloads. Redaction is best-effort, not a guarantee. The GUI uses the default budgets described below; time and memory are not hard quotas. An optional trusted Rust executable can be enabled using `--rust-helper`.
+
+### Command line
+
 ```text
 python -m nexa_scriptguard script.sh --view plain --json report.json
 python -m nexa_scriptguard script.sh --html report.html --sarif report.sarif

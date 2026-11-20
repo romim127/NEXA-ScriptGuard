@@ -105,7 +105,17 @@ La consolidación corrigió un defecto reproducido: `Finding.to_dict` omitía `t
 
 Las pruebas de archivos verificaron hardlinks al input, destinos equivalentes, destino preexistente, dos escritores simultáneos, aparición del destino durante la publicación, rollback ante fallo del segundo enlace y conservación de un destino reemplazado antes del rollback. La prueba de symlink real se omitió por falta de privilegios; no se simuló su éxito. La redacción se ejercitó con credenciales, Bearer, rutas Windows/Unix y controles sintéticos en JSON, HTML, SARIF y ambas vistas de terminal.
 
-El test suite utilizó `unittest`, que es el runner declarado en CI. No se afirma que las pruebas hayan pasado en Linux o macOS; tampoco se ejecutó el workflow remoto.
+El test suite utilizó `unittest`, que es el runner declarado en CI. Los resultados remotos del commit posterior se indican por separado en la sección de corrección puntual.
+
+### Corrección puntual del presupuesto temporal en CI Windows
+
+La prueba anterior usaba un límite de `1e-12` segundos y dependía de que el reloj monotónico avanzara durante el análisis. Esa duración es menor que la resolución observada localmente de `QueryPerformanceCounter` (100 ns), y la suma del plazo en coma flotante también puede redondearse. Por ello, que el reloj devuelva la misma lectura durante un análisis rápido puede hacer que una comparación estricta `>` no detecte el vencimiento. Esta es una explicación compatible con el fallo comunicado en CI; no se dispone de las lecturas del reloj de ese job para demostrar cuál fue su secuencia exacta.
+
+Además se reprodujo determinísticamente un defecto real: la última comprobación del plazo se efectuaba antes de `classify_findings`, por lo que un análisis que agotaba o superaba el presupuesto durante la clasificación podía devolverse como completo. La comprobación final ahora se realiza después de clasificar y construir el informe; se marca incompleto cuando el reloj alcanza o supera el plazo. Las comprobaciones de reglas, flujo y compatibilidad utilizan el mismo criterio conservador. La prueba frágil se sustituyó por un reloj controlado en las pruebas, sin alterar el reloj monotónico de producción; se prueban 9, 10 y 11 segundos para un presupuesto de 10 segundos, tanto tras el parser como durante la clasificación.
+
+**Resultados locales de esta corrección, Windows/Python 3.14.3:** `python -m unittest discover -s tests -v`: **65 tests, 64 aprobados y 1 omitido** en 5,101 s. La omisión sigue siendo el symlink por `WinError 1314`. Los 64 tests anteriores están incluidos; se añadió una prueba de regresión. `cargo fmt -- --check`, `cargo test --all-targets` (**6 aprobados**), `cargo clippy --all-targets -- -D warnings`, `cargo build`, `compileall` y `git diff --check` pasaron.
+
+El usuario informó que en el commit `568268d` el workflow Rust y Python 3.10/3.12 en Ubuntu y macOS pasaron, y que en Windows falló únicamente la prueba temporal. No se verificaron los jobs remotamente en esta sesión porque `gh` no está autenticado. La corrección actual todavía no se ha ejecutado en GitHub Actions ni en Python 3.10/3.12 localmente.
 
 ## 10. Fuzzing y límites de recursos
 
@@ -115,7 +125,7 @@ Los límites configurables se prueban para entrada, nodos, hallazgos, memoria es
 
 ## 11. Compatibilidad multiplataforma
 
-La CI declara Windows, Linux y macOS. El workflow Python prueba Python 3.10 y 3.12, instala el extra `test`, compila Rust y ejecuta `unittest`, incluidas las validaciones de esquema; el workflow Rust ejecuta tests y Clippy en los tres sistemas. La compatibilidad declarada de dependencias no sustituye resultados reales: solo se ejecutó localmente en Windows/Python 3.14.3; Python 3.10 y 3.12 no estaban instalados. La prueba de symlink se omitió por permisos; debe confirmarse en un runner Windows configurado para ello.
+La CI declara Windows, Linux y macOS. El workflow Python prueba Python 3.10 y 3.12, instala el extra `test`, compila Rust y ejecuta `unittest`, incluidas las validaciones de esquema; el workflow Rust ejecuta tests y Clippy en los tres sistemas. Para el commit `568268d` se dispone de los resultados remotos comunicados por el usuario en la sección 9; los cambios actuales solo se ejecutaron localmente en Windows/Python 3.14.3. La prueba de symlink se omitió por permisos; debe confirmarse en un runner Windows configurado para ello.
 
 ## 12. Capacidades incompletas
 
@@ -130,7 +140,7 @@ La CI declara Windows, Linux y macOS. El workflow Python prueba Python 3.10 y 3.
 ## 13. Bloqueos técnicos
 
 1. El parser Tree-sitter no es interrumpible desde el proceso Python y no ofrece por sí solo una cuota de memoria nativa.
-2. El runner Windows local no permite crear el symlink de prueba. Linux/macOS no estaban disponibles para validación local y no se consultaron resultados de CI remota.
+2. El runner Windows local no permite crear el symlink de prueba. Linux/macOS no estaban disponibles para validar localmente la corrección; la consulta independiente de CI remota requiere autenticación de `gh`.
 3. Las pruebas SARIF requieren acceso al esquema oficial o una copia local con el hash fijado; no se probó ningún consumidor externo. El esquema por sí solo no certifica semántica ni interoperabilidad completa.
 4. No se proporcionó un instalador oficial de Ollama ni autorización para descargarlo o ejecutarlo; ninguno fue descargado ni ejecutado.
 
@@ -179,11 +189,53 @@ Falsos positivos y negativos son esperables: reglas y flujo son indicadores heur
 | Fuzzing | Parcial | 250 casos deterministas de smoke; no coverage-guided. |
 | Corpus sintético reproducible | Implementado | Casos positivos, negativos y ambiguos versionados en `tests/corpus/bash_cases.json`. |
 | Procedimiento del instalador oficial Ollama | Parcial | Procedimiento está documentado; artefacto no disponible, no descargado ni ejecutado. |
-| CI Windows/Linux/macOS | Parcial | Workflows declarados para las tres plataformas; solo Windows local ejecutado, no se afirma éxito remoto. |
+| CI Windows/Linux/macOS | Parcial | Para `568268d`, el usuario comunicó Rust y Python Ubuntu/macOS aprobados y fallo temporal en Windows; falta ejecutar la corrección actual en CI. |
 | README ES/EN, arquitectura, reglas, límites, seguridad, contribución y roadmap | Implementado | Documentación sincronizada con capacidades y límites alfa. |
 | `.gitignore` y `Cargo.lock` | Implementado | Excluye `.vscode`, `.venv`, `target` y cachés; se conserva lock del binario Rust sin dependencias externas. |
 | No commits, push ni ejecución de scripts analizados | Cumplido | No se realizaron commits/push; tampoco se ejecutaron scripts analizados ni instalador de Ollama. |
 
-## 17. Estado final de Git
+## 17. Estado de Git al cierre de la integración inicial
 
-El trabajo permanece local y sin commit ni push. Los archivos de la implementación, pruebas, corpus y documentación, incluido `rust/nexa-scriptguard-helper/Cargo.lock`, están preparados en el índice para revisión. `.vscode/`, `target/`, `.venv/` y las cachés están ignorados y no se eliminaron. La advertencia de Git sobre conversión LF/CRLF en archivos Rust no afectó las pruebas ni `git diff --check`.
+La implementación base está en el commit `568268d`. Posteriormente se integró por fast-forward el commit remoto `6845d5e`, sin sobrescribir los cambios locales de timeout. Al cierre de esta intervención, `main` y la referencia local `origin/main` apuntan a `6845d5e`; esto refleja el fetch realizado, no garantiza que el remoto no haya cambiado después. Las modificaciones indicadas más abajo siguen sin preparar. No se hicieron commits ni push. `.vscode/`, `target/`, `.venv/` y las cachés siguen ignorados.
+
+## 18. Recuperación e integración de la interfaz original
+
+- **Referencia recuperada:** `design/archive/demo-report-original-2026-11-18.html`, incorporada por el commit `6845d5e`. Es una maqueta de informe estático, no una aplicación funcional. Se revisaron las referencias Git y archivos locales disponibles; no se encontró otra implementación de frontend ni recursos gráficos originales. Esto no demuestra que nunca hayan existido.
+- **Interfaz funcional:** `nexa_scriptguard/gui_assets/index.html`, `app.css` y `app.js`, reutilizando la estructura de cabecera y tarjetas de la referencia. El escudo es una recreación vectorial local basada en la imagen aportada posteriormente; no se dispone del archivo original. La maqueta original permanece intacta. El HTML de exportación existente sigue siendo un reporte, no la GUI.
+- **Integración:** `python -m nexa_scriptguard.gui` inicia `http.server` de biblioteca estándar en `127.0.0.1` y puerto aleatorio; abre el navegador y muestra una URL privada. El selector envía bytes acotados, no una ruta al servidor. El motor `analyze` recibe un `Source` en memoria y devuelve el modelo existente; el puente Rust de confianza es opcional con `--rust-helper`. No se ejecutan scripts ni comandos de investigación.
+- **Protección:** token aleatorio, verificación de Host y Origin en POST, política CSP, contenido dinámico mediante `textContent`, redacción existente, un análisis a la vez, máximo ocho conexiones concurrentes, timeout de socket y límites predeterminados del motor. El identificador de resultado impide exportar accidentalmente el reporte de otra pestaña. La URL y la consola deben mantenerse privadas; no se pretende aislar de procesos locales o extensiones maliciosas del navegador.
+- **Resultados:** hallazgos con instrucción, ubicación, severidad, confianza, contexto, correlación, explicación y recomendaciones. La falta de hallazgos no implica seguridad; se muestran expresamente el estado incompleto y sus causas. Los botones utilizan los renderers JSON/HTML/SARIF existentes y sus límites de salida. El navegador gestiona el destino y las colisiones de descarga; no se aplica la garantía de no sobrescritura de la CLI. Solo se conserva en memoria el último reporte.
+- **Inicio Windows:** desde la raíz y tras instalar dependencias, `.\.venv\Scripts\python.exe -m nexa_scriptguard.gui`; mantener abierta la consola y finalizar con `Ctrl+C`. Si el navegador no se abre, utilizar la URL privada impresa.
+- **Validación Windows:** `python -m unittest discover -s tests -v`: 73 pruebas, 72 aprobadas y una omitida por `WinError 1314` al crear un symlink. `cargo fmt --check`, `cargo clippy --all-targets -- -D warnings`, `cargo test` (6 aprobadas) y `cargo build`, todos con `--manifest-path rust\nexa-scriptguard-helper\Cargo.toml`, aprobaron. La corrección de timeout y sus pruebas deterministas se preservaron.
+- **Navegador local:** la carga de `demo_example.sh` como datos produjo dos hallazgos HIGH, con evidencias y recomendaciones; no se ejecutó el archivo. Un caso sintético con sintaxis incompleta mostró su causa y el contenido HTML sospechoso como texto, sin crear un elemento `img`. Los tres botones de exportación recibieron HTTP 200 y los formatos se verificaron mediante pruebas HTTP; el entorno de automatización no emitió el evento de descarga esperado, por lo que queda pendiente comprobar el guardado físico con un navegador de usuario.
+- **Límites y pendientes:** la redacción es heurística; revisar antes de compartir. El límite temporal es cooperativo y Tree-sitter no es preemptible; la memoria es estimada, no cuota dura. El timeout de socket es por operación, no una cuota total ante clientes lentos. Verificar descarga física, symlinks con privilegios y CI de los cambios actuales en Windows, Linux y macOS. Los resultados remotos reportados para `568268d` no validan estos cambios nuevos.
+
+La preparación posterior y sus pendientes priorizados se registran en
+[NEXA_SCRIPTGUARD_PENDING_WORK_REPORT.md](NEXA_SCRIPTGUARD_PENDING_WORK_REPORT.md).
+
+### Archivos locales candidatos al próximo commit
+
+Modificados:
+
+- `README.md`
+- `README.en.md`
+- `docs/ARCHITECTURE.md`
+- `docs/reports/NEXA_SCRIPTGUARD_IMPLEMENTATION_REPORT.md`
+- `nexa_scriptguard/analysis.py`
+- `nexa_scriptguard/compat.py`
+- `nexa_scriptguard/dataflow.py`
+- `nexa_scriptguard/rules.py`
+- `pyproject.toml`
+- `tests/test_analysis_core.py`
+
+Nuevos, aún sin seguimiento:
+
+- `nexa_scriptguard/gui.py`
+- `nexa_scriptguard/gui_assets/index.html`
+- `nexa_scriptguard/gui_assets/app.css`
+- `nexa_scriptguard/gui_assets/app.js`
+- `nexa_scriptguard/gui_assets/infinity-shield.svg`
+- `tests/test_gui.py`
+- `tests/corpus/gui_incomplete.sh`
+
+La referencia visual ya está versionada en `6845d5e` y no forma parte del próximo diff.

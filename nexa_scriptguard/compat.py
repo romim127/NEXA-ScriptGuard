@@ -17,7 +17,7 @@ def analyze_compat(source, path, sha256, limits: ScanLimits, deadline):
     findings = []
     reasons = []
     for line_number, line in enumerate(lines, 1):
-        if time.monotonic() > deadline:
+        if time.monotonic() >= deadline:
             reasons.append("Analysis time limit reached during compatibility scanning.")
             break
         if not line.strip() or line.lstrip().startswith("#"):
@@ -46,7 +46,7 @@ def analyze_compat(source, path, sha256, limits: ScanLimits, deadline):
                     break
             if reasons:
                 break
-    if time.monotonic() <= deadline:
+    if time.monotonic() < deadline:
         for item in correlated_findings(lines):
             findings.append(Finding(
                 rule_id=item["rule_id"],

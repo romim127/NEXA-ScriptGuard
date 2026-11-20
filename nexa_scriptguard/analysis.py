@@ -167,16 +167,12 @@ def analyze(
         )
     if document.node_count > limits.max_ast_nodes:
         limitations.append(f"AST node limit reached ({limits.max_ast_nodes}).")
-    if time.monotonic() > deadline:
-        limitations.append(
-            "Analysis deadline exceeded; parser execution itself is not preemptible."
-        )
     classified, classify_limitations = classify_findings(
         raw_findings, str(source.path), digest, limits
     )
     limitations.extend(classify_limitations)
     incomplete = list(dict.fromkeys(limitations))
-    return AnalysisReport(
+    report = AnalysisReport(
         file_path=str(source.path),
         sha256=digest,
         line_count=len(lines),
@@ -191,3 +187,9 @@ def analyze(
         parser=document.parser_name,
         analyzed_at_utc=dt.datetime.now(dt.timezone.utc).isoformat(),
     )
+    if time.monotonic() >= deadline:
+        report.complete = False
+        report.incomplete_reasons.append(
+            "Analysis deadline exceeded; parser execution itself is not preemptible."
+        )
+    return report

@@ -21,8 +21,9 @@ test = ["jsonschema>=4.23,<5"]
 
 [project.scripts]
 nexa-scriptguard = "nexa_scriptguard.__main__:main"
+nexa-scriptguard-gui = "nexa_scriptguard.gui:main"
 
 [tool.setuptools]
 packages = ["nexa_scriptguard"]
 [tool.setuptools.package-data]
-nexa_scriptguard = ["bash.json"]
+nexa_scriptguard = ["bash.json", "gui_assets/*.html", "gui_assets/*.css", "gui_assets/*.js", "gui_assets/*.svg"]

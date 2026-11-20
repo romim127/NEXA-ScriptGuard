@@ -228,7 +228,7 @@ def analyze_rules(document: BashDocument, rules, source_lines, deadline, limits:
     limitations = []
     pipeline_rule = rules.get("SG-001")
     for node in document.walk():
-        if time.monotonic() > deadline:
+        if time.monotonic() >= deadline:
             limitations.append("Analysis time limit reached during rule matching.")
             break
         if node.kind == "pipeline" and pipeline_rule:

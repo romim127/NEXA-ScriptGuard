@@ -2,6 +2,7 @@ import hashlib
 from unittest import mock
 import json
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -158,9 +159,82 @@ class AnalysisCoreTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             script = Path(temp) / "sample.sh"
             script.write_text("echo safe\n", encoding="utf-8")
-            result = analyze(script, ScanLimits(timeout_seconds=1e-12))
-        self.assertFalse(result.complete)
-        self.assertTrue(result.incomplete_reasons)
+            for elapsed, expected_complete in ((9, True), (10, False), (11, False)):
+                with self.subTest(elapsed=elapsed):
+                    clock = [time.monotonic()]
+                    controlled_time = mock.Mock()
+                    controlled_time.monotonic.side_effect = lambda: clock[0]
+
+                    def slow_parse(data, limits):
+                        document = parse_bash(data, limits)
+                        clock[0] += elapsed
+                        return document
+
+                    with (
+                        mock.patch("nexa_scriptguard.analysis.time", controlled_time),
+                        mock.patch("nexa_scriptguard.rules.time", controlled_time),
+                        mock.patch("nexa_scriptguard.dataflow.time", controlled_time),
+                        mock.patch("nexa_scriptguard.analysis.parse_bash", side_effect=slow_parse),
+                    ):
+                        result = analyze(script, ScanLimits(timeout_seconds=10))
+                    self.assertEqual(result.complete, expected_complete)
+                    self.assertEqual(
+                        result.to_dict()["analysis_status"],
+                        "complete" if expected_complete else "incomplete",
+                    )
+                    if not expected_complete:
+                        self.assertTrue(any(
+                            "deadline exceeded" in reason
+                            for reason in result.incomplete_reasons
+                        ))
+
+            started = 1_000_000.0
+            timeout = 1e-12
+            self.assertEqual(started + timeout, started)
+            controlled_time = mock.Mock()
+            controlled_time.monotonic.return_value = started
+            with (
+                mock.patch("nexa_scriptguard.analysis.time", controlled_time),
+                mock.patch("nexa_scriptguard.rules.time", controlled_time),
+                mock.patch("nexa_scriptguard.dataflow.time", controlled_time),
+            ):
+                result = analyze(script, ScanLimits(timeout_seconds=timeout))
+            self.assertFalse(result.complete)
+            self.assertTrue(any(
+                "deadline exceeded" in reason for reason in result.incomplete_reasons
+            ))
+
+    def test_deadline_is_checked_after_classification(self):
+        with tempfile.TemporaryDirectory() as temp:
+            script = Path(temp) / "sample.sh"
+            script.write_text("chmod 777 file\n", encoding="utf-8")
+            for elapsed, expected_complete in ((9, True), (10, False), (11, False)):
+                with self.subTest(elapsed=elapsed):
+                    clock = [time.monotonic()]
+                    controlled_time = mock.Mock()
+                    controlled_time.monotonic.side_effect = lambda: clock[0]
+
+                    def slow_classification(*args):
+                        result = classify_findings(*args)
+                        clock[0] += elapsed
+                        return result
+
+                    with (
+                        mock.patch("nexa_scriptguard.analysis.time", controlled_time),
+                        mock.patch("nexa_scriptguard.rules.time", controlled_time),
+                        mock.patch("nexa_scriptguard.dataflow.time", controlled_time),
+                        mock.patch(
+                            "nexa_scriptguard.analysis.classify_findings",
+                            side_effect=slow_classification,
+                        ),
+                    ):
+                        result = analyze(script, ScanLimits(timeout_seconds=10))
+                    self.assertEqual(result.complete, expected_complete)
+                    if not expected_complete:
+                        self.assertTrue(any(
+                            "deadline exceeded" in reason
+                            for reason in result.incomplete_reasons
+                        ))
 
     def test_redaction_applies_recursively_and_sanitizes_controls(self):
         report = {

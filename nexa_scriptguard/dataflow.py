@@ -119,7 +119,7 @@ def analyze_dataflow(document: BashDocument, rules, source_lines, deadline, limi
         node.location.start_line, node.location.start_column
     ))
     for node in nodes:
-        if time.monotonic() > deadline:
+        if time.monotonic() >= deadline:
             limitations.append("Analysis time limit reached during data-flow analysis.")
             return findings, limitations
         if node.kind != "variable_assignment":
@@ -135,7 +135,7 @@ def analyze_dataflow(document: BashDocument, rules, source_lines, deadline, limi
         })
 
     for node in nodes:
-        if time.monotonic() > deadline:
+        if time.monotonic() >= deadline:
             limitations.append("Analysis time limit reached during data-flow analysis.")
             break
         if node.kind == "pipeline":

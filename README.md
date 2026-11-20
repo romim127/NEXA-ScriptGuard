@@ -18,6 +18,20 @@ En Linux/macOS, activar el entorno con `source .venv/bin/activate`. La gramátic
 
 ## Uso
 
+### Interfaz gráfica local en Windows
+
+Desde la raíz del repositorio y con las dependencias instaladas:
+
+```powershell
+.\.venv\Scripts\python.exe -m nexa_scriptguard.gui
+```
+
+Se abre el navegador; si no ocurre, copie la URL privada que aparece en la consola. Seleccione un `.sh`, pulse **Analizar archivo** y revise el estado, las evidencias redactadas y las recomendaciones. Los botones exportan JSON, HTML y SARIF mediante descargas del navegador. La interfaz usa el motor existente, no ejecuta el script y conserva su estado incompleto. Mantenga la consola abierta; `Ctrl+C` detiene el servicio.
+
+El servidor escucha solo en `127.0.0.1`, en un puerto aleatorio, y utiliza un token de sesión: no comparta la URL ni la consola. Se conserva solo el último resultado; si otra pestaña inicia un análisis, la exportación anterior exige analizar de nuevo. El navegador decide el destino y cómo resolver colisiones al descargar; la garantía de no sobrescritura de la CLI no se aplica a estas descargas. La redacción es heurística, no garantiza eliminar todos los secretos. Los límites de la GUI usan los valores predeterminados descritos abajo y el tiempo/memoria no son cuotas duras. El helper opcional puede habilitarse con `--rust-helper` seguido de la ruta a un ejecutable Rust de confianza.
+
+### Línea de comandos
+
 ```text
 python -m nexa_scriptguard script.sh --view plain --json report.json
 python -m nexa_scriptguard script.sh --html report.html --sarif report.sarif
