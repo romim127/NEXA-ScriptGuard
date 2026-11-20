@@ -46,6 +46,11 @@ abierto como borrador; no fusionado.
   [jobs Python del PR](https://github.com/romim127/NEXA-ScriptGuard/actions/runs/44789980406)
   y [jobs Rust del PR](https://github.com/romim127/NEXA-ScriptGuard/actions/runs/44789980214).
   Los checks de cualquier commit posterior deben verificarse por separado.
+- En el [job Windows/Python 3.12](https://github.com/romim127/NEXA-ScriptGuard/actions/runs/44789980406/job/136474767313)
+  se comprobó en el log que `test_refuses_symlink_destination` pasó sin
+  omitirse: prueba el rechazo de un destino symlink y la conservación de su
+  archivo objetivo. Esta evidencia corresponde al runner remoto, no al entorno
+  Windows local donde faltan privilegios.
 - En navegador local, el archivo sintético Python produjo cuatro hallazgos y
   la credencial de ejemplo apareció redactada. El escudo cargó en una vista
   de 375 píxeles sin desbordamiento horizontal. Se verificó por hash que el
@@ -61,8 +66,9 @@ abierto como borrador; no fusionado.
    protecciones de rama antes del merge. El usuario comunicó que en `725986e`
    también aprobaron los workflows Python y Rust. `gh` no estaba autenticado;
    los resultados de `dcd0615` se consultaron mediante integración GitHub.
-2. Ejecutar la prueba real de symlink con permisos apropiados sin cambiar
-   ajustes del sistema sin autorización adicional.
+2. Si se necesita certificar el equipo local o escenarios de symlink distintos
+   al destino existente probado en CI, ejecutarlos con permisos apropiados sin
+   cambiar ajustes del sistema sin autorización adicional.
 3. Confirmar descargas físicas JSON, HTML y SARIF y comportamiento ante nombres
    existentes. El navegador controla la ruta y las colisiones, y no hereda la
    garantía no-clobber de la CLI.

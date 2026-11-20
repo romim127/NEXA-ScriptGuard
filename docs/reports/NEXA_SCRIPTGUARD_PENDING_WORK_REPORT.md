@@ -20,7 +20,7 @@ están en el [informe de implementación](NEXA_SCRIPTGUARD_IMPLEMENTATION_REPORT
 | Prioridad | Pendiente | Criterio de aceptación |
 |---|---|---|
 | P0 | CI de la evolución Bash/Python: los seis jobs Python y tres Rust aprobaron para `dcd0615`; ver enlaces en el informe de evolución. El usuario informó también aprobación para `725986e`. | Verificar los resultados reales de cualquier commit posterior antes de merge. |
-| P0 | Probar symlinks en Windows con los permisos necesarios. | La prueba omitida localmente se ejecuta y verifica el rechazo del destino sin sobrescritura; registrar la configuración utilizada. |
+| P0 | Symlink de destino existente: la prueba omitida localmente pasó en el job Windows/Python 3.12 de CI de `dcd0615`, preservando el archivo objetivo. | Confirmar escenarios adicionales o el equipo local solo si se necesitan; no modificar configuración sin autorización. |
 | P0 | Comprobar la descarga física desde un navegador de usuario. | Guardar JSON, HTML y SARIF, abrirlos, comprobar contenido y estado, y verificar el comportamiento del navegador frente a un nombre existente. |
 | P0 | Conservar el escudo aprobado visualmente por la persona responsable del diseño. | Mantener intacto el SVG aprobado y comprobar su presentación al ampliar la interfaz, sin volver a solicitar aprobación del diseño. |
 | P1 | Validar redacción y seguridad de las salidas compartidas. | Ampliar corpus sintético de secretos y rutas, controles, casos negativos y revisar resultados antes de compartir. La redacción actual es heurística. |
