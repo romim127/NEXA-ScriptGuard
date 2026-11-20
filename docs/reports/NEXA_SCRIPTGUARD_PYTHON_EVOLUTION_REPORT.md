@@ -1,7 +1,9 @@
 # NEXA ScriptGuard — Evolución del análisis Python
 
 Fecha de corte: 20 de noviembre de 2026. Rama de trabajo:
-`feat/python-static-analysis`, creada desde `725986e`.
+`feat/python-static-analysis`, creada desde `725986e`. Implementación:
+`dcd0615`. [Pull request #1](https://github.com/romim127/NEXA-ScriptGuard/pull/1),
+abierto como borrador; no fusionado.
 
 ## Implementación
 
@@ -38,6 +40,12 @@ Fecha de corte: 20 de noviembre de 2026. Rama de trabajo:
 - Rust: `cargo fmt --check`, `cargo clippy --all-targets -- -D warnings`,
   `cargo test` (**6 aprobadas**) y `cargo build`, con
   `--manifest-path rust\nexa-scriptguard-helper\Cargo.toml`: aprobados.
+- GitHub Actions verificó el commit de implementación `dcd0615`: los seis
+  jobs Python (Windows, Ubuntu y macOS con 3.10 y 3.12) y los tres jobs Rust
+  aprobaron tanto para el push como para el pull request. Consultar los
+  [jobs Python del PR](https://github.com/romim127/NEXA-ScriptGuard/actions/runs/44789980406)
+  y [jobs Rust del PR](https://github.com/romim127/NEXA-ScriptGuard/actions/runs/44789980214).
+  Los checks de cualquier commit posterior deben verificarse por separado.
 - En navegador local, el archivo sintético Python produjo cuatro hallazgos y
   la credencial de ejemplo apareció redactada. El escudo cargó en una vista
   de 375 píxeles sin desbordamiento horizontal. Se verificó por hash que el
@@ -49,10 +57,10 @@ Fecha de corte: 20 de noviembre de 2026. Rama de trabajo:
 
 ## Verificaciones pendientes y bloqueos
 
-1. Repetir la CI del nuevo commit para los tres sistemas y Python 3.10/3.12.
-   El usuario comunicó que en `725986e` los workflows Python y Rust y los seis
-   jobs Python aprobaron; esa ejecución no certifica el commit nuevo. `gh` no
-   estaba autenticado al preparar esta evolución.
+1. Verificar los checks de cualquier commit posterior al `dcd0615` y las
+   protecciones de rama antes del merge. El usuario comunicó que en `725986e`
+   también aprobaron los workflows Python y Rust. `gh` no estaba autenticado;
+   los resultados de `dcd0615` se consultaron mediante integración GitHub.
 2. Ejecutar la prueba real de symlink con permisos apropiados sin cambiar
    ajustes del sistema sin autorización adicional.
 3. Confirmar descargas físicas JSON, HTML y SARIF y comportamiento ante nombres
