@@ -1,6 +1,7 @@
 import hashlib
 import http.client
 import json
+import socket
 import threading
 import unittest
 from pathlib import Path
@@ -110,12 +111,24 @@ class GuiIntegrationTests(unittest.TestCase):
         self.assertEqual(self.upload(b"123456")[0], 413)
         self.server.lock.acquire()
         try:
-            self.assertEqual(self.upload(b"123")[0], 409)
+            for _ in range(10):
+                self.assertEqual(self.upload(b"123")[0], 409)
             self.assertEqual(self.request("GET", "/export/json", headers={
                 "X-Nexa-Token": self.server.token,
             })[0], 409)
         finally:
             self.server.lock.release()
+
+    def test_incomplete_rejected_body_does_not_block_indefinitely(self):
+        self.server.limits = ScanLimits(max_input_bytes=5)
+        with socket.create_connection(("127.0.0.1", self.server.server_port), timeout=5) as conn:
+            request = (
+                f"POST /analyze HTTP/1.1\r\nHost: 127.0.0.1:{self.server.server_port}\r\n"
+                f"Origin: {self.server.origin}\r\nX-Nexa-Token: {self.server.token}\r\n"
+                "X-Nexa-Filename: large.py\r\nContent-Length: 6\r\n\r\n"
+            )
+            conn.sendall(request.encode("ascii"))
+            self.assertIn(b" 413 ", conn.recv(1024))
 
     def test_failed_analysis_clears_previous_result(self):
         self.assertEqual(self.upload(b"echo hello\n")[0], 200)
@@ -164,4 +177,5 @@ class GuiIntegrationTests(unittest.TestCase):
         self.assertFalse(report["complete"])
         self.assertTrue(report["incomplete_reasons"])
         self.server.limits = ScanLimits(max_input_bytes=5)
-        self.assertEqual(self.upload(b"123456", "large.py")[0], 413)
+        for _ in range(10):
+            self.assertEqual(self.upload(b"123456", "large.py")[0], 413)

@@ -29,8 +29,8 @@ abierto como borrador; no fusionado.
 
 ## Validación local
 
-- Windows/Python 3.14.3: `python -m unittest discover -s tests -v`: **84
-  pruebas, 83 aprobadas y 1 omitida**, 23,563 s. La omisión es la creación de
+- Windows/Python 3.14.3: `python -m unittest discover -s tests -v`: **85
+  pruebas, 84 aprobadas y 1 omitida**, 13,308 s. La omisión es la creación de
   symlink por `WinError 1314`; no se modificaron permisos ni configuración.
 - Pruebas positivas y negativas para las ocho reglas, alias, shadowing,
   reasignación, sintaxis inválida, archivo vacío, límites, redacción, no
@@ -51,6 +51,14 @@ abierto como borrador; no fusionado.
   omitirse: prueba el rechazo de un destino symlink y la conservación de su
   archivo objetivo. Esta evidencia corresponde al runner remoto, no al entorno
   Windows local donde faltan privilegios.
+- Un job posterior de Windows/Python 3.12 falló con `WinError 10053` al
+  rechazar una carga de seis bytes con un límite de cinco. El servidor cerraba
+  el socket con el cuerpo sin leer, por lo que la respuesta 413 podía perderse.
+  Se descartan cuerpos rechazados de hasta 64 KiB durante un máximo de un
+  segundo; para cargas mayores se mantiene el cierre. La prueba se repitió
+  localmente, incluso con un cuerpo incompleto; la CI del commit correctivo
+  debe verificarse. En cuerpos grandes el cliente aún puede recibir un error
+  de conexión en vez de 413; no se consume una entrada arbitrariamente grande.
 - En navegador local, el archivo sintético Python produjo cuatro hallazgos y
   la credencial de ejemplo apareció redactada. El escudo cargó en una vista
   de 375 píxeles sin desbordamiento horizontal. Se verificó por hash que el
