@@ -31,3 +31,15 @@ Este roadmap registra trabajo incompleto, no capacidades anunciadas como termina
 
 - Análisis de binarios ejecutables, PowerShell, red/descarga en tiempo de análisis y ejecución instrumentada.
 - Descarga automática del instalador de Ollama o ejecución de instaladores/scripts.
+
+## Evaluación de hosting
+
+La decisión actual es conservar el producto local-first. No se añadió
+configuración ni se desplegó NEXA en Vercel. El análisis del runtime Python,
+los límites de payload/filesystem, los costos publicados, la condición de uso
+del plan Hobby y los controles pendientes están en
+[`decisions/ADR-0003-VERCEL-EVALUATION.md`](decisions/ADR-0003-VERCEL-EVALUATION.md).
+Un futuro servicio requeriría aprobación separada para transferir scripts,
+revisar privacidad/abuso/retención y probar el parser nativo en el runtime
+objetivo; no se debe inferir compatibilidad por la mera disponibilidad de una
+función Python.

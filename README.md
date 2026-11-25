@@ -77,6 +77,9 @@ Para `.py`, el módulo estándar `ast` analiza sintaxis soportada por la versió
 - [Catálogo de reglas](docs/RULES.md)
 - [Procedimiento para el instalador de Ollama](docs/Ollama-analysis.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Arquitectura, requisitos y gobernanza](docs/architecture/PROJECT_TREE.md)
+- [Decisión de evaluación Vercel](docs/decisions/ADR-0003-VERCEL-EVALUATION.md) — evaluación documental; no hay despliegue ni servicio alojado.
+- [Informe de consolidación y pendientes](docs/reports/NEXA_SCRIPTGUARD_CONSOLIDATION_REPORT.md)
 - [Política de seguridad](SECURITY.md)
 - [Contribuciones](CONTRIBUTING.md)
 - [Cambios](CHANGELOG.md)

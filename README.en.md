@@ -70,6 +70,9 @@ For `.py` files, the standard-library `ast` parser uses the running Python versi
 - [Rule catalog](docs/RULES.md)
 - [Ollama installer procedure](docs/Ollama-analysis.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Architecture, requirements, and governance map](docs/architecture/PROJECT_TREE.md)
+- [Vercel evaluation decision](docs/decisions/ADR-0003-VERCEL-EVALUATION.md) — documentation only; no hosted service or deployment exists.
+- [Consolidation and pending work report](docs/reports/NEXA_SCRIPTGUARD_CONSOLIDATION_REPORT.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
 - [Changelog](CHANGELOG.md)

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demostración sintética · NEXA ScriptGuard</title>
+  <link rel="stylesheet" href="../../nexa_scriptguard/gui_assets/app.css">
+</head>
+<body>
+  <main>
+    <header>
+      <img src="../../nexa_scriptguard/gui_assets/infinity-shield.svg" width="64" height="64" alt="Escudo Infinity">
+      <h1>NEXA ScriptGuard</h1>
+      <p>Demostración con datos sintéticos</p>
+    </header>
+    <p>Estos resultados se generaron previamente con archivos del repositorio. Esta página no recibe archivos ni realiza análisis.</p>
+    <section>
+      <h2>Bash</h2>
+      <p><code>demo_example.sh</code> · Análisis completo · 2 hallazgos</p>
+      <ul>
+        <li>SG-001 · Línea 4 · Pipeline con un comando de red y un intérprete.</li>
+        <li>SG-002 · Línea 5 · Opción de carga asociada a una ruta potencialmente sensible.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Python</h2>
+      <p><code>python_gui_example.py</code> · Análisis completo · 4 hallazgos</p>
+      <ul>
+        <li>PY-005 · Línea 4 · Literal asignado a una variable asociada a credenciales. Evidencia redactada.</li>
+        <li>PY-001 · Línea 6 · Evaluación dinámica de código.</li>
+        <li>PY-004 · Línea 6 · Relación sintáctica entre una fuente de red y evaluación dinámica.</li>
+        <li>PY-003 · Línea 7 · Deserialización con pickle.</li>
+      </ul>
+    </section>
+    <p>Los hallazgos describen patrones estáticos que requieren revisión humana.</p>
+  </main>
+</body>
+</html>

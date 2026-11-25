@@ -1,0 +1,12 @@
+# Trazabilidad de requisitos
+
+| Requisito | Módulos o reglas | Evidencia y criterio |
+|---|---|---|
+| Analizar Bash y Python como datos | `analysis`, `parser`, `rules`, `python_analysis` y PY-001 a PY-008 | `test_parser.py`, `test_python_analysis.py`, `test_analysis_core.py`. Reglas y estado de análisis verificables. |
+| Ingestión segura y límites | `ingestion`, `limits`, `gui` | `test_ingestion.py`, `test_gui.py`. Rechazo acotado y visibilidad de análisis incompleto. |
+| Modelo, compatibilidad y privacidad | `model`, `classification`, `redaction`, `reports` | `test_report_schemas.py`, `test_redaction.py`. Formatos válidos, evidencia sensible redactada y HTML escapado. |
+| Exportar desde GUI y CLI | `reports`, `cli`, `gui_assets/app.js` | `test_cli.py`, `test_gui.py` y comprobación física con navegador. Los destinos CLI se publican sin reemplazo. |
+| Helper opcional | `rust_bridge`, `src/main.rs` | `test_rust_bridge.py`, `cargo test` y matriz Rust. |
+| Reproducibilidad y compatibilidad | `pyproject.toml`, `Cargo.lock`, `.github/workflows` | Suites de [CI y pruebas](../development/TESTING.md) asociadas al SHA evaluado. |
+
+Ver [criterios de aceptación](ACCEPTANCE_CRITERIA.md), [requisitos funcionales](FUNCTIONAL_REQUIREMENTS.md) y [no funcionales](NONFUNCTIONAL_REQUIREMENTS.md).

@@ -239,3 +239,28 @@ Nuevos, aún sin seguimiento:
 - `tests/corpus/gui_incomplete.sh`
 
 La referencia visual ya está versionada en `6845d5e` y no forma parte del próximo diff.
+
+## 19. Actualización de consolidación — 25 de noviembre de 2026
+
+Este cierre no altera el código del analizador ni los componentes visuales. Se
+agregaron 15 documentos de arquitectura/gobernanza/requisitos/decisiones/
+desarrollo y se enlazaron desde ambos README y el roadmap. La evaluación Vercel
+recomienda conservar el modo local; no se añadió configuración ni endpoint.
+
+En Windows/Python 3.14.3, la última suite ejecutó 85 pruebas: 84 aprobadas y
+una omitida por `WinError 1314` al crear symlinks. Rust `cargo fmt --check`,
+Clippy con `-D warnings`, seis pruebas y build aprobaron. Los nueve jobs únicos
+de CI del head anterior `950fc35` aprobaron, pero no validan el commit
+documental posterior.
+
+En el navegador integrado, `demo_example.sh` se analizó como datos y mostró
+dos hallazgos HIGH. La descarga física desde un navegador de escritorio y el
+comportamiento ante colisiones no se pudieron verificar; los reportes previos
+en Downloads no se modificaron. SARIF se valida por esquema, pero falta un
+consumidor real instalado para comprobar interoperabilidad.
+
+El informe vigente para la matriz completa, estado del PR, bloqueos y próximos
+pasos es
+[NEXA_SCRIPTGUARD_CONSOLIDATION_REPORT.md](NEXA_SCRIPTGUARD_CONSOLIDATION_REPORT.md).
+Su lista de cambios sustituye los candidatos históricos enumerados en la
+sección anterior.
