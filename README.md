@@ -18,13 +18,17 @@ En Linux/macOS, activar el entorno con `source .venv/bin/activate`. La gramátic
 
 ## Uso
 
-### Interfaz gráfica local en Windows
+### Interfaz gráfica local
 
 Desde la raíz del repositorio y con las dependencias instaladas:
 
 ```powershell
-.\.venv\Scripts\python.exe -m nexa_scriptguard.gui
+.\run-windows.bat
 ```
+
+En CMD usá `run-windows.bat` y en Bash `./run-linux.sh`. Para iniciar desde
+cualquier directorio, indicá la ruta del lanzador o instalá `RUN`.
+[Instrucciones de arranque e instalación](docs/development/SETUP.md)
 
 Se abre el navegador; si no ocurre, copie la URL privada que aparece en la consola. Seleccione un `.sh` o `.py`, pulse **Analizar archivo** y revise el lenguaje, el estado, las evidencias redactadas y las recomendaciones. Los botones exportan JSON, HTML y SARIF mediante descargas del navegador. La interfaz usa el motor correspondiente, no ejecuta el script y conserva su estado incompleto. Mantenga la consola abierta; `Ctrl+C` detiene el servicio.
 

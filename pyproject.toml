@@ -20,6 +20,7 @@ authors = [{name = "NextGenAI Infinity"}]
 test = ["jsonschema>=4.23,<5"]
 
 [project.scripts]
+RUN = "nexa_scriptguard.gui:main"
 nexa-scriptguard = "nexa_scriptguard.__main__:main"
 nexa-scriptguard-gui = "nexa_scriptguard.gui:main"
 

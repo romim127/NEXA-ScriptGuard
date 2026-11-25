@@ -34,6 +34,9 @@ Este roadmap registra trabajo incompleto, no capacidades anunciadas como termina
 
 ## Evaluación de hosting
 
+El estándar de arranque local conserva los lanzadores y el comando `RUN`
+durante la evolución del frontend. [NGI-STD-002](governance/NGI-STD-002_LOCAL_APPLICATION_LAUNCH_STANDARD.md)
+
 La decisión actual es conservar el producto local-first. No se añadió
 configuración ni se desplegó NEXA en Vercel. El análisis del runtime Python,
 los límites de payload/filesystem, los costos publicados, la condición de uso

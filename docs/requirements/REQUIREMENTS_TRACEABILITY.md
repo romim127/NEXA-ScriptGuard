@@ -8,5 +8,6 @@
 | Exportar desde GUI y CLI | `reports`, `cli`, `gui_assets/app.js` | `test_cli.py`, `test_gui.py` y comprobación física con navegador. Los destinos CLI se publican sin reemplazo. |
 | Helper opcional | `rust_bridge`, `src/main.rs` | `test_rust_bridge.py`, `cargo test` y matriz Rust. |
 | Reproducibilidad y compatibilidad | `pyproject.toml`, `Cargo.lock`, `.github/workflows` | Suites de [CI y pruebas](../development/TESTING.md) asociadas al SHA evaluado. |
+| Arranque local estable | Lanzadores, `RUN`, `gui.main` | `test_launch.py`. Inicio desde otro directorio, navegador, loopback, puertos independientes y cierre. |
 
 Ver [criterios de aceptación](ACCEPTANCE_CRITERIA.md), [requisitos funcionales](FUNCTIONAL_REQUIREMENTS.md) y [no funcionales](NONFUNCTIONAL_REQUIREMENTS.md).
