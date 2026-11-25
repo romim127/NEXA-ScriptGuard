@@ -77,6 +77,8 @@ class BashParserTests(unittest.TestCase):
                 result = self.scan(case["source"])
                 actual = {finding.rule_id for finding in result.findings}
                 self.assertTrue(set(case["expected_rules"]) <= actual)
+                if case["classification"] == "negative":
+                    self.assertFalse(actual)
 
     def test_variable_flow_has_source_and_destination_evidence(self):
         result = self.scan(

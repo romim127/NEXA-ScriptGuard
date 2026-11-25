@@ -6,7 +6,8 @@ from pathlib import PurePath
 
 _REDACTIONS = (
     (re.compile(r"(?i)(\bauthorization\s*:\s*bearer\s+)[^\s,;]+"), r"\1[REDACTED]"),
-    (re.compile(r"(?i)(\b(?:password|passwd|api[_-]?key|secret|token)\s*[=:]\s*[\"']?)[^\s\"']+"), r"\1[REDACTED]"),
+    (re.compile(r"""(?i)(\b(?:[a-z][a-z0-9_]*_)?(?:password|passwd|api[_-]?key|secret|token)(?:_[a-z0-9_]+)?["']?(?:\s*:\s*[a-z_][a-z0-9_.]*)?\s*[=:]\s*)(["'])(?:\\.|(?!\2)[^\\\r\n])*\2"""), r"\1\2[REDACTED]\2"),
+    (re.compile(r"(?i)(\b(?:[a-z][a-z0-9_]*_)?(?:password|passwd|api[_-]?key|secret|token)(?:_[a-z0-9_]+)?[\"']?(?:\s*:\s*[a-z_][a-z0-9_.]*)?\s*[=:]\s*[\"']?)[^\s\"']+"), r"\1[REDACTED]"),
     (re.compile(r"(?i)(https?://)[^/\s:@]+:[^/\s@]+@"), r"\1[REDACTED]@"),
     (re.compile(r"(?i)(-----BEGIN [^-]*PRIVATE KEY-----).*?(-----END [^-]*PRIVATE KEY-----)", re.S), r"\1[REDACTED]\2"),
     (re.compile(r"(?i)(?:[A-Z]:\\Users\\)[^\\\s]+"), r"[REDACTED_USER_PATH]"),

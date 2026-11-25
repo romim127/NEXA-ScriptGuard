@@ -5,6 +5,7 @@ import hmac
 import json
 import secrets
 import threading
+import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
@@ -15,7 +16,7 @@ from .analysis import analyze
 from .ingestion import Source
 from .limits import ScanLimits
 from .redaction import prepare_report, sanitize_text
-from .reports import render_html, render_json, render_sarif, validate_report, validate_sarif
+from .reports import render_html, render_json, render_sarif, rules_for_report, validate_report, validate_sarif
 from .rules import RULES_PATH
 
 
@@ -72,6 +73,8 @@ class GuiHandler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("Cross-Origin-Resource-Policy", "same-origin")
+        if self.close_connection:
+            self.send_header("Connection", "close")
         if result_id is not None:
             self.send_header("X-Nexa-Result", result_id)
         self.send_header(
@@ -85,6 +88,32 @@ class GuiHandler(BaseHTTPRequestHandler):
 
     def error_response(self, status, message):
         self.respond(status, json.dumps({"error": message}).encode("utf-8"), "application/json")
+
+    def reject_post(self, status, message):
+        self.close_connection = True
+        lengths = self.headers.get_all("Content-Length", [])
+        if not self.headers.get("Transfer-Encoding") and len(lengths) == 1:
+            try:
+                length = int(lengths[0])
+            except ValueError:
+                length = 0
+            if 0 < length <= 65536:
+                deadline = time.monotonic() + 1
+                try:
+                    while length:
+                        remaining = deadline - time.monotonic()
+                        if remaining <= 0:
+                            break
+                        self.connection.settimeout(remaining)
+                        chunk = self.rfile.read1(min(length, 8192))
+                        if not chunk:
+                            break
+                        length -= len(chunk)
+                except TimeoutError:
+                    pass
+                finally:
+                    self.connection.settimeout(15)
+        return self.error_response(status, message)
 
     def allowed_host(self):
         return self.headers.get("Host") == f"127.0.0.1:{self.server.server_port}"
@@ -130,7 +159,7 @@ class GuiHandler(BaseHTTPRequestHandler):
                     content_type = "text/html; charset=utf-8"
                 elif format_name == "sarif":
                     rules = json.loads(RULES_PATH.read_text(encoding="utf-8"))
-                    sarif = render_sarif(report, rules)
+                    sarif = render_sarif(report, rules_for_report(report, rules))
                     validate_sarif(sarif)
                     content = json.dumps(sarif, ensure_ascii=False, indent=2).encode("utf-8")
                     content_type = "application/sarif+json; charset=utf-8"
@@ -147,33 +176,26 @@ class GuiHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         if not self.authorized() or self.headers.get("Origin") != self.server.origin:
-            self.close_connection = True
-            return self.error_response(403, "Solicitud no autorizada.")
+            return self.reject_post(403, "Solicitud no autorizada.")
         if urlsplit(self.path).path != "/analyze":
-            self.close_connection = True
-            return self.error_response(404, "Recurso desconocido.")
+            return self.reject_post(404, "Recurso desconocido.")
         if self.headers.get("Transfer-Encoding") or len(self.headers.get_all("Content-Length", [])) != 1:
-            self.close_connection = True
-            return self.error_response(400, "Formato de carga no admitido.")
+            return self.reject_post(400, "Formato de carga no admitido.")
         try:
             length = int(self.headers.get("Content-Length", ""))
         except ValueError:
-            self.close_connection = True
-            return self.error_response(411, "Se requiere un tamaño de entrada válido.")
+            return self.reject_post(411, "Se requiere un tamaño de entrada válido.")
         if length < 0 or length > self.server.limits.max_input_bytes:
-            self.close_connection = True
-            return self.error_response(413, "El archivo supera el límite de entrada.")
+            return self.reject_post(413, "El archivo supera el límite de entrada.")
         name = unquote(self.headers.get("X-Nexa-Filename", ""))
         if (
             not name or len(name) > 255 or "/" in name or "\\" in name
             or any(ord(char) < 32 or ord(char) == 127 for char in name)
-            or not name.lower().endswith(".sh")
+            or not name.lower().endswith((".sh", ".py"))
         ):
-            self.close_connection = True
-            return self.error_response(400, "Seleccione un archivo Bash con extensión .sh.")
+            return self.reject_post(400, "Seleccione un archivo Bash (.sh) o Python (.py).")
         if not self.server.lock.acquire(blocking=False):
-            self.close_connection = True
-            return self.error_response(409, "Ya hay un análisis en curso.")
+            return self.reject_post(409, "Ya hay un análisis en curso.")
         try:
             self.server.report = None
             self.server.report_id = ""

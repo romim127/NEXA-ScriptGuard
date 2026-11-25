@@ -5,6 +5,14 @@ from pathlib import Path
 from urllib.parse import quote
 
 
+def rules_for_report(report, bash_rules):
+    if report["parser"] != "python-ast":
+        return bash_rules
+    from .python_analysis import python_rules
+
+    return bash_rules + python_rules()
+
+
 def render_json(report):
     return json.dumps(report, ensure_ascii=False, indent=2).encode("utf-8")
 

@@ -3,7 +3,7 @@
 ## Flujo de datos
 
 1. `ingestion.py` resuelve y abre una entrada regular, comprueba identidad del descriptor, límite de bytes y cambios detectables durante lectura. Los bytes se hashean antes de decodificar.
-2. `parser.py` usa `tree-sitter` y `tree-sitter-bash` para construir nodos sintácticos con rangos byte y posiciones Unicode de inicio y fin. El texto se obtiene por corte diferido del snapshot compartido, evitando copiar repetidamente los segmentos de cada nodo. Errores de gramática, nodos excesivos y ausencia de la biblioteca se informan como incompletos.
+2. `analysis.py` selecciona por extensión `.sh` o `.py`; rechaza otras extensiones. Para Bash, `parser.py` usa `tree-sitter` y `tree-sitter-bash`. Para Python, `python_analysis.py` utiliza `ast` de la biblioteca estándar sin importar ni ejecutar el archivo, y aplica las reglas de `python_rules.json`. Errores de gramática y límites se informan como incompletos.
 3. `analysis.py` coordina parsing, reglas, correlación y análisis de variables; no ejecuta Bash.
 4. `rules.py` aplica identificadores estables a nodos `command` y `pipeline`; `dataflow.py` conserva los sitios de asignación y consumo para unas pocas correlaciones.
 5. `model.py` unifica metadatos de archivo, hash, ubicación, clasificación, evidencia, recomendación y estado.
@@ -38,6 +38,8 @@ El presupuesto temporal de `analyze` usa el reloj monotónico y considera agotad
 La dependencia es `tree-sitter>=0.25,<0.26` y `tree-sitter-bash==0.25.1` (MIT). Tree-sitter ofrece gramática Bash, recuperación de errores y rangos de origen byte precisos, convertidos aquí a columnas de caracteres Unicode. La gramática representa comandos, pipelines, redirecciones, palabras, asignaciones, sustituciones, heredocs y estructuras compuestas para las construcciones aceptadas. No resuelve funciones llamadas dinámicamente, `source`, entorno real, comandos externos ni comportamiento de runtime. El soporte efectivo queda limitado a la gramática y fixtures de `tests/test_parser.py`.
 
 El modo `--compat-heuristics` conserva regex históricas, pero nunca comparte la etiqueta de parsing AST y siempre produce un estado incompleto.
+
+El AST de Python está limitado por la gramática del intérprete que ejecuta NEXA. Su resolución de nombres es conservadora: alias importados con asignaciones conflictivas se consideran ambiguos. La correlación PY-004 relaciona únicamente expresiones de red directas o asignaciones simples con llamadas de evaluación; no construye un grafo de control y puede producir falsos positivos y negativos. El límite temporal es cooperativo y no interrumpe `ast.parse`; el presupuesto de memoria es estimado. El helper Rust no analiza archivos Python.
 
 ## Dependencias
 

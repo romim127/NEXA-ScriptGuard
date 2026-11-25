@@ -14,10 +14,11 @@
     <div class="motto">AI assists. Human verifies. Human decides.</div>
   </div></header>
   <section class="top">
-    <label for="script-file">ARCHIVO BASH PARA ANALIZAR</label>
-    <div class="controls"><input id="script-file" type="file" accept=".sh">
+    <label for="script-file">ARCHIVO DE SCRIPT PARA ANALIZAR</label>
+    <div class="controls"><input id="script-file" type="file" accept=".sh,.py">
       <button id="analyze" type="button" disabled>Analizar archivo</button></div>
     <div>ARCHIVO SELECCIONADO · <strong class="path" id="filename">Ninguno</strong></div>
+    <div>LENGUAJE DETECTADO · <strong id="language">—</strong></div>
     <div class="summary" id="status" role="status" aria-live="polite">Seleccione un archivo. No se ejecutará.</div>
     <div class="hash" id="hash"></div><div class="hash" id="date"></div>
     <div class="controls" id="exports" hidden>

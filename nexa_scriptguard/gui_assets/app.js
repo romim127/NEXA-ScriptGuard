@@ -8,6 +8,7 @@ const status = document.getElementById("status");
 const findings = document.getElementById("findings");
 const exportsPanel = document.getElementById("exports");
 const filename = document.getElementById("filename");
+const language = document.getElementById("language");
 const hash = document.getElementById("hash");
 const date = document.getElementById("date");
 let resultId = "";
@@ -49,6 +50,7 @@ function showFinding(finding) {
 input.addEventListener("change", () => {
   const file = input.files[0];
   filename.textContent = file ? file.name : "Ninguno";
+  language.textContent = file ? (/\.sh$/i.test(file.name) ? "Bash" : /\.py$/i.test(file.name) ? "Python" : "No compatible") : "—";
   analyze.disabled = !file;
   exportsPanel.hidden = true;
   resultId = "";
@@ -79,6 +81,7 @@ analyze.addEventListener("click", async () => {
     });
     const report = await response.json();
     if (!response.ok) throw new Error(report.error || `Error HTTP ${response.status}`);
+    language.textContent = report.parser === "python-ast" ? "Python" : /\.py$/i.test(file.name) ? "Python" : "Bash";
     resultId = response.headers.get("X-Nexa-Result");
     if (!resultId) throw new Error("Falta el identificador de resultado.");
     const counts = {};
