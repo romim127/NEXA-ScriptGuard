@@ -1,7 +1,32 @@
 # NEXA ScriptGuard — Informe de trabajo pendiente
 
-Fecha de corte: 20 de noviembre de 2026. Para la evolución Bash/Python,
+Fecha de corte inicial: 20 de noviembre de 2026; actualización vigente:
+25 de noviembre de 2026. Para la evolución Bash/Python,
 véase también [NEXA_SCRIPTGUARD_PYTHON_EVOLUTION_REPORT.md](NEXA_SCRIPTGUARD_PYTHON_EVOLUTION_REPORT.md).
+
+Las secciones históricas que siguen al estado vigente conservan el snapshot
+original del 20 de noviembre. En caso de contradicción, prevalecen el estado
+vigente de este informe y el
+[informe de consolidación](NEXA_SCRIPTGUARD_CONSOLIDATION_REPORT.md).
+
+## Estado vigente al 25 de noviembre
+
+La matriz de CI del head `950fc352bc58fe412897b302c4043710b161d886` tiene
+nueve jobs únicos aprobados (seis Python y tres Rust); no cubre cambios
+posteriores. La repetición local dio 85 pruebas Python (84 aprobadas, una
+omitida por falta de privilegio local para crear symlinks) y seis pruebas Rust,
+con `fmt`, Clippy y build aprobados.
+
+La prueba visual local seleccionó `demo_example.sh` y mostró dos hallazgos
+HIGH sin ejecutar el script. Persisten dos verificaciones distintas: el
+navegador integrado no guardó físicamente JSON/HTML/SARIF, y no hay un
+consumidor SARIF instalado. La descarga y la interoperabilidad real siguen
+pendientes; no se instalaron extensiones.
+
+Se agregaron 15 documentos de arquitectura/gobernanza/requisitos/decisiones/
+desarrollo y se evaluó Vercel sin desplegar. La decisión es conservar el modo
+local. Para matriz, resultados exactos y próximos pasos prevalece el
+[informe de consolidación](NEXA_SCRIPTGUARD_CONSOLIDATION_REPORT.md).
 
 ## Alcance y estado
 

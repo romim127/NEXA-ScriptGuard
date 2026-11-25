@@ -1,6 +1,7 @@
 # NEXA ScriptGuard — Evolución del análisis Python
 
-Fecha de corte: 20 de noviembre de 2026. Rama de trabajo:
+Fecha de corte inicial: 20 de noviembre de 2026; actualización:
+25 de noviembre de 2026. Rama de trabajo:
 `feat/python-static-analysis`, creada desde `725986e`. Implementación:
 `dcd0615`. [Pull request #1](https://github.com/romim127/NEXA-ScriptGuard/pull/1),
 abierto como borrador; no fusionado.
@@ -97,3 +98,19 @@ Inicio en Windows desde la raíz con dependencias instaladas:
 
 La publicación requiere revisar los checks y permisos reales. No se declara
 merge ni CI exitosa sin evidencia posterior.
+
+## Actualización de consolidación — 25 de noviembre de 2026
+
+- En `950fc352bc58fe412897b302c4043710b161d886`, GitHub reportó exitosos los
+  seis jobs Python (Windows, Ubuntu y macOS con 3.10/3.12) y los tres jobs
+  Rust. Son nueve jobs únicos; no se atribuyen a commits posteriores.
+- La repetición local de la suite Python 3.14.3 ejecutó **85 pruebas: 84
+  aprobadas y 1 omitida** por `WinError 1314` al crear un symlink, en 14.058 s.
+  Rust `fmt`, Clippy, seis pruebas y build aprobaron.
+- Edge guardó JSON, HTML y SARIF y renombró la descarga repetida con la
+  política normal de un perfil aislado. SARIF Multitool aceptó los tres
+  casos sintéticos. El informe de consolidación detalla los resultados.
+- La evaluación Vercel concluyó en mantener el modo local; no se desplegó ni
+  añadió configuración. Véase
+  [`NEXA_SCRIPTGUARD_CONSOLIDATION_REPORT.md`](NEXA_SCRIPTGUARD_CONSOLIDATION_REPORT.md).
+- El PR #1 quedó fusionado en `74a1c3cc959950c2061d48855b7f69921d7e5ace`.
