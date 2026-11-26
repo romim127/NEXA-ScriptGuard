@@ -3,7 +3,7 @@ import {
   Dashboard, ExportPanel, FileUploader, InfinityShield, Sidebar, StatusIndicator, severities,
 } from '@nextgenai/ui';
 import shield from '../../nexa_scriptguard/gui_assets/infinity-shield.svg?url';
-import { AnalysisFinding } from './features/analysis/AnalysisFinding';
+import { FindingExplorer } from './features/analysis/FindingExplorer';
 import { downloadReport } from './features/reports/download';
 import { createClient, type Analysis, type ExportFormat } from './services/api';
 
@@ -20,7 +20,10 @@ function languageFor(file: File | null) {
   return 'No compatible';
 }
 
-export function App({ client }: { client: ReturnType<typeof createClient> }) {
+export function App({ client, maxInputBytes }: {
+  client: ReturnType<typeof createClient>;
+  maxInputBytes?: number;
+}) {
   const [file, setFile] = useState<File | null>(null);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [pending, setPending] = useState<'analyze' | 'export' | null>(null);
@@ -28,16 +31,21 @@ export function App({ client }: { client: ReturnType<typeof createClient> }) {
   const [saved, setSaved] = useState('');
   const report = analysis?.report;
   const language = report?.parser === 'python-ast' ? 'Python' : languageFor(file);
+  const tooLarge = file != null && maxInputBytes != null && file.size > maxInputBytes;
 
   function select(next: File | null) {
     setFile(next);
     setAnalysis(null);
     setSaved('');
-    setError(languageFor(next) === 'No compatible' ? 'Seleccione un archivo Bash (.sh) o Python (.py).' : '');
+    if (next && maxInputBytes != null && next.size > maxInputBytes) {
+      setError('El archivo supera el límite de entrada.');
+    } else {
+      setError(languageFor(next) === 'No compatible' ? 'Seleccione un archivo Bash (.sh) o Python (.py).' : '');
+    }
   }
 
   async function analyze() {
-    if (!file || pending || language === 'No compatible') return;
+    if (!file || pending || tooLarge || language === 'No compatible') return;
     setPending('analyze');
     setAnalysis(null);
     setSaved('');
@@ -85,7 +93,7 @@ export function App({ client }: { client: ReturnType<typeof createClient> }) {
   </>}>
     <section className="top" id="archivo" aria-label="Archivo y exportaciones">
       <FileUploader label="ARCHIVO DE SCRIPT PARA ANALIZAR" accept=".sh,.py" disabled={pending !== null} onSelect={select}>
-        <button type="button" onClick={analyze} disabled={!file || pending !== null || language === 'No compatible'}>
+        <button type="button" onClick={analyze} disabled={!file || pending !== null || tooLarge || language === 'No compatible'}>
           Analizar archivo
         </button>
       </FileUploader>
@@ -100,6 +108,8 @@ export function App({ client }: { client: ReturnType<typeof createClient> }) {
       {error && <p className="summary ngi-status-error" role="alert">{error}</p>}
       {saved && <p role="status">{saved}</p>}
       {report && <>
+        <div>RESUMEN · {report.file} · {report.lines} líneas · Parser: {report.parser}</div>
+        {report.findings.length > 0 && <div>Motores de hallazgos: {[...new Set(report.findings.map(finding => finding.engine))].join(', ')}</div>}
         <div className="hash">SHA-256: {report.sha256}</div>
         <div className="hash">FECHA UTC: {report.analyzed_at_utc}</div>
         <ExportPanel label="Exportaciones" formats={formats} disabled={pending !== null} onExport={exportResult} />
@@ -112,7 +122,7 @@ export function App({ client }: { client: ReturnType<typeof createClient> }) {
         <ul>{report.limitations.map((limit, index) => <li key={index}>{limit}</li>)}</ul>
       </details>}
       {report?.findings.length === 0 && <p className="notice">Sin coincidencias detectadas.</p>}
-      {report?.findings.map(finding => <AnalysisFinding key={finding.id} finding={finding} />)}
+      {!!report?.findings.length && <FindingExplorer findings={report.findings} />}
     </section>
   </Dashboard>;
 }

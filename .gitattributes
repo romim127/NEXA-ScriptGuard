@@ -1,3 +1,5 @@
 /run-linux.sh text eol=lf
 /run-windows.bat text eol=crlf
 /nexa_scriptguard/gui_assets/modern/* text eol=lf
+/frontend/demo/public/reports/* text eol=lf
+/frontend/index.html text eol=lf

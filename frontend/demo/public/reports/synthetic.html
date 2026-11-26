@@ -1,0 +1,34 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>NEXA ScriptGuard</title><style>
+    body{background:radial-gradient(ellipse at top,#211039,#050912 65%);color:#f5f7ff;font:15px/1.6 system-ui,sans-serif;margin:0}
+    main{max-width:1080px;margin:auto;padding:35px}header{border-bottom:1px solid #00d9ff;padding:24px 0}
+    h1{font-size:42px;color:#00d9ff}.finding{border:1px solid var(--sev);box-shadow:0 0 14px var(--sev);border-radius:18px;padding:22px;margin:25px 0;background:#080e1b}
+    h2{color:var(--sev)}h3{color:#00d9ff;font-size:13px;letter-spacing:.1em}
+    pre{background:#020711;border:1px solid #00b9ef;padding:15px;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:9px}
+    </style><main><header><h1>♾ NEXA ScriptGuard</h1><p>NextGenAI Infinity · AI assists. Human verifies. Human decides.</p><p>DEMO MODE — SYNTHETIC DATA</p></header>
+    <p>Estado: COMPLETO · Archivo: synthetic.py · SHA-256: 8b4332afaf9d06ef03eb341c45a4f46abcbc5046fba3349c79c3eb354893b537</p>
+    <p>Parser: python-ast · Hallazgos: 2</p>
+    <article class="finding" style="--sev:#ff765c">
+          <h2>⚠ HIGH · PY-001 · Evaluación dinámica de código</h2>
+          <p>Hallazgo beb524dfb440bb093dd5 · LÍNEA 2 · COLUMNA 9</p>
+          <p>SHA-256 8b4332afaf9d06ef03eb341c45a4f46abcbc5046fba3349c79c3eb354893b537 · CONFIANZA medium · ESTADO requires_review</p>
+          <p>Coincidencia AST estática; la ejecución y el contexto requieren revisión.</p>
+          <h3>INSTRUCCIÓN</h3><pre>eval(&quot;1+1&quot;)</pre>
+          <h3>CONTEXTO</h3><div><strong>Instrucción correlacionada:</strong></div>
+          <h3>FLUJO / CORRELACIÓN</h3><pre>[]</pre>
+          <h3>ANÁLISIS</h3><p>Una llamada a eval o exec puede interpretar código no confiable; la sintaxis no demuestra que se ejecute ni el origen del argumento.</p>
+          <h3>RECOMENDACIÓN</h3><p>Evitar la evaluación dinámica; revisar procedencia y usar alternativas específicas para datos.</p>
+          <h3>VERIFICACIÓN — NO EJECUTADA</h3><ul><li><code>Inspeccionar el argumento y su procedencia sin ejecutar el archivo.</code></li></ul>
+          <p>Limitaciones: Python AST parsing uses the running Python version; newer syntax may not be supported.; Name resolution and network correlation are conservative approximations, not control-flow or execution proof.; Parsing is not preemptible and memory use is estimated, not a hard quota.</p></article>
+<article class="finding" style="--sev:#ffc36e">
+          <h2>⚠ MEDIUM · PY-005 · Posible secreto literal en código</h2>
+          <p>Hallazgo bb66675e3fa80f20bb8b · LÍNEA 1 · COLUMNA 1</p>
+          <p>SHA-256 8b4332afaf9d06ef03eb341c45a4f46abcbc5046fba3349c79c3eb354893b537 · CONFIANZA medium · ESTADO requires_review</p>
+          <p>Coincidencia AST estática; la ejecución y el contexto requieren revisión.</p>
+          <h3>INSTRUCCIÓN</h3><pre>api_token = &quot;[REDACTED]&quot;</pre>
+          <h3>CONTEXTO</h3><div><strong>Instrucción correlacionada:</strong></div>
+          <h3>FLUJO / CORRELACIÓN</h3><pre>[]</pre>
+          <h3>ANÁLISIS</h3><p>Una variable con nombre asociado a credenciales recibe una cadena literal no vacía; podría ser un ejemplo o un secreto real.</p>
+          <h3>RECOMENDACIÓN</h3><p>Verificar si el valor es sensible y, de serlo, retirarlo y rotarlo según el procedimiento correspondiente.</p>
+          <h3>VERIFICACIÓN — NO EJECUTADA</h3><ul><li><code>Revisar el valor en un entorno autorizado sin compartirlo.</code></li></ul>
+          <p>Limitaciones: Python AST parsing uses the running Python version; newer syntax may not be supported.; Name resolution and network correlation are conservative approximations, not control-flow or execution proof.; Parsing is not preemptible and memory use is estimated, not a hard quota.</p></article><p>Las verificaciones no se ejecutan. Los hallazgos requieren revisión humana.</p></main></html>

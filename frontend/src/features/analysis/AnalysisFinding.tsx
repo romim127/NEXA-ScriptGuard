@@ -11,7 +11,7 @@ export function AnalysisFinding({ finding }: { finding: Finding }) {
     <h3>INSTRUCCIÓN DETECTADA</h3>
     <pre className="instruction">{String(start.line).padStart(4, '0')} │ {finding.instruction}</pre>
     <EvidenceViewer label={finding.evidence.truncated ? 'EVIDENCIA COMPARTIBLE · TRUNCADA' : 'EVIDENCIA COMPARTIBLE'}
-      value={finding.evidence.shared} />
+      value={finding.evidence.shared} expandable />
     <EvidenceViewer label="CONTEXTO" value={context || 'Sin contexto adicional.'} />
     {finding.evidence.correlation.length > 0 &&
       <EvidenceViewer label="CORRELACIÓN" value={JSON.stringify(finding.evidence.correlation, null, 2)} />}

@@ -7,6 +7,7 @@ const point = z.object({ line: z.number().int().positive(), column: z.number().i
 const strings = z.array(z.string());
 const finding = z.object({
   id: z.string().min(1),
+  engine: z.enum(['python', 'rust', 'compatibility']),
   rule_id: z.string(),
   title: z.string(),
   severity: z.enum(severities),
@@ -33,6 +34,8 @@ const finding = z.object({
 export const reportSchema = z.object({
   schema_version: z.literal('1.0'),
   parser: z.string().min(1),
+  file: z.string().min(1),
+  lines: z.number().int().nonnegative(),
   sha256: z.string().regex(/^[0-9a-f]{64}$/),
   analyzed_at_utc: z.iso.datetime({ offset: true }),
   complete: z.boolean(),

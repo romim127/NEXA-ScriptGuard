@@ -4,12 +4,13 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "build:demo": "vite build --config demo/vite.config.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "e2e": "playwright test"
   },
   "dependencies": {
-    "@nextgenai/ui": "0.1.0",
+    "@nextgenai/ui": "0.2.0",
     "react": "^19",
     "react-dom": "^19",
     "zod": "^4"

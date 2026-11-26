@@ -7,6 +7,7 @@ const resultId = 'y'.repeat(32);
 const local = 'http://127.0.0.1:55555';
 const report = {
   schema_version: '1.0', parser: 'python-ast', sha256: 'a'.repeat(64),
+  file: 'example.py', lines: 1,
   analyzed_at_utc: '2026-11-25T12:00:00+00:00', complete: true,
   analysis_status: 'complete', incomplete_reasons: [], redaction_applied: true, limitations: [],
   findings: [],

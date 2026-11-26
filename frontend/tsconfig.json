@@ -20,6 +20,7 @@
   },
   "include": [
     "src",
+    "demo",
     "tests",
     "*.config.ts",
     "../packages/nextgenai-ui"
