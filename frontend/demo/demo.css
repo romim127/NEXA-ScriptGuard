@@ -51,7 +51,6 @@
 }
 .demo-panel h2, .demo-banner + main #hallazgos > h2 { margin: 0 0 8px; font-size: 1.25rem; }
 .demo-panel .notice, .demo-file { margin: 4px 0 10px; }
-.demo-local-help { margin: 12px 0 0; color: var(--ngi-link); }
 .demo-panel h3 { margin: 10px 0 6px; }
 .demo-metrics {
   display: grid;

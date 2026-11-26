@@ -46,9 +46,6 @@ falta. Cada instancia usa un puerto propio en `127.0.0.1` y su propio token.
 Presioná Ctrl+C para cerrar. Si CMD pregunta si debe terminar el archivo por
 lotes, confirmá el cierre.
 
-En la interfaz local, pulsá **Subir archivo**, elegí el script desde el
-selector de tu equipo y pulsá **Analizar archivo**.
-
 ## Instalar `RUN` para usarlo desde cualquier directorio
 
 Con pipx instalado, ejecutá `pipx install .` desde la raíz del repositorio.

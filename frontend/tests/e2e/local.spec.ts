@@ -92,7 +92,8 @@ test('local GUI analyzes Bash and Python offline and saves physical reports', as
     await expect(page.getByRole('alert')).toContainText('Seleccione un archivo');
     await expect(analyze).toBeDisabled();
     const chooser = page.waitForEvent('filechooser');
-    await page.getByRole('button', { name: 'Subir archivo' }).press('Enter');
+    await expect(input).toBeVisible();
+    await input.press('Enter');
     await (await chooser).setFiles(join(root, 'demo_example.sh'));
     await expect(page.getByText('demo_example.sh', { exact: true })).toBeVisible();
     await analyze.focus();
@@ -300,8 +301,7 @@ test('premium demo fits each viewport and downloads only synthetic reports', asy
   await page.goto(origin);
   await expect(page.getByRole('note')).toHaveText('DEMO MODE — SYNTHETIC DATA');
   await expect(page.locator('input[type=file]')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Subir archivo' })).toHaveCount(0);
-  await expect(page.getByText('¿Querés analizar tu archivo?', { exact: true })).toBeVisible();
+  await expect(page.getByText('¿Querés analizar tu archivo?', { exact: true })).toHaveCount(0);
   expect(await page.locator('html').evaluate(element => getComputedStyle(element).overflowY)).toBe('scroll');
   await expect(page.getByRole('article')).toHaveCount(2);
   await expect(page.locator('.demo-metrics dd')).toHaveText(['2', '1', '1']);

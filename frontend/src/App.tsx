@@ -132,7 +132,6 @@ export function App(props: AppProps) {
           <div className="hash">FECHA UTC: {props.report.analyzed_at_utc}</div>
           <p className="notice">Un resultado sin hallazgos no demuestra que el script sea seguro.</p>
         </details>
-        <p className="demo-local-help"><strong>¿Querés analizar tu archivo?</strong> Escribí <code>RUN</code> en la terminal. Cuando se abra el navegador, pulsá <strong>Subir archivo</strong>, elegí el script de tu equipo y pulsá <strong>Analizar archivo</strong>.</p>
       </section>
       <section className="demo-panel" id="exportaciones" aria-labelledby="demo-exports-title">
         <h2 id="demo-exports-title">Exportaciones</h2>
@@ -147,8 +146,7 @@ export function App(props: AppProps) {
         <p className="notice">Motores disponibles en la aplicación local.</p>
       </section>
     </div> : <section className="top" id="archivo" aria-label="Archivo y exportaciones">
-      <FileUploader label="ARCHIVO DE SCRIPT PARA ANALIZAR" buttonLabel="Subir archivo"
-        accept=".sh,.py" disabled={pending !== null} onSelect={select}>
+      <FileUploader label="ARCHIVO DE SCRIPT PARA ANALIZAR" accept=".sh,.py" disabled={pending !== null} onSelect={select}>
         <button type="button" onClick={analyze} disabled={!file || pending !== null || tooLarge || language === 'No compatible'}>
           Analizar archivo
         </button>
