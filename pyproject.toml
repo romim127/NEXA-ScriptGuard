@@ -27,4 +27,9 @@ nexa-scriptguard-gui = "nexa_scriptguard.gui:main"
 [tool.setuptools]
 packages = ["nexa_scriptguard"]
 [tool.setuptools.package-data]
-nexa_scriptguard = ["bash.json", "python_rules.json", "gui_assets/*.html", "gui_assets/*.css", "gui_assets/*.js", "gui_assets/*.svg"]
+nexa_scriptguard = [
+    "bash.json", "python_rules.json",
+    "gui_assets/*.html", "gui_assets/*.css", "gui_assets/*.js", "gui_assets/*.svg",
+    "gui_assets/modern/*.html", "gui_assets/modern/*.css", "gui_assets/modern/*.js",
+    "gui_assets/modern/*.svg", "gui_assets/modern/*.md",
+]

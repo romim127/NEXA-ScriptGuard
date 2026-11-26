@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 194" role="img" aria-labelledby="title">
+  <title id="title">Escudo Infinity de NextGenAI</title>
+  <defs>
+    <linearGradient id="edge" x1="0" y1="0" x2="0.85" y2="1">
+      <stop stop-color="#bffbff"/><stop offset=".18" stop-color="#00bfff"/>
+      <stop offset=".5" stop-color="#087bff"/><stop offset=".85" stop-color="#00dfff"/>
+      <stop offset="1" stop-color="#b6ffff"/>
+    </linearGradient>
+    <linearGradient id="face" x1=".15" y1="0" x2=".8" y2="1">
+      <stop stop-color="#092b5a"/><stop offset=".32" stop-color="#020c23"/>
+      <stop offset=".7" stop-color="#03132e"/><stop offset="1" stop-color="#004e94"/>
+    </linearGradient>
+    <radialGradient id="bottom-glow">
+      <stop stop-color="#10deff" stop-opacity=".85"/><stop offset="1" stop-color="#004aff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-60%" y="-40%" width="220%" height="180%">
+      <feGaussianBlur stdDeviation="3.5"/>
+    </filter>
+    <filter id="bloom" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <path id="outline" d="M80 17 C63 30 39 38 14 43 C14 107 27 151 80 178 C133 151 146 107 146 43 C121 38 97 30 80 17 Z"/>
+  </defs>
+  <ellipse cx="80" cy="181" rx="74" ry="12" fill="url(#bottom-glow)"/>
+  <use href="#outline" fill="none" stroke="#009cff" stroke-width="9" opacity=".8" filter="url(#bloom)"/>
+  <use href="#outline" fill="url(#face)" stroke="#008cff" stroke-width="7" opacity=".95" filter="url(#glow)"/>
+  <use href="#outline" fill="url(#face)" stroke="url(#edge)" stroke-width="2.3"/>
+  <path d="M80 23 C61 36 40 42 20 47 C20 105 32 144 80 170 C128 144 140 105 140 47 C120 42 99 36 80 23 Z"
+        fill="none" stroke="#0871bc" stroke-width="1.5" opacity=".7"/>
+  <path d="M47 73 C47 64 53 59 61 59 C69 59 75 66 80 72 C85 78 91 85 99 85 C107 85 113 80 113 72 C113 64 107 59 99 59 C91 59 85 66 80 72 C75 78 69 85 61 85 C53 85 47 80 47 73 Z"
+        fill="none" stroke="#00cfff" stroke-width="10" stroke-linecap="round" filter="url(#glow)" opacity=".95"/>
+  <path d="M47 73 C47 64 53 59 61 59 C69 59 75 66 80 72 C85 78 91 85 99 85 C107 85 113 80 113 72 C113 64 107 59 99 59 C91 59 85 66 80 72 C75 78 69 85 61 85 C53 85 47 80 47 73 Z"
+        fill="none" stroke="#00dfff" stroke-width="4.3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="80" y="115" fill="#f5f9ff" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="21">Infinity</text>
+  <text x="80" y="129" fill="#5be8ff" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="6.8" letter-spacing="2">NEXTGENAI</text>
+</svg>

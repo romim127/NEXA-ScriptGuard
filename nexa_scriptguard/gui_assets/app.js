@@ -1,7 +1,7 @@
 "use strict";
 const token = location.hash.slice(1) || sessionStorage.getItem("nexa-token") || "";
 if (token) sessionStorage.setItem("nexa-token", token);
-history.replaceState(null, "", "/");
+history.replaceState(null, "", location.pathname);
 const input = document.getElementById("script-file");
 const analyze = document.getElementById("analyze");
 const status = document.getElementById("status");

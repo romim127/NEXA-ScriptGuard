@@ -1,0 +1,13 @@
+:root {
+  --ngi-cyan: #00d9ff;
+  --ngi-error: #ff354c;
+  --ngi-warning: #ffc36e;
+  --ngi-link: #a8f4ff;
+}
+.ngi-navigation { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+.ngi-navigation a { color: var(--ngi-link); }
+:focus-visible { outline: 2px solid var(--ngi-cyan); outline-offset: 4px; }
+.ngi-evidence { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ngi-status-error { border-color: var(--ngi-error); color: #ffb4bc; }
+.ngi-status-warning { border-color: var(--ngi-warning); color: var(--ngi-warning); }
+.finding, .rule, .metadata { overflow-wrap: anywhere; }

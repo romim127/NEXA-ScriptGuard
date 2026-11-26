@@ -1,0 +1,24 @@
+{
+  "name": "nexa-scriptguard-workspace",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "packages/nextgenai-ui"
+  ],
+  "engines": {
+    "node": "^22.13.0 || >=24"
+  },
+  "scripts": {
+    "build": "npm run build -w frontend",
+    "typecheck": "npm run typecheck -w frontend",
+    "lint": "eslint frontend packages/nextgenai-ui",
+    "test": "npm run test -w frontend",
+    "e2e": "npm run e2e -w frontend"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10",
+    "eslint": "^10",
+    "eslint-plugin-react-hooks": "^7",
+    "typescript-eslint": "^8"
+  }
+}

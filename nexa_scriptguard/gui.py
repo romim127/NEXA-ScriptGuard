@@ -133,15 +133,28 @@ class GuiHandler(BaseHTTPRequestHandler):
         if not self.allowed_host():
             return self.error_response(403, "Host no autorizado.")
         path = urlsplit(self.path).path
+        resources = files("nexa_scriptguard").joinpath("gui_assets")
+        modern = {
+            "/": ("index.html", "text/html; charset=utf-8"),
+            "/phase4.js": ("phase4.js", "text/javascript; charset=utf-8"),
+            "/phase4.css": ("phase4.css", "text/css; charset=utf-8"),
+            "/phase4-infinity-shield.svg": ("phase4-infinity-shield.svg", "image/svg+xml"),
+        }
+        if path in modern:
+            name, content_type = modern[path]
+            asset = resources.joinpath("modern", name)
+            if asset.is_file():
+                return self.respond(200, asset.read_bytes(), content_type)
         assets = {
             "/": ("index.html", "text/html; charset=utf-8"),
+            "/legacy": ("index.html", "text/html; charset=utf-8"),
             "/app.css": ("app.css", "text/css; charset=utf-8"),
             "/app.js": ("app.js", "text/javascript; charset=utf-8"),
             "/infinity-shield.svg": ("infinity-shield.svg", "image/svg+xml"),
         }
         if path in assets:
             name, content_type = assets[path]
-            return self.respond(200, files("nexa_scriptguard").joinpath("gui_assets", name).read_bytes(), content_type)
+            return self.respond(200, resources.joinpath(name).read_bytes(), content_type)
         if path.startswith("/export/"):
             if not self.authorized():
                 return self.error_response(403, "Solicitud no autorizada.")
