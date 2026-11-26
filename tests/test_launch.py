@@ -79,7 +79,7 @@ class LauncherProcessTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn(b"--rust-helper", result.stdout)
 
-    @unittest.skipIf(os.name == "nt", "POSIX signal and BROWSER integration")
+    @unittest.skipUnless(sys.platform == "linux", "Linux signal and BROWSER integration")
     def test_browser_handoff_dynamic_ports_and_controlled_shutdown(self):
         browser = self.work / "browser.py"
         browser.write_text(

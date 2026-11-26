@@ -5,6 +5,8 @@ Bash, Python, CLI, GUI, escudo, exportaciones y helper Rust opcional quedaron in
 El [informe de consolidación](../reports/NEXA_SCRIPTGUARD_CONSOLIDATION_REPORT.md) conserva el historial y las evidencias. Los trabajos abiertos y sus dependencias figuran en [tareas pendientes](PENDING_TASKS.md).
 
 El arranque local dispone de `run-windows.bat`, `run-linux.sh` y `RUN`. Los
-tres inician la GUI existente. La suite comprueba el traspaso al navegador,
-puertos independientes, cierre y ejecución desde un directorio externo.
+tres inician la GUI existente. La suite verifica el lanzador desde un
+directorio externo y el manejo de apertura y cierre en Windows, Linux y macOS.
+En Linux también verifica dos procesos simultáneos, el traspaso a un navegador
+de prueba y el cierre de ambos puertos por señal.
 [NGI-STD-002](../governance/NGI-STD-002_LOCAL_APPLICATION_LAUNCH_STANDARD.md)
