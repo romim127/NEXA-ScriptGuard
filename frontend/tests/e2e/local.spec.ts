@@ -278,9 +278,12 @@ test('modern explorer filters, sorts and navigates to expandable evidence', asyn
   }
 });
 
-test('static demo shares the local design and downloads only synthetic reports', async ({ page }) => {
+test('premium demo fits each viewport and downloads only synthetic reports', async ({ page }) => {
   const origin = 'https://demo.example.invalid';
   const location = join(root, 'frontend/demo/dist');
+  const deploy = JSON.parse(await readFile(join(root, 'vercel.json'), 'utf-8'));
+  expect(deploy.outputDirectory).toBe('frontend/demo/dist');
+  expect(deploy.buildCommand).toBe('npm run build:demo');
   const requests: string[] = [];
   await page.route('**/*', async route => {
     const url = new URL(route.request().url());
@@ -288,40 +291,67 @@ test('static demo shares the local design and downloads only synthetic reports',
       requests.push(url.pathname);
       return route.abort();
     }
-    await route.fulfill({ path: join(location, url.pathname === '/' ? 'index.html' : url.pathname.slice(1)) });
+    await route.fulfill({ path: join(location, url.pathname === '/' ? 'index.html' : url.pathname.slice(1)),
+      headers: Object.fromEntries(deploy.headers[0].headers.map(({ key, value }: { key: string; value: string }) => [key, value])) });
   });
   await page.goto(origin);
   await expect(page.getByRole('note')).toHaveText('DEMO MODE — SYNTHETIC DATA');
   await expect(page.locator('input[type=file]')).toHaveCount(0);
   await expect(page.getByRole('article')).toHaveCount(2);
-  const instance = await service();
-  const local = await page.context().newPage();
-  try {
-    await local.goto(instance.url.href);
-    await local.getByLabel('ARCHIVO DE SCRIPT PARA ANALIZAR').setInputFiles(join(root, 'tests/corpus/python_gui_example.py'));
-    await local.getByRole('button', { name: 'Analizar archivo' }).click();
-    await expect(local.getByRole('article')).toHaveCount(4);
-    const styles = () => ['body', 'main', 'header', 'h1 b', '.shield', '.summary', '.finding', '.flag', '[aria-label="Exportaciones"] button']
-      .map(selector => {
-        const element = document.querySelector(selector);
-        if (!element) throw new Error(`Missing element: ${selector}`);
-        const css = getComputedStyle(element);
-        return [css.backgroundImage, css.backgroundColor, css.color, css.fontSize, css.padding,
-          css.borderColor, css.borderRadius, css.boxShadow, css.maxWidth];
-      });
-    for (const width of [780, 1440]) {
-      const viewport = { width, height: 800 };
-      await page.setViewportSize(viewport);
-      await local.setViewportSize(viewport);
-      expect(await page.evaluate(styles)).toEqual(await local.evaluate(styles));
+  await expect(page.locator('.demo-metrics dd')).toHaveText(['2', '1', '1']);
+  await expect(page.getByRole('list', { name: 'Motores disponibles en la aplicación local' })).toContainText('Rust');
+  await expect(page.getByRole('button', { name: 'Analizar archivo' })).toHaveCount(0);
+  const contrast = await page.locator('.demo-banner, .demo-metrics > div, .ngi-navigation a, .demo-panel button')
+    .evaluateAll(elements => elements.map(element => {
+      function luminance(color: string) {
+        const channels = color.match(/\d+(?:\.\d+)?/g)?.slice(0, 3).map(Number) ?? [];
+        return channels.reduce((total, channel, index) => {
+          const value = channel / 255;
+          const linear = value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+          return total + linear * [0.2126, 0.7152, 0.0722][index];
+        }, 0);
+      }
+      const style = getComputedStyle(element);
+      const [low, high] = [luminance(style.color), luminance(style.backgroundColor)].sort((a, b) => a - b);
+      return (high + 0.05) / (low + 0.05);
+    }));
+  expect(Math.min(...contrast)).toBeGreaterThanOrEqual(4.5);
+
+  for (const viewport of [
+    { name: 'escritorio', width: 1440, height: 1000 },
+    { name: 'tablet', width: 820, height: 1060 },
+    { name: 'movil', width: 390, height: 844 },
+    { name: 'movil-estrecho', width: 320, height: 740 },
+  ]) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    const dimensions = await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth,
+      viewport: document.documentElement.clientWidth,
+    }));
+    expect(dimensions.width).toBeLessThanOrEqual(dimensions.viewport);
+    const cards = await page.getByRole('article').evaluateAll(elements => elements.map(element => ({
+      x: element.getBoundingClientRect().x,
+      border: getComputedStyle(element).borderTopColor,
+    })));
+    expect(cards[0].border).not.toBe(cards[1].border);
+    if (viewport.width > 750) expect(cards[1].x).toBeGreaterThan(cards[0].x);
+    else expect(cards[1].x).toBe(cards[0].x);
+    if (process.env.NEXA_VISUAL_DIR && viewport.width >= 390) {
+      await page.screenshot({ path: join(process.env.NEXA_VISUAL_DIR, viewport.name + '.png'), fullPage: true });
     }
-  } finally {
-    await local.close();
-    await instance.stop();
   }
+  await page.keyboard.press('Tab');
+  const firstLink = page.getByRole('link', { name: 'Resumen' });
+  await expect(firstLink).toBeFocused();
+  expect(await firstLink.evaluate(element => getComputedStyle(element).outlineStyle)).not.toBe('none');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Hallazgos', exact: true })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/#hallazgos$/);
+  await expect.poll(() => page.getByRole('note').evaluate(element => element.getBoundingClientRect().top)).toBe(0);
   await page.getByLabel('Criticidad').selectOption('MEDIUM');
   await expect(page.getByRole('article')).toHaveCount(1);
-  await page.getByText('EVIDENCIA COMPARTIBLE').click();
+  await page.getByText('EVIDENCIA COMPARTIBLE').press('Enter');
   await expect(page.locator('.ngi-disclosure[open] p')).toBeVisible();
   for (const format of ['JSON', 'HTML', 'SARIF']) {
     const download = page.waitForEvent('download');
