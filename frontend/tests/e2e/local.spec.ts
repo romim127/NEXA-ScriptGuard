@@ -91,7 +91,10 @@ test('local GUI analyzes Bash and Python offline and saves physical reports', as
     await input.setInputFiles({ name: 'invalid.txt', mimeType: 'text/plain', buffer: Buffer.from('text') });
     await expect(page.getByRole('alert')).toContainText('Seleccione un archivo');
     await expect(analyze).toBeDisabled();
-    await input.setInputFiles(join(root, 'demo_example.sh'));
+    const chooser = page.waitForEvent('filechooser');
+    await page.getByRole('button', { name: 'Subir archivo' }).press('Enter');
+    await (await chooser).setFiles(join(root, 'demo_example.sh'));
+    await expect(page.getByText('demo_example.sh', { exact: true })).toBeVisible();
     await analyze.focus();
     await page.keyboard.press('Enter');
     await expect(page.getByRole('status')).toContainText('ANÁLISIS COMPLETO');
@@ -297,6 +300,7 @@ test('premium demo fits each viewport and downloads only synthetic reports', asy
   await page.goto(origin);
   await expect(page.getByRole('note')).toHaveText('DEMO MODE — SYNTHETIC DATA');
   await expect(page.locator('input[type=file]')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Subir archivo' })).toHaveCount(0);
   await expect(page.getByText('¿Querés analizar tu archivo?', { exact: true })).toBeVisible();
   expect(await page.locator('html').evaluate(element => getComputedStyle(element).overflowY)).toBe('scroll');
   await expect(page.getByRole('article')).toHaveCount(2);
