@@ -46,7 +46,7 @@ export function FindingExplorer({ findings, compact = false }: { findings: Findi
         <a href={`#finding-${index}`}>Línea {finding.location.start.line}, columna {finding.location.start.column} · {finding.rule_id}</a>
       </li>)}</ul>
     </details>}
-    <div className={compact ? 'demo-findings-grid' : undefined}>
+    <div className="findings-grid">
       {visible.map((finding, index) => <section id={`finding-${index}`} tabIndex={-1} key={finding.id}>
         <AnalysisFinding finding={finding} compact={compact} />
       </section>)}

@@ -4,7 +4,6 @@ import { reportSchema } from '../src/types/report';
 import fixture from './public/reports/synthetic.json';
 import htmlReport from './public/reports/synthetic.html?raw';
 import sarifReport from './public/reports/synthetic.sarif?raw';
-import './demo.css';
 
 const reports = {
   json: [JSON.stringify(fixture, null, 2), 'application/json'],

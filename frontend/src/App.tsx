@@ -10,6 +10,7 @@ import type { Report } from './types/report';
 import '../../nexa_scriptguard/gui_assets/app.css';
 import '@nextgenai/ui/theme.css';
 import './results.css';
+import './dashboard.css';
 
 const formats = [
   { id: 'json', label: 'Exportar JSON' },
@@ -95,83 +96,78 @@ export function App(props: AppProps) {
     return count ? ` · ${severity} ${count}` : '';
   });
   const exports = <ExportPanel label="Exportaciones" formats={formats}
-    disabled={pending !== null} onExport={exportResult} />;
+    disabled={!report || pending !== null} onExport={exportResult} />;
 
   return <>
     {demo && <p className="demo-banner" role="note">DEMO MODE — SYNTHETIC DATA</p>}
-    <Dashboard header={<>
+    <Dashboard className="scriptguard-dashboard" header={<>
     <InfinityShield src={shield} alt="Escudo Infinity de NextGenAI" />
     <div>
       <h1>NEXA <b>ScriptGuard</b></h1>
       <div className="subtitle">NEXTGENAI INFINITY · STATIC SECURITY ANALYZER</div>
       <div className="motto">AI assists. Human verifies. Human decides.</div>
-      {demo && <p className="demo-creed">THERE IS NO FINAL VERSION. THERE IS ONLY EVOLUTION.</p>}
-      {report && <Sidebar label="Navegación del reporte" links={[
-        { id: 'archivo', label: demo ? 'Resumen' : 'Archivo y exportaciones' },
+      <p className="dashboard-creed">THERE IS NO FINAL VERSION. THERE IS ONLY EVOLUTION.</p>
+      <Sidebar label="Navegación del reporte" links={[
+        { id: 'archivo', label: demo ? 'Resumen' : 'Archivo' },
         { id: 'hallazgos', label: 'Hallazgos' },
-        ...(demo ? [{ id: 'exportaciones', label: 'Exportaciones' }] : []),
-      ]} />}
+        { id: 'exportaciones', label: 'Exportaciones' },
+      ]} />
     </div>
   </>}>
-    {demo ? <div className="demo-overview">
-      <section className="demo-panel" id="archivo" aria-labelledby="demo-overview-title">
-        <h2 id="demo-overview-title">Resumen del reporte</h2>
-        <p className="demo-file"><strong>{props.report.file}</strong> · {language} · {props.report.lines} líneas</p>
-        <dl className="demo-metrics">
-          <div><dt>Hallazgos</dt><dd>{props.report.findings.length}</dd></div>
+    <div className="dashboard-overview">
+      <section className="dashboard-panel" id="archivo" aria-label={demo ? 'Resumen del reporte' : 'Archivo de análisis'}>
+        {demo ? <h2>Resumen del reporte</h2> : <>
+          <FileUploader label="ARCHIVO DE SCRIPT PARA ANALIZAR" accept=".sh,.py" disabled={pending !== null} onSelect={select}>
+            <button type="button" onClick={analyze} disabled={!file || pending !== null || tooLarge || language === 'No compatible'}>
+              Analizar archivo
+            </button>
+          </FileUploader>
+          <div>ARCHIVO SELECCIONADO · <strong className="path">{file?.name ?? 'Ninguno'}</strong></div>
+          <div>LENGUAJE DETECTADO · <strong>{language}</strong></div>
+          <StatusIndicator tone={pending ? 'loading' : report ? report.complete ? 'success' : 'warning' : 'idle'}>
+            {pending === 'analyze' ? 'ANALIZANDO · El script no se ejecuta.'
+              : pending === 'export' ? 'EXPORTANDO · Preparando el reporte.'
+              : report ? <>{report.complete ? 'ANÁLISIS COMPLETO' : 'ANÁLISIS INCOMPLETO'} · {report.findings.length} HALLAZGOS{summary}</>
+              : file ? 'Seleccione Analizar archivo.' : 'Seleccione un archivo. No se ejecutará.'}
+          </StatusIndicator>
+        </>}
+        {error && <p className="summary ngi-status-error" role="alert">{error}</p>}
+        {report && <>
+        <p className="dashboard-file"><strong>{report.file}</strong> · {language} · {report.lines} líneas · Parser: {report.parser}</p>
+        {!demo && report.findings.length > 0 && <div>Motores de hallazgos: {[...new Set(report.findings.map(finding => finding.engine))].join(', ')}</div>}
+        <dl className="dashboard-metrics">
+          <div><dt>Hallazgos</dt><dd>{report.findings.length}</dd></div>
           {severities.map(severity => {
-            const count = props.report.findings.filter(finding => finding.severity === severity).length;
+            const count = report.findings.filter(finding => finding.severity === severity).length;
             return count > 0 && <div key={severity} className={`metric-${severity.toLowerCase()}`}>
               <dt>{severity}</dt><dd>{count}</dd>
             </div>;
           })}
         </dl>
-        <details className="demo-metadata"><summary>Metadatos y alcance</summary>
-          <p>Reporte precomputado · {props.report.complete ? 'Análisis completo' : 'Análisis incompleto'} · {props.report.parser}</p>
-          <div className="hash">SHA-256: {props.report.sha256}</div>
-          <div className="hash">FECHA UTC: {props.report.analyzed_at_utc}</div>
+        <details className="dashboard-metadata"><summary>Metadatos y alcance</summary>
+          {demo && <p>Reporte precomputado · {report.complete ? 'Análisis completo' : 'Análisis incompleto'}</p>}
+          <div className="hash">SHA-256: {report.sha256}</div>
+          <div className="hash">FECHA UTC: {report.analyzed_at_utc}</div>
           <p className="notice">Un resultado sin hallazgos no demuestra que el script sea seguro.</p>
         </details>
+        </>}
       </section>
-      <section className="demo-panel" id="exportaciones" aria-labelledby="demo-exports-title">
-        <h2 id="demo-exports-title">Exportaciones</h2>
-        <p className="notice">Descargá el reporte sintético completo.</p>
+      <section className="dashboard-panel" id="exportaciones" aria-labelledby="exports-title">
+        <h2 id="exports-title">Exportaciones</h2>
+        <p className="notice">{demo ? 'Descargá el reporte sintético completo.'
+          : report ? 'Descargá el reporte completo.' : 'El reporte estará disponible después de analizar un archivo.'}</p>
         {exports}
         {saved && <p role="status">{saved}</p>}
-        {error && <p className="summary ngi-status-error" role="alert">{error}</p>}
         <h3>Capacidades del producto</h3>
-        <ul className="demo-capabilities" aria-label="Motores disponibles en la aplicación local">
+        <ul className="dashboard-capabilities" aria-label="Motores disponibles en la aplicación local">
           <li>Bash</li><li>Python</li><li>Rust <small>helper</small></li>
         </ul>
         <p className="notice">Motores disponibles en la aplicación local.</p>
       </section>
-    </div> : <section className="top" id="archivo" aria-label="Archivo y exportaciones">
-      <FileUploader label="ARCHIVO DE SCRIPT PARA ANALIZAR" accept=".sh,.py" disabled={pending !== null} onSelect={select}>
-        <button type="button" onClick={analyze} disabled={!file || pending !== null || tooLarge || language === 'No compatible'}>
-          Analizar archivo
-        </button>
-      </FileUploader>
-      <div>ARCHIVO SELECCIONADO · <strong className="path">{file?.name ?? 'Ninguno'}</strong></div>
-      <div>LENGUAJE DETECTADO · <strong>{language}</strong></div>
-      <StatusIndicator tone={pending ? 'loading' : report ? report.complete ? 'success' : 'warning' : 'idle'}>
-        {pending === 'analyze' ? 'ANALIZANDO · El script no se ejecuta.'
-          : pending === 'export' ? 'EXPORTANDO · Preparando el reporte.'
-          : report ? <>{report.complete ? 'ANÁLISIS COMPLETO' : 'ANÁLISIS INCOMPLETO'} · {report.findings.length} HALLAZGOS{summary}</>
-          : file ? 'Seleccione Analizar archivo.' : 'Seleccione un archivo. No se ejecutará.'}
-      </StatusIndicator>
-      {error && <p className="summary ngi-status-error" role="alert">{error}</p>}
-      {saved && <p role="status">{saved}</p>}
-      {report && <>
-        <div>RESUMEN · {report.file} · {report.lines} líneas · Parser: {report.parser}</div>
-        {report.findings.length > 0 && <div>Motores de hallazgos: {[...new Set(report.findings.map(finding => finding.engine))].join(', ')}</div>}
-        <div className="hash">SHA-256: {report.sha256}</div>
-        <div className="hash">FECHA UTC: {report.analyzed_at_utc}</div>
-        {exports}
-      </>}
-      <p className="notice">Un resultado sin hallazgos no demuestra que el script sea seguro. Revise las evidencias antes de compartirlas.</p>
-    </section>}
+    </div>
     <section id="hallazgos" aria-label="Hallazgos">
-      {demo && <h2>Hallazgos</h2>}
+      <h2>Hallazgos</h2>
+      {!report && <p className="notice">Los hallazgos aparecerán acá después del análisis.</p>}
       {report?.incomplete_reasons.map((reason, index) => <p className="notice" key={index}>INCOMPLETO: {reason}</p>)}
       {!!report?.limitations.length && <details><summary>Limitaciones del análisis</summary>
         <ul>{report.limitations.map((limit, index) => <li key={index}>{limit}</li>)}</ul>

@@ -87,6 +87,17 @@ test('local GUI analyzes Bash and Python offline and saves physical reports', as
     expect((await request.get(second.url.origin)).ok()).toBe(true);
     const input = page.getByLabel('ARCHIVO DE SCRIPT PARA ANALIZAR');
     const analyze = page.getByRole('button', { name: 'Analizar archivo' });
+    const exportJson = page.getByRole('button', { name: 'Exportar JSON' });
+    await expect(page.getByRole('navigation', { name: 'Navegación del reporte' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Capacidades del producto' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Hallazgos', exact: true })).toBeVisible();
+    await expect(exportJson).toBeDisabled();
+    await expect(page.locator('.dashboard-metrics')).toHaveCount(0);
+    if (process.env.NEXA_VISUAL_DIR) {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.screenshot({ path: join(process.env.NEXA_VISUAL_DIR, 'local-inicio.png'), fullPage: true });
+      await page.setViewportSize({ width: 360, height: 640 });
+    }
 
     await input.setInputFiles({ name: 'invalid.txt', mimeType: 'text/plain', buffer: Buffer.from('text') });
     await expect(page.getByRole('alert')).toContainText('Seleccione un archivo');
@@ -100,6 +111,13 @@ test('local GUI analyzes Bash and Python offline and saves physical reports', as
     await page.keyboard.press('Enter');
     await expect(page.getByRole('status')).toContainText('ANÁLISIS COMPLETO');
     await expect(page.getByRole('article')).toHaveCount(2);
+    await expect(exportJson).toBeEnabled();
+    await expect(page.locator('.dashboard-metrics dd')).toHaveText(['2', '2']);
+    if (process.env.NEXA_VISUAL_DIR) {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.screenshot({ path: join(process.env.NEXA_VISUAL_DIR, 'local-reporte.png'), fullPage: true });
+      await page.setViewportSize({ width: 360, height: 640 });
+    }
     await page.getByRole('link', { name: 'Hallazgos', exact: true }).click();
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
@@ -113,7 +131,7 @@ test('local GUI analyzes Bash and Python offline and saves physical reports', as
     await page.route('**/analyze', route => route.fulfill({ status: 500, json: { error: '<script>malicious</script>' } }), { times: 1 });
     await analyze.click();
     await expect(page.getByRole('alert')).toHaveText('Error del servidor (HTTP 500).');
-    await expect(page.getByRole('button', { name: 'Exportar JSON' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Exportar JSON' })).toBeDisabled();
 
     await input.setInputFiles(join(root, 'tests/corpus/python_gui_example.py'));
     await analyze.click();
@@ -196,7 +214,8 @@ test('modern and legacy have semantic parity across complete and incomplete repo
         await analyze.focus();
         await page.keyboard.press('Enter');
         await expect(page.getByRole('status').first()).toContainText(`ANÁLISIS ${status}`);
-        await expect(page.getByText(language, { exact: true })).toBeVisible();
+        const languageArea = route === '/' ? page.locator('#archivo') : page.locator('main');
+        await expect(languageArea.getByText(language, { exact: true })).toBeVisible();
         const json = page.waitForEvent('download');
         await page.getByRole('button', { name: 'Exportar JSON' }).click();
         const report = JSON.parse(await readFile(await (await json).path(), 'utf-8'));
@@ -304,10 +323,10 @@ test('premium demo fits each viewport and downloads only synthetic reports', asy
   await expect(page.getByText('¿Querés analizar tu archivo?', { exact: true })).toHaveCount(0);
   expect(await page.locator('html').evaluate(element => getComputedStyle(element).overflowY)).toBe('scroll');
   await expect(page.getByRole('article')).toHaveCount(2);
-  await expect(page.locator('.demo-metrics dd')).toHaveText(['2', '1', '1']);
+  await expect(page.locator('.dashboard-metrics dd')).toHaveText(['2', '1', '1']);
   await expect(page.getByRole('list', { name: 'Motores disponibles en la aplicación local' })).toContainText('Rust');
   await expect(page.getByRole('button', { name: 'Analizar archivo' })).toHaveCount(0);
-  const contrast = await page.locator('.demo-banner, .demo-metrics > div, .ngi-navigation a, .demo-panel button')
+  const contrast = await page.locator('.demo-banner, .dashboard-metrics > div, .ngi-navigation a, .dashboard-panel button')
     .evaluateAll(elements => elements.map(element => {
       function luminance(color: string) {
         const channels = color.match(/\d+(?:\.\d+)?/g)?.slice(0, 3).map(Number) ?? [];

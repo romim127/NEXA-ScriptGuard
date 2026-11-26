@@ -1,0 +1,106 @@
+.demo-banner {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 8px;
+  background: var(--ngi-warning);
+  color: #04070d;
+  font-weight: 750;
+  text-align: center;
+}
+.scriptguard-page {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  scrollbar-color: #418b9f #071825;
+}
+.scriptguard-dashboard {
+  max-width: 1380px;
+  padding: clamp(14px, 2.4vw, 32px) clamp(14px, 3vw, 40px) 48px;
+}
+.demo-banner + main section[id] { scroll-margin-top: 64px; }
+.scriptguard-dashboard > header { gap: clamp(12px, 2vw, 24px); padding-bottom: 16px; flex-wrap: nowrap; }
+.scriptguard-dashboard > header .shield { width: clamp(80px, 13vw, 170px); }
+.scriptguard-dashboard h1 { font-size: clamp(25px, 4.5vw, 54px); line-height: 1.12; overflow-wrap: anywhere; }
+.scriptguard-dashboard .subtitle { margin-top: 8px; letter-spacing: .14em; }
+.dashboard-creed { color: var(--muted); font-size: .82rem; margin: 6px 0 0; }
+.scriptguard-dashboard .ngi-navigation { gap: 6px 8px; margin-top: 10px; }
+.scriptguard-dashboard .ngi-navigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 10px;
+  border: 1px solid var(--ngi-border);
+  border-radius: 8px;
+  background: var(--ngi-surface);
+  text-decoration: none;
+}
+.scriptguard-dashboard .ngi-navigation a:hover { text-decoration: underline; }
+.dashboard-overview, .findings-grid {
+  display: grid;
+  gap: clamp(12px, 1.5vw, 20px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.dashboard-overview { margin: 18px 0 22px; }
+.dashboard-panel {
+  min-width: 0;
+  padding: clamp(12px, 1.6vw, 20px);
+  border: 1px solid var(--ngi-border);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(47, 29, 77, .55), rgba(7, 24, 37, .94) 65%);
+}
+.dashboard-panel h2, .scriptguard-dashboard #hallazgos > h2 { margin: 0 0 8px; font-size: 1.25rem; }
+.dashboard-panel .notice, .dashboard-file { margin: 4px 0 10px; }
+.dashboard-panel h3 { margin: 10px 0 6px; }
+.dashboard-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 86px), 1fr));
+  gap: 8px;
+  margin: 10px 0;
+}
+.dashboard-metrics > div {
+  padding: 6px 10px;
+  border: 1px solid var(--ngi-border);
+  border-radius: 10px;
+  background: #080e1c;
+  color: var(--metric-color, var(--ngi-link));
+}
+.dashboard-metrics dt { font-size: .8rem; font-weight: 650; }
+.dashboard-metrics dd { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 750; }
+.metric-critical, .metric-high { --metric-color: #ff8b91; }
+.metric-medium { --metric-color: var(--ngi-warning); }
+.dashboard-metadata summary, .scriptguard-dashboard #hallazgos summary { cursor: pointer; color: var(--ngi-link); }
+.dashboard-capabilities { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; list-style: none; }
+.dashboard-capabilities li { padding: 2px 9px; border: 1px solid var(--ngi-border); border-radius: 6px; }
+.dashboard-capabilities small { color: var(--muted); }
+.dashboard-panel .controls { margin: 8px 0; gap: 8px; }
+.scriptguard-dashboard .finding-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.scriptguard-dashboard .finding-filters :is(input, select) { width: 100%; min-height: 38px; font: inherit; }
+.findings-grid { margin-top: 12px; align-items: start; }
+.findings-grid .finding { margin: 0; padding: clamp(14px, 1.8vw, 22px); }
+.findings-grid .finding h2 { font-size: clamp(20px, 2vw, 26px); line-height: 1.25; }
+.findings-grid .instruction { padding: 12px; }
+.findings-grid .detail { margin-top: 12px; padding-top: 10px; }
+.findings-grid .detail[open] > p { padding: 10px; border-radius: 8px; background: #080e1c; }
+@media (max-width: 750px) {
+  .dashboard-overview, .findings-grid { grid-template-columns: minmax(0, 1fr); }
+  .scriptguard-dashboard .finding-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scriptguard-dashboard .ngi-navigation a,
+  .scriptguard-dashboard .finding-filters :is(input, select),
+  .dashboard-panel button { min-height: 44px; }
+}
+@media (max-width: 400px) {
+  .scriptguard-dashboard > header { align-items: start; }
+  .scriptguard-dashboard > header .shield { margin-top: 4px; }
+  .scriptguard-dashboard .ngi-navigation a { padding-inline: 8px; }
+}
+
+.scriptguard-page body { min-height: 100vh; }
+.dashboard-panel .path { color: var(--ngi-cyan); }
+.dashboard-panel .summary { margin: 8px 0; }
+.dashboard-file { overflow-wrap: anywhere; }
