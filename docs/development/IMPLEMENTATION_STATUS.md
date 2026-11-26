@@ -15,3 +15,5 @@ Fase 4 aporta React y NextGenAI UI, cliente TypeScript y comprobación de la
 rueda mediante pipx. El servidor y los motores mantienen los contratos
 existentes. La referencia anterior se sirve en `/legacy`.
 [ADR 0004](../decisions/ADR-0004-REACT-LOOPBACK.md)
+
+Fase 5 implementa filtros, búsqueda, orden, evidencia expandible, navegación por línea, metadatos reales del archivo, enlaces SARIF y demo estática. La suite compara React y legacy. El experimento WASM solo mide muestras acotadas de Python y Bash e inspecciona el helper Rust compilado. [Matriz](PHASE_5_PARITY.md) · [ADR 0005](../decisions/ADR-0005-STATIC-DEMO-WASM-PROBE.md)

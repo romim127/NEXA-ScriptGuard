@@ -20,3 +20,5 @@ available.
 Rule coverage and semantics are documented in
 [`../RULES.md`](../RULES.md) and
 [`../ARCHITECTURE.md`](../ARCHITECTURE.md).
+
+Phase 5 adds finding filters, search, sorting, collapsible evidence, navigation to locations, file summary and engine metadata. Export continues to include the complete current report. [Parity matrix](../development/PHASE_5_PARITY.md)

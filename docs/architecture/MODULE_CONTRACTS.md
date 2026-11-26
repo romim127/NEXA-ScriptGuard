@@ -16,3 +16,9 @@
 | `reports.py` | Informe → JSON, HTML, SARIF o terminal | Validación estructural, escape de contenido y límite de salida según el punto de entrada. |
 
 Consultar [contratos de reportes](REPORTING_CONTRACTS.md) y [garantías de archivos y límites](../ARCHITECTURE.md).
+
+El explorador React usa campos existentes de reporte (`file`, `lines`) y hallazgo (`engine`). Filtra y ordena en memoria sin modificar el reporte exportado. El consumidor estático usa props públicas de `@nextgenai/ui` y reportes precomputados, sin invocar el servicio local.
+
+El atributo `data-max-input-bytes` del HTML local anuncia el límite vigente
+para validar la selección en ambas GUI. El límite sigue bajo control de
+Python y se comprueba también en `POST /analyze`.

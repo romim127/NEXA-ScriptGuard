@@ -40,3 +40,5 @@ No hosted endpoint is configured. A Vercel deployment would transmit uploaded
 source to a third party and therefore requires a separate privacy, security,
 abuse-control, retention, and authorization decision. See
 [`../decisions/ADR-0003-VERCEL-EVALUATION.md`](../decisions/ADR-0003-VERCEL-EVALUATION.md).
+
+El servidor rechaza nombres percent-encoded con UTF-8 inválido. La demo tiene un build separado y CSP sin conexiones. El experimento WASM solo usa fixtures sintéticos y no cambia los límites cooperativos de la aplicación local. [ADR 0005](../decisions/ADR-0005-STATIC-DEMO-WASM-PROBE.md)

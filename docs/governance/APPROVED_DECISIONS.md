@@ -12,3 +12,5 @@
   [ADR 0004](../decisions/ADR-0004-REACT-LOOPBACK.md)
 
 Ver el [registro de decisiones](../decisions/README.md).
+
+La Fase 5 conserva `/legacy` hasta una decisión aprobada y permite publicar únicamente la demostración estática sintética. [ADR 0005](../decisions/ADR-0005-STATIC-DEMO-WASM-PROBE.md)

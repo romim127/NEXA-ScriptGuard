@@ -19,3 +19,5 @@ La Fase 4 sirve el frontend React desde los recursos de la distribución
 Python. TypeScript valida el contrato consumido y NextGenAI UI presenta
 controles y resultados. Vite se usa durante la compilación. La referencia
 anterior queda disponible en `/legacy`. [ADR 0004](../decisions/ADR-0004-REACT-LOOPBACK.md)
+
+La Fase 5 agrega exploración de hallazgos en la GUI local y un consumidor independiente con fixtures estáticos. El análisis WASM integral continúa experimental. [ADR 0005](../decisions/ADR-0005-STATIC-DEMO-WASM-PROBE.md)

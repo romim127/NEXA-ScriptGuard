@@ -14,3 +14,5 @@ conserva el token en `sessionStorage` de la pestaña para recargas. Tras
 recibir el reporte valida el esquema consumido antes de renderizarlo como
 texto. Para exportar solicita los bytes al servidor y entrega un enlace Blob
 temporal al navegador.
+
+Las vistas de criticidad, regla, búsqueda y orden son proyecciones del reporte validado. Las exportaciones siguen leyendo el resultado vigente completo. La demo empaqueta fixtures y produce blobs locales sin recibir archivos de entrada.

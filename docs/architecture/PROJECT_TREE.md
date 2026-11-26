@@ -25,10 +25,12 @@ docs/decisions/ADR-0001-LOCAL-FIRST.md
 docs/decisions/ADR-0002-SARIF-2.1.0.md
 docs/decisions/ADR-0003-VERCEL-EVALUATION.md
 docs/decisions/ADR-0004-REACT-LOOPBACK.md
+docs/decisions/ADR-0005-STATIC-DEMO-WASM-PROBE.md
 docs/decisions/README.md
 docs/demo/index.html
 docs/development/IMPLEMENTATION_STATUS.md
 docs/development/PENDING_TASKS.md
+docs/development/PHASE_5_PARITY.md
 docs/development/PROJECT_TREE.md
 docs/development/ROADMAP.md
 docs/development/SETUP.md
@@ -54,13 +56,25 @@ docs/requirements/REQUIREMENTS_TRACEABILITY.md
 docs/ROADMAP.md
 docs/RULES.md
 eslint.config.mjs
+frontend/demo/demo.css
+frontend/demo/generate_reports.py
+frontend/demo/index.html
+frontend/demo/main.tsx
+frontend/demo/public/reports/synthetic.html
+frontend/demo/public/reports/synthetic.json
+frontend/demo/public/reports/synthetic.sarif
+frontend/demo/vite.config.ts
+frontend/experiments/wasm/run.mjs
+frontend/experiments/wasm/worker.mjs
 frontend/index.html
 frontend/package.json
 frontend/playwright.config.ts
 frontend/src/App.tsx
 frontend/src/features/analysis/AnalysisFinding.tsx
+frontend/src/features/analysis/FindingExplorer.tsx
 frontend/src/features/reports/download.ts
 frontend/src/main.tsx
+frontend/src/results.css
 frontend/src/services/api.ts
 frontend/src/types/report.ts
 frontend/tests/e2e/browser_probe.py
@@ -103,6 +117,7 @@ nexa_scriptguard/rules.py
 nexa_scriptguard/rust_bridge.py
 package-lock.json
 package.json
+packages/nextgenai-ui/CHANGELOG.md
 packages/nextgenai-ui/components/Dashboard.tsx
 packages/nextgenai-ui/components/EvidenceViewer.tsx
 packages/nextgenai-ui/components/ExportPanel.tsx
@@ -114,7 +129,9 @@ packages/nextgenai-ui/components/Sidebar.tsx
 packages/nextgenai-ui/components/StatusIndicator.tsx
 packages/nextgenai-ui/index.ts
 packages/nextgenai-ui/package.json
+packages/nextgenai-ui/README.md
 packages/nextgenai-ui/themes/infinity.css
+packages/nextgenai-ui/themes/tokens.css
 pyproject.toml
 README.en.md
 README.md
@@ -139,6 +156,7 @@ tests/test_redaction.py
 tests/test_report_schemas.py
 tests/test_rust_bridge.py
 tests/test_scanner.py
+vercel.json
 ```
 
 ## Arquitectura proyectada
