@@ -19,8 +19,14 @@
   padding: clamp(14px, 2.4vw, 32px) clamp(14px, 3vw, 40px) 48px;
 }
 .demo-banner + main section[id] { scroll-margin-top: 64px; }
-.scriptguard-dashboard > header { gap: clamp(12px, 2vw, 24px); padding-bottom: 16px; flex-wrap: nowrap; }
-.scriptguard-dashboard > header .shield { width: clamp(80px, 13vw, 170px); }
+.scriptguard-dashboard > header {
+  align-items: start;
+  gap: clamp(12px, 2vw, 24px);
+  padding-bottom: 16px;
+  flex-wrap: nowrap;
+}
+.scriptguard-dashboard > header .shield { width: clamp(88px, 14.5vw, 190px); }
+.scriptguard-dashboard > header > div { padding-block-start: clamp(4px, .75vw, 11px); }
 .scriptguard-dashboard h1 { font-size: clamp(25px, 4.5vw, 54px); line-height: 1.12; overflow-wrap: anywhere; }
 .scriptguard-dashboard .subtitle { margin-top: 8px; letter-spacing: .14em; }
 .dashboard-creed { color: var(--muted); font-size: .82rem; margin: 6px 0 0; }
@@ -95,8 +101,6 @@
   .dashboard-panel button { min-height: 44px; }
 }
 @media (max-width: 400px) {
-  .scriptguard-dashboard > header { align-items: start; }
-  .scriptguard-dashboard > header .shield { margin-top: 4px; }
   .scriptguard-dashboard .ngi-navigation a { padding-inline: 8px; }
 }
 
