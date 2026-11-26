@@ -138,7 +138,6 @@ class GuiHandler(BaseHTTPRequestHandler):
             "/": ("index.html", "text/html; charset=utf-8"),
             "/phase4.js": ("phase4.js", "text/javascript; charset=utf-8"),
             "/phase4.css": ("phase4.css", "text/css; charset=utf-8"),
-            "/phase4-infinity-shield.svg": ("phase4-infinity-shield.svg", "image/svg+xml"),
         }
         if path in modern:
             name, content_type = modern[path]
@@ -151,6 +150,7 @@ class GuiHandler(BaseHTTPRequestHandler):
             "/app.css": ("app.css", "text/css; charset=utf-8"),
             "/app.js": ("app.js", "text/javascript; charset=utf-8"),
             "/infinity-shield.svg": ("infinity-shield.svg", "image/svg+xml"),
+            "/phase4-infinity-shield.svg": ("infinity-shield.svg", "image/svg+xml"),
         }
         if path in assets:
             name, content_type = assets[path]
