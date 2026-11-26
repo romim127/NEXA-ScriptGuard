@@ -49,3 +49,5 @@ Un futuro servicio requeriría aprobación separada para transferir scripts,
 revisar privacidad/abuso/retención y probar el parser nativo en el runtime
 objetivo; no se debe inferir compatibilidad por la mera disponibilidad de una
 función Python.
+
+La Fase 5 consolida la GUI local y separa la demo sintética del análisis web experimental. Preparar paridad de corpus, adaptación de Bash y mediciones de memoria antes de considerar un analizador web. [ADR 0005](decisions/ADR-0005-STATIC-DEMO-WASM-PROBE.md)

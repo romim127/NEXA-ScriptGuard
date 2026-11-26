@@ -10,3 +10,5 @@
   mediante acción explícita. [NGI-STD-002](NGI-STD-002_LOCAL_APPLICATION_LAUNCH_STANDARD.md)
 - Mantener la distribución local operativa sin Node.js ni servicios de red
   después de instalarla. Tratar evidencias como texto y conservar la CSP.
+
+La demostración muestra su condición sintética de forma persistente y no acepta archivos. Los experimentos web requieren paridad y verificación antes de habilitar análisis real.

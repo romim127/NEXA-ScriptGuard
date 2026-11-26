@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "npm run build -w frontend",
+    "build:demo": "npm run build:demo -w frontend",
     "typecheck": "npm run typecheck -w frontend",
     "lint": "eslint frontend packages/nextgenai-ui",
     "test": "npm run test -w frontend",

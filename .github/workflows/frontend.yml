@@ -20,6 +20,7 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      - run: npm run build:demo
       - name: Verify versioned production bundle
         run: test -z "$(git status --porcelain -- nexa_scriptguard/gui_assets/modern)"
       - name: Install local Python distribution with pipx
@@ -30,6 +31,8 @@ jobs:
           python -m pip install pipx
           python -m pipx install .
           "$PIPX_BIN_DIR/RUN" --help
+          "$PIPX_HOME/venvs/nexa-scriptguard/bin/python" -m frontend.demo.generate_reports
+          test -z "$(git status --porcelain -- frontend/demo/public/reports)"
           echo "NEXA_RUN=$PIPX_BIN_DIR/RUN" >> "$GITHUB_ENV"
           echo "NEXA_PYTHON=$(command -v python)" >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium

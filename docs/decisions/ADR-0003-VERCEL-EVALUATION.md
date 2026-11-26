@@ -109,3 +109,5 @@ Reviewed 2026-11-25:
 - [Filesystem and runtimes](https://vercel.com/docs/functions/runtimes)
 - [Hobby plan usage](https://vercel.com/docs/plans/hobby)
 - [Vercel Terms of Service](https://vercel.com/legal/terms)
+
+La Fase 5 agrega configuración de Vercel exclusivamente para la demostración sintética y registra mediciones de viabilidad del navegador. El servidor local se mantiene independiente. [ADR 0005](ADR-0005-STATIC-DEMO-WASM-PROBE.md)

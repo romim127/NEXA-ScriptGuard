@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "tool": "NEXA ScriptGuard",
+  "version": "0.5.0-alpha.1",
+  "analyzed_at_utc": "2026-11-26T00:00:00+00:00",
+  "file": "synthetic.py",
+  "sha256": "8b4332afaf9d06ef03eb341c45a4f46abcbc5046fba3349c79c3eb354893b537",
+  "lines": 2,
+  "complete": true,
+  "analysis_status": "complete",
+  "incomplete_reasons": [],
+  "parser": "python-ast",
+  "redaction_applied": true,
+  "limitations": [
+    "Python AST parsing uses the running Python version; newer syntax may not be supported.",
+    "Name resolution and network correlation are conservative approximations, not control-flow or execution proof.",
+    "Parsing is not preemptible and memory use is estimated, not a hard quota."
+  ],
+  "findings": [
+    {
+      "id": "beb524dfb440bb093dd5",
+      "rule": {
+        "id": "PY-001",
+        "version": "1.0.0"
+      },
+      "rule_id": "PY-001",
+      "title": "Evaluación dinámica de código",
+      "file": "synthetic.py",
+      "sha256": "8b4332afaf9d06ef03eb341c45a4f46abcbc5046fba3349c79c3eb354893b537",
+      "location": {
+        "start": {
+          "line": 2,
+          "column": 9
+        },
+        "end": {
+          "line": 2,
+          "column": 20
+        }
+      },
+      "line": 2,
+      "column": 9,
+      "end_line": 2,
+      "end_column": 20,
+      "instruction": "eval(\"1+1\")",
+      "context": {
+        "before": [],
+        "after": []
+      },
+      "context_before": [],
+      "context_after": [],
+      "severity": "HIGH",
+      "confidence": "medium",
+      "confidence_reason": "Coincidencia AST estática; la ejecución y el contexto requieren revisión.",
+      "status": "requires_review",
+      "evidence": {
+        "truncated": false,
+        "correlation": [],
+        "shared": "eval(\"1+1\")",
+        "original_available_in_this_report": false
+      },
+      "explanation": "Una llamada a eval o exec puede interpretar código no confiable; la sintaxis no demuestra que se ejecute ni el origen del argumento.",
+      "recommendation": "Evitar la evaluación dinámica; revisar procedencia y usar alternativas específicas para datos.",
+      "verification_commands": [
+        "Inspeccionar el argumento y su procedencia sin ejecutar el archivo."
+      ],
+      "limitations": [
+        "Python AST parsing uses the running Python version; newer syntax may not be supported.",
+        "Name resolution and network correlation are conservative approximations, not control-flow or execution proof.",
+        "Parsing is not preemptible and memory use is estimated, not a hard quota."
+      ],
+      "engine": "python"
+    },
+    {
+      "id": "bb66675e3fa80f20bb8b",
+      "rule": {
+        "id": "PY-005",
+        "version": "1.0.0"
+      },
+      "rule_id": "PY-005",
+      "title": "Posible secreto literal en código",
+      "file": "synthetic.py",
+      "sha256": "8b4332afaf9d06ef03eb341c45a4f46abcbc5046fba3349c79c3eb354893b537",
+      "location": {
+        "start": {
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "line": 1,
+          "column": 32
+        }
+      },
+      "line": 1,
+      "column": 1,
+      "end_line": 1,
+      "end_column": 32,
+      "instruction": "api_token = \"[REDACTED]\"",
+      "context": {
+        "before": [],
+        "after": []
+      },
+      "context_before": [],
+      "context_after": [],
+      "severity": "MEDIUM",
+      "confidence": "medium",
+      "confidence_reason": "Coincidencia AST estática; la ejecución y el contexto requieren revisión.",
+      "status": "requires_review",
+      "evidence": {
+        "truncated": false,
+        "correlation": [],
+        "shared": "api_token = \"[REDACTED]\"",
+        "original_available_in_this_report": false
+      },
+      "explanation": "Una variable con nombre asociado a credenciales recibe una cadena literal no vacía; podría ser un ejemplo o un secreto real.",
+      "recommendation": "Verificar si el valor es sensible y, de serlo, retirarlo y rotarlo según el procedimiento correspondiente.",
+      "verification_commands": [
+        "Revisar el valor en un entorno autorizado sin compartirlo."
+      ],
+      "limitations": [
+        "Python AST parsing uses the running Python version; newer syntax may not be supported.",
+        "Name resolution and network correlation are conservative approximations, not control-flow or execution proof.",
+        "Parsing is not preemptible and memory use is estimated, not a hard quota."
+      ],
+      "engine": "python"
+    }
+  ],
+  "demo": "DEMO MODE — SYNTHETIC DATA"
+}

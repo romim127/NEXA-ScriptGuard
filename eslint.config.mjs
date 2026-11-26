@@ -3,7 +3,7 @@ import hooks from 'eslint-plugin-react-hooks';
 import ts from 'typescript-eslint';
 
 export default ts.config(
-  { ignores: ['**/playwright-report/**', '**/test-results/**'] },
+  { ignores: ['**/playwright-report/**', '**/test-results/**', '**/dist/**'] },
   js.configs.recommended,
   ...ts.configs.recommended,
   {

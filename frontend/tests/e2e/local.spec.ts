@@ -115,7 +115,7 @@ test('local GUI analyzes Bash and Python offline and saves physical reports', as
     await analyze.click();
     await expect(page.getByRole('status')).toContainText('ANÁLISIS COMPLETO');
     await expect(page.getByRole('article')).toHaveCount(4);
-    await expect(page.getByText('PY-005', { exact: true })).toBeVisible();
+    await expect(page.locator('.rule').filter({ hasText: 'PY-005' })).toBeVisible();
     for (const format of ['JSON', 'HTML', 'SARIF']) {
       const download = page.waitForEvent('download');
       await page.getByRole('button', { name: `Exportar ${format}` }).click();
@@ -170,5 +170,140 @@ test('static bundle renders at a subpath without a backend', async ({ page }) =>
   await page.getByLabel('ARCHIVO DE SCRIPT PARA ANALIZAR').setInputFiles(join(root, 'demo_example.sh'));
   await page.getByRole('button', { name: 'Analizar archivo' }).click();
   await expect(page.getByRole('alert')).toContainText('Sesión no autorizada.');
+  expect(requests).toEqual([]);
+});
+
+test('modern and legacy have semantic parity across complete and incomplete reports', async ({ page }) => {
+  const instance = await service();
+  try {
+    await page.setViewportSize({ width: 375, height: 650 });
+    const samples = [
+      ['demo_example.sh', 'Bash', 'COMPLETO'],
+      ['tests/corpus/python_gui_example.py', 'Python', 'COMPLETO'],
+      ['tests/corpus/gui_incomplete.sh', 'Bash', 'INCOMPLETO'],
+    ] as const;
+    for (const [sample, language, status] of samples) {
+      const snapshots = [];
+      for (const route of ['/', '/legacy']) {
+        await page.goto(instance.url.origin + route + instance.url.hash);
+        const selector = page.getByLabel('ARCHIVO DE SCRIPT PARA ANALIZAR');
+        await selector.setInputFiles(join(root, sample));
+        const analyze = page.getByRole('button', { name: 'Analizar archivo' });
+        await analyze.focus();
+        await page.keyboard.press('Enter');
+        await expect(page.getByRole('status').first()).toContainText(`ANÁLISIS ${status}`);
+        await expect(page.getByText(language, { exact: true })).toBeVisible();
+        const json = page.waitForEvent('download');
+        await page.getByRole('button', { name: 'Exportar JSON' }).click();
+        const report = JSON.parse(await readFile(await (await json).path(), 'utf-8'));
+        delete report.analyzed_at_utc;
+        const cards = page.locator('.finding');
+        await expect(cards).toHaveCount(report.findings.length);
+        for (const [index, finding] of report.findings.entries()) {
+          const card = cards.nth(index);
+          const evidence = card.locator('summary').filter({ hasText: 'EVIDENCIA COMPARTIBLE' });
+          if (route === '/') await evidence.click();
+          await expect(card.locator('.rule')).toHaveText(finding.rule_id);
+          await expect(card.locator('.flag')).toContainText(finding.severity);
+          await expect(card.locator('.metadata')).toContainText(new RegExp(`línea ${finding.line} · columna ${finding.column}`, 'i'));
+          await expect(card).toContainText(finding.explanation);
+          await expect(card).toContainText(finding.recommendation);
+          await expect(card).toContainText(finding.evidence.shared);
+        }
+        await page.mouse.wheel(0, 700);
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+        const reports: unknown[] = [];
+        for (const format of ['HTML', 'SARIF']) {
+          const started = page.waitForEvent('download');
+          await page.getByRole('button', { name: `Exportar ${format}` }).click();
+          const contents = await readFile(await (await started).path(), 'utf-8');
+          if (format === 'HTML') {
+            reports.push(contents);
+          } else {
+            const parsed = JSON.parse(contents);
+            delete parsed.analyzed_at_utc;
+            reports.push(parsed);
+          }
+        }
+        snapshots.push({ report, reports });
+      }
+      expect(snapshots[0]).toEqual(snapshots[1]);
+    }
+
+    for (const route of ['/', '/legacy']) {
+      await page.goto(instance.url.origin + route + instance.url.hash);
+      const input = page.getByLabel('ARCHIVO DE SCRIPT PARA ANALIZAR');
+      const analyze = page.getByRole('button', { name: 'Analizar archivo' });
+      await input.setInputFiles({ name: 'invalid.txt', mimeType: 'text/plain', buffer: Buffer.from('example') });
+      if (route === '/legacy') await analyze.click();
+      await expect(page.getByText('Seleccione un archivo Bash (.sh) o Python (.py).', { exact: false })).toBeVisible();
+      await input.setInputFiles({ name: 'limite.py', mimeType: 'text/plain', buffer: Buffer.alloc(5 * 1024 * 1024 + 1, 32) });
+      await expect(analyze).toBeDisabled();
+      await expect(page.getByText(/supera el límite/)).toBeVisible();
+    }
+  } finally {
+    await instance.stop();
+  }
+});
+
+test('modern explorer filters, sorts and navigates to expandable evidence', async ({ page }) => {
+  const instance = await service();
+  try {
+    await page.goto(instance.url.href);
+    await page.getByLabel('ARCHIVO DE SCRIPT PARA ANALIZAR').setInputFiles(join(root, 'tests/corpus/python_gui_example.py'));
+    await page.getByRole('button', { name: 'Analizar archivo' }).click();
+    await expect(page.getByRole('article')).toHaveCount(4);
+    await expect(page.getByText(/Parser: python-ast/)).toBeVisible();
+    await expect(page.getByText(/Motores de hallazgos: python/)).toBeVisible();
+    await page.getByLabel('Criticidad').selectOption('MEDIUM');
+    await expect(page.getByRole('article')).toHaveCount(1);
+    await page.getByLabel('Regla').selectOption('PY-001');
+    await expect(page.getByText('Ningún hallazgo coincide con los filtros.')).toBeVisible();
+    await page.getByLabel('Criticidad').selectOption('');
+    await expect(page.getByRole('article')).toHaveCount(1);
+    await page.getByLabel('Regla').selectOption('');
+    await page.getByLabel('Buscar hallazgos').fill('PY-005');
+    await expect(page.getByRole('article')).toHaveCount(1);
+    await page.getByLabel('Buscar hallazgos').clear();
+    await page.getByLabel('Orden').selectOption('line');
+    await expect(page.getByRole('article').first()).toContainText('PY-005');
+    await page.getByText('Ir a una ubicación detectada').click();
+    await page.getByRole('link', { name: /PY-005/ }).click();
+    await expect(page).toHaveURL(/#finding-0$/);
+    await page.getByText('EVIDENCIA COMPARTIBLE').first().click();
+    await expect(page.locator('.ngi-disclosure[open] p')).toBeVisible();
+  } finally {
+    await instance.stop();
+  }
+});
+
+test('independent static consumer explores and downloads only synthetic reports', async ({ page }) => {
+  const origin = 'https://demo.example.invalid';
+  const location = join(root, 'frontend/demo/dist');
+  const requests: string[] = [];
+  await page.route('**/*', async route => {
+    const url = new URL(route.request().url());
+    if (url.origin !== origin || !/^\/(?:assets\/[a-zA-Z0-9_.-]+|reports\/synthetic\.(?:json|html|sarif))?$/.test(url.pathname)) {
+      requests.push(url.pathname);
+      return route.abort();
+    }
+    await route.fulfill({ path: join(location, url.pathname === '/' ? 'index.html' : url.pathname.slice(1)) });
+  });
+  await page.goto(origin);
+  await expect(page.getByRole('note')).toHaveText('DEMO MODE — SYNTHETIC DATA');
+  await expect(page.locator('input[type=file]')).toHaveCount(0);
+  await expect(page.getByRole('article')).toHaveCount(2);
+  await page.getByLabel('Criticidad').selectOption('MEDIUM');
+  await expect(page.getByRole('article')).toHaveCount(1);
+  await page.getByText('Evidencia sintética').click();
+  await expect(page.locator('.ngi-disclosure[open] p')).toBeVisible();
+  for (const format of ['JSON', 'HTML', 'SARIF']) {
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: `Descargar ${format} sintético` }).click();
+    const contents = await readFile(await (await download).path(), 'utf-8');
+    expect(contents).toContain('DEMO MODE — SYNTHETIC DATA');
+    expect(contents).not.toContain('synthetic_example');
+  }
   expect(requests).toEqual([]);
 });

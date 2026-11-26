@@ -1,0 +1,10 @@
+body { margin: 0; background: #04070d; color: var(--ngi-text); font: 16px/1.6 system-ui, sans-serif; }
+.demo-banner { position: sticky; top: 0; z-index: 1; margin: 0; padding: 8px; background: var(--ngi-warning); color: #04070d; font-weight: 750; text-align: center; }
+main { max-width: 900px; margin: auto; padding: 24px; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
+.shield { width: 120px; max-width: 100%; }
+button, select { color: var(--ngi-text); background: var(--ngi-surface); border: 1px solid var(--ngi-border); border-radius: 7px; padding: 8px 12px; }
+.finding { border: 1px solid var(--ngi-border); border-radius: 14px; padding: 16px; margin: 16px 0; }
+.heading, .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+.flag, .rule { color: var(--ngi-cyan); }
+section { scroll-margin-top: 60px; }

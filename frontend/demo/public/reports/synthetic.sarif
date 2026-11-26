@@ -1,0 +1,476 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "columnKind": "unicodeCodePoints",
+      "tool": {
+        "driver": {
+          "name": "NEXA ScriptGuard",
+          "informationUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md",
+          "version": "0.5.0-alpha.1",
+          "rules": [
+            {
+              "id": "SG-001",
+              "shortDescription": {
+                "text": "Descarga de red conectada a un intérprete"
+              },
+              "fullDescription": {
+                "text": "Un pipeline contiene un comando de red y un intérprete; el análisis estático no demuestra que el contenido llegue o se ejecute."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-001",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-002",
+              "shortDescription": {
+                "text": "Posible transferencia de archivo sensible"
+              },
+              "fullDescription": {
+                "text": "Un cliente de red usa una opción de carga junto con una ruta que parece sensible."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-002",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-003",
+              "shortDescription": {
+                "text": "Permisos excesivamente amplios"
+              },
+              "fullDescription": {
+                "text": "El modo indicado otorga permisos de escritura amplios."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-003",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-004",
+              "shortDescription": {
+                "text": "Borrado recursivo forzado"
+              },
+              "fullDescription": {
+                "text": "La combinación de opciones puede borrar recursivamente sin confirmación."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-004",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-005",
+              "shortDescription": {
+                "text": "Evaluación dinámica mediante eval"
+              },
+              "fullDescription": {
+                "text": "eval vuelve a interpretar argumentos como instrucciones de shell."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-005",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-006",
+              "shortDescription": {
+                "text": "Shell dinámico con entrada expandida"
+              },
+              "fullDescription": {
+                "text": "Un argumento expandido se pasa a un intérprete mediante -c."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-006",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-007",
+              "shortDescription": {
+                "text": "Posible desactivación de controles de seguridad"
+              },
+              "fullDescription": {
+                "text": "El comando parece reducir o detener un control de seguridad."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-007",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-008",
+              "shortDescription": {
+                "text": "Posible mecanismo de persistencia"
+              },
+              "fullDescription": {
+                "text": "El comando puede editar tareas programadas o habilitar un servicio persistente."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-008",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-009",
+              "shortDescription": {
+                "text": "Modificación de configuración sensible"
+              },
+              "fullDescription": {
+                "text": "Un comando de edición o copia referencia archivos sensibles de configuración."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-009",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-010",
+              "shortDescription": {
+                "text": "Posible asignación de bit setuid"
+              },
+              "fullDescription": {
+                "text": "El modo de permisos puede habilitar ejecución con identidad del propietario."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-010",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-011",
+              "shortDescription": {
+                "text": "Posible credencial literal en instrucción"
+              },
+              "fullDescription": {
+                "text": "Una asignación parece contener una credencial literal; puede ser un valor ficticio."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-011",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-012",
+              "shortDescription": {
+                "text": "Escritura a destino de alto impacto"
+              },
+              "fullDescription": {
+                "text": "Una utilidad de escritura referencia un dispositivo o archivo crítico."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-012",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-FLOW-001",
+              "shortDescription": {
+                "text": "Flujo posible de comando dinámico a intérprete"
+              },
+              "fullDescription": {
+                "text": "Una variable con contenido de red puede llegar a un intérprete; el flujo es una hipótesis estática."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-flow-001",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "SG-FLOW-002",
+              "shortDescription": {
+                "text": "Flujo posible de ruta sensible a carga"
+              },
+              "fullDescription": {
+                "text": "Una variable puede conectar una ruta sensible con una opción de transferencia."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#sg-flow-002",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "PY-001",
+              "shortDescription": {
+                "text": "Evaluación dinámica de código"
+              },
+              "fullDescription": {
+                "text": "Una llamada a eval o exec puede interpretar código no confiable; la sintaxis no demuestra que se ejecute ni el origen del argumento."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#py-001",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "PY-002",
+              "shortDescription": {
+                "text": "Subprocess con shell habilitado"
+              },
+              "fullDescription": {
+                "text": "Una llamada a subprocess con shell=True puede permitir interpretación de operadores de shell; el riesgo depende de los argumentos."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#py-002",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "PY-003",
+              "shortDescription": {
+                "text": "Deserialización con pickle"
+              },
+              "fullDescription": {
+                "text": "Deserializar datos con pickle puede ejecutar código durante la carga; no se ha establecido la confianza de los datos."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#py-003",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "PY-004",
+              "shortDescription": {
+                "text": "Código de red utilizado en evaluación dinámica"
+              },
+              "fullDescription": {
+                "text": "Se observa una relación sintáctica directa o una asignación simple entre una fuente de red y eval o exec; no demuestra transferencia ni ejecución."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#py-004",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "PY-005",
+              "shortDescription": {
+                "text": "Posible secreto literal en código"
+              },
+              "fullDescription": {
+                "text": "Una variable con nombre asociado a credenciales recibe una cadena literal no vacía; podría ser un ejemplo o un secreto real."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#py-005",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "PY-006",
+              "shortDescription": {
+                "text": "Invocación de comandos del sistema"
+              },
+              "fullDescription": {
+                "text": "Se identifica una llamada a una función conocida de ejecución de comandos; la sintaxis no demuestra ejecución ni que los argumentos sean peligrosos."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#py-006",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "PY-007",
+              "shortDescription": {
+                "text": "Consulta SQL construida dinámicamente"
+              },
+              "fullDescription": {
+                "text": "Una llamada execute o executemany recibe una consulta construida con formato, concatenación o interpolación; el origen de los datos no se ha demostrado."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#py-007",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            },
+            {
+              "id": "PY-008",
+              "shortDescription": {
+                "text": "Verificación TLS desactivada"
+              },
+              "fullDescription": {
+                "text": "Una llamada de cliente HTTP conocida desactiva explícitamente la verificación TLS; el efecto depende del contexto y la biblioteca."
+              },
+              "helpUri": "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md#py-008",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "version": "1.0.0"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "PY-001",
+          "level": "error",
+          "message": {
+            "text": "Una llamada a eval o exec puede interpretar código no confiable; la sintaxis no demuestra que se ejecute ni el origen del argumento."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "synthetic.py"
+                },
+                "region": {
+                  "startLine": 2,
+                  "startColumn": 9,
+                  "endLine": 2,
+                  "endColumn": 20
+                }
+              }
+            }
+          ],
+          "properties": {
+            "findingId": "beb524dfb440bb093dd5",
+            "sha256": "8b4332afaf9d06ef03eb341c45a4f46abcbc5046fba3349c79c3eb354893b537",
+            "severity": "HIGH",
+            "confidence": "medium",
+            "confidenceReason": "Coincidencia AST estática; la ejecución y el contexto requieren revisión.",
+            "status": "requires_review",
+            "evidence": {
+              "truncated": false,
+              "correlation": [],
+              "shared": "eval(\"1+1\")",
+              "original_available_in_this_report": false
+            },
+            "context": {
+              "before": [],
+              "after": []
+            },
+            "recommendation": "Evitar la evaluación dinámica; revisar procedencia y usar alternativas específicas para datos.",
+            "verificationCommands": [
+              "Inspeccionar el argumento y su procedencia sin ejecutar el archivo."
+            ],
+            "limitations": [
+              "Python AST parsing uses the running Python version; newer syntax may not be supported.",
+              "Name resolution and network correlation are conservative approximations, not control-flow or execution proof.",
+              "Parsing is not preemptible and memory use is estimated, not a hard quota."
+            ]
+          }
+        },
+        {
+          "ruleId": "PY-005",
+          "level": "warning",
+          "message": {
+            "text": "Una variable con nombre asociado a credenciales recibe una cadena literal no vacía; podría ser un ejemplo o un secreto real."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "synthetic.py"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "properties": {
+            "findingId": "bb66675e3fa80f20bb8b",
+            "sha256": "8b4332afaf9d06ef03eb341c45a4f46abcbc5046fba3349c79c3eb354893b537",
+            "severity": "MEDIUM",
+            "confidence": "medium",
+            "confidenceReason": "Coincidencia AST estática; la ejecución y el contexto requieren revisión.",
+            "status": "requires_review",
+            "evidence": {
+              "truncated": false,
+              "correlation": [],
+              "shared": "api_token = \"[REDACTED]\"",
+              "original_available_in_this_report": false
+            },
+            "context": {
+              "before": [],
+              "after": []
+            },
+            "recommendation": "Verificar si el valor es sensible y, de serlo, retirarlo y rotarlo según el procedimiento correspondiente.",
+            "verificationCommands": [
+              "Revisar el valor en un entorno autorizado sin compartirlo."
+            ],
+            "limitations": [
+              "Python AST parsing uses the running Python version; newer syntax may not be supported.",
+              "Name resolution and network correlation are conservative approximations, not control-flow or execution proof.",
+              "Parsing is not preemptible and memory use is estimated, not a hard quota."
+            ]
+          }
+        }
+      ],
+      "properties": {
+        "schemaVersion": "1.0",
+        "analysisStatus": "complete",
+        "incompleteReasons": [],
+        "demo": "DEMO MODE — SYNTHETIC DATA"
+      }
+    }
+  ]
+}

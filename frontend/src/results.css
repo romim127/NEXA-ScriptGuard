@@ -1,0 +1,10 @@
+.finding-filters label { display: grid; gap: 4px; max-width: 100%; }
+.finding-filters input, .finding-filters select {
+  padding: 8px;
+  border: 1px solid #296c81;
+  border-radius: 6px;
+  background: var(--ngi-surface);
+  color: var(--ngi-text);
+  max-width: 100%;
+}
+#hallazgos a { color: var(--ngi-link); }

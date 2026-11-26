@@ -11,6 +11,7 @@ const filename = document.getElementById("filename");
 const language = document.getElementById("language");
 const hash = document.getElementById("hash");
 const date = document.getElementById("date");
+const maxInputBytes = Number(document.body.dataset.maxInputBytes);
 let resultId = "";
 
 function element(tag, className, text) {
@@ -51,14 +52,16 @@ input.addEventListener("change", () => {
   const file = input.files[0];
   filename.textContent = file ? file.name : "Ninguno";
   language.textContent = file ? (/\.sh$/i.test(file.name) ? "Bash" : /\.py$/i.test(file.name) ? "Python" : "No compatible") : "—";
-  analyze.disabled = !file;
+  const tooLarge = file && maxInputBytes > 0 && file.size > maxInputBytes;
+  analyze.disabled = !file || tooLarge;
   exportsPanel.hidden = true;
   resultId = "";
   findings.replaceChildren();
   hash.textContent = "";
   date.textContent = "";
-  status.classList.remove("error");
-  status.textContent = "Seleccione Analizar archivo. El contenido no se ejecutará.";
+  status.classList.toggle("error", Boolean(tooLarge));
+  status.textContent = tooLarge ? "El archivo supera el límite de entrada."
+    : "Seleccione Analizar archivo. El contenido no se ejecutará.";
 });
 
 analyze.addEventListener("click", async () => {

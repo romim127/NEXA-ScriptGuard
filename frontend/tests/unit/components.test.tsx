@@ -5,6 +5,16 @@ import { EvidenceViewer, ExportPanel, FileUploader, InfinityShield, Sidebar, Sta
 afterEach(cleanup);
 
 describe('NextGenAI UI', () => {
+  it('uses a native disclosure without interpreting markup as evidence', () => {
+    const { container } = render(<EvidenceViewer label="Detalles" value="<b>literal</b>" expandable />);
+    const details = container.querySelector('details');
+    expect(details?.open).toBe(false);
+    fireEvent.click(screen.getByText('Detalles'));
+    expect(details?.open).toBe(true);
+    expect(details?.querySelector('p')?.textContent).toBe('<b>literal</b>');
+    expect(details?.querySelector('b')).toBeNull();
+  });
+
   it('renders evidence as text and retains multiline content', () => {
     const evidence = '<img src=x onerror=alert(1)>\nsegunda línea';
     const { container } = render(<EvidenceViewer label="Evidencia" value={evidence} />);

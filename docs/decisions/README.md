@@ -8,3 +8,5 @@
 | [0004](ADR-0004-REACT-LOOPBACK.md) | React y NextGenAI UI empaquetados y servidos por Python. |
 
 Registrar decisiones nuevas con fecha, estado, contexto, alternativas y consecuencias. Referenciar ADR sustituidos para preservar la historia.
+
+[ADR 0005](ADR-0005-STATIC-DEMO-WASM-PROBE.md) registra el alcance de la demo estática y la prueba WASM.
