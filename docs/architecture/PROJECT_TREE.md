@@ -3,6 +3,7 @@
 Rutas versionadas o incluidas en el cambio de consolidación. Se excluyen entornos, cachés y artefactos generados.
 
 ```text
+.gitattributes
 .github/workflows/rust.yml
 .github/workflows/tests.yml
 .gitignore
@@ -35,6 +36,7 @@ docs/governance/DATA_HANDLING.md
 docs/governance/DEVELOPMENT_PRINCIPLES.md
 docs/governance/LOCAL_FIRST_AI_POLICY.md
 docs/governance/NGI-STD-001_SOFTWARE_DEVELOPMENT.md
+docs/governance/NGI-STD-002_LOCAL_APPLICATION_LAUNCH_STANDARD.md
 docs/governance/NON_NEGOTIABLE_REQUIREMENTS.md
 docs/governance/PROJECT_CHARTER.md
 docs/governance/RELEASE_POLICY.md
@@ -78,6 +80,8 @@ nexa_scriptguard/rust_bridge.py
 pyproject.toml
 README.en.md
 README.md
+run-linux.sh
+run-windows.bat
 rust/nexa-scriptguard-helper/Cargo.lock
 rust/nexa-scriptguard-helper/Cargo.toml
 rust/nexa-scriptguard-helper/src/main.rs
@@ -90,6 +94,7 @@ tests/test_analysis_core.py
 tests/test_cli.py
 tests/test_gui.py
 tests/test_ingestion.py
+tests/test_launch.py
 tests/test_parser.py
 tests/test_python_analysis.py
 tests/test_redaction.py

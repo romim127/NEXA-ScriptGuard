@@ -18,13 +18,17 @@ On Linux/macOS, activate with `source .venv/bin/activate`. The [`tree-sitter-bas
 
 ## Usage
 
-### Local graphical interface on Windows
+### Local graphical interface
 
 From the repository root, after installing dependencies:
 
 ```powershell
-.\.venv\Scripts\python.exe -m nexa_scriptguard.gui
+.\run-windows.bat
 ```
+
+In CMD use `run-windows.bat`. In Bash use `./run-linux.sh`. From another
+directory, use the launcher's path or install `RUN`.
+[Launch and installation instructions](docs/development/SETUP.md)
 
 The browser opens automatically; otherwise use the private URL printed in the console. Select a `.sh` or `.py` file, click **Analizar archivo**, and review the detected language, status, redacted evidence and recommendations. JSON, HTML and SARIF are offered as browser downloads. The analyzer does not execute the script and preserves incomplete status. Keep the console open; `Ctrl+C` stops the server.
 

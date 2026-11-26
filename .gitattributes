@@ -1,0 +1,2 @@
+/run-linux.sh text eol=lf
+/run-windows.bat text eol=crlf

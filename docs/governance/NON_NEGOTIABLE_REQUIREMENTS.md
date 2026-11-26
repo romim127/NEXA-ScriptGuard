@@ -5,3 +5,6 @@
 - Preservar módulos previos, identidad y diseños aprobados. Los cambios de identidad requieren autorización.
 - Entregar por GitHub sin ZIP y publicar implementaciones terminadas mediante el proceso de integración.
 - Registrar resultados reales de pruebas. Conservar los controles de seguridad en cualquier despliegue.
+- Mantener un arranque local estable, sin privilegios administrativos,
+  con loopback, puerto dinámico y token. El PATH de usuario solo cambia
+  mediante acción explícita. [NGI-STD-002](NGI-STD-002_LOCAL_APPLICATION_LAUNCH_STANDARD.md)

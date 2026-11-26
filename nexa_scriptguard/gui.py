@@ -4,6 +4,7 @@ import argparse
 import hmac
 import json
 import secrets
+import sys
 import threading
 import time
 import webbrowser
@@ -15,6 +16,7 @@ from urllib.parse import unquote, urlsplit
 from .analysis import analyze
 from .ingestion import Source
 from .limits import ScanLimits
+from .parser import parse_bash
 from .redaction import prepare_report, sanitize_text
 from .reports import render_html, render_json, render_sarif, rules_for_report, validate_report, validate_sarif
 from .rules import RULES_PATH
@@ -230,18 +232,38 @@ def main(argv=None):
             args.rust_helper = args.rust_helper.resolve(strict=True)
         except OSError as exc:
             parser.error(f"No se encuentra el helper Rust: {exc}")
-    server = GuiServer(rust_helper=args.rust_helper)
+    try:
+        import rich  # Verify the declared reporting dependency.
+
+        parse_bash(b"", ScanLimits())
+    except (ImportError, OSError, RuntimeError, TypeError, ValueError) as exc:
+        print(f"NEXA ScriptGuard: dependencias incompatibles o ausentes ({exc}). "
+              "Instale el proyecto en el entorno virtual con: python -m pip install .",
+              file=sys.stderr)
+        return 1
+    try:
+        server = GuiServer(rust_helper=args.rust_helper)
+    except OSError as exc:
+        print(f"NEXA ScriptGuard: no se pudo iniciar el servidor local ({exc}).", file=sys.stderr)
+        return 1
     url = f"{server.origin}/#{server.token}"
     print("NEXA ScriptGuard: servidor local activo. Ctrl+C para detener.", flush=True)
     print("Abra esta URL privada si el navegador no se inicia:", url, flush=True)
-    webbrowser.open(url)
     try:
+        try:
+            opened = webbrowser.open(url)
+        except (webbrowser.Error, OSError):
+            opened = False
+        if not opened:
+            print("NEXA ScriptGuard: abra manualmente la URL privada indicada arriba.",
+                  file=sys.stderr, flush=True)
         server.serve_forever()
     except KeyboardInterrupt:
         print("\nServidor detenido.", flush=True)
     finally:
         server.server_close()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

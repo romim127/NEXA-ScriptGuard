@@ -21,3 +21,6 @@ jobs:
       - name: Run Bash, Python analyzer, GUI and report tests
         run: python -m unittest discover -s tests -v
       - run: python -m nexa_scriptguard --help
+      - name: Check installed RUN command from another directory
+        working-directory: ${{ runner.temp }}
+        run: RUN --help
