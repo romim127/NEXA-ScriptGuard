@@ -132,6 +132,7 @@ export function App(props: AppProps) {
           <div className="hash">FECHA UTC: {props.report.analyzed_at_utc}</div>
           <p className="notice">Un resultado sin hallazgos no demuestra que el script sea seguro.</p>
         </details>
+        <p className="demo-local-help"><strong>¿Querés analizar tu archivo?</strong> Abrí ScriptGuard con <code>RUN</code> y usá el selector de archivos de la aplicación local.</p>
       </section>
       <section className="demo-panel" id="exportaciones" aria-labelledby="demo-exports-title">
         <h2 id="demo-exports-title">Exportaciones</h2>
