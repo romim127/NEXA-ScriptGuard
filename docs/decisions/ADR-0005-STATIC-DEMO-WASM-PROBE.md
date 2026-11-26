@@ -6,7 +6,9 @@ acceso autorizado a Vercel. C permanece experimental.
 
 ## Modalidad B
 
-`frontend/demo` es un consumidor independiente de `@nextgenai/ui`. El
+`frontend/demo` reutiliza la misma aplicación React y las mismas hojas de
+estilo que la GUI local. Su punto de entrada proporciona un reporte
+sintético fijo y exportaciones estáticas. El
 banner «DEMO MODE — SYNTHETIC DATA» permanece visible al desplazarse.
 El consumidor ofrece filtros y evidencias expandibles y descarga tres
 reportes prefabricados. No acepta archivos. La CSP niega conexiones.

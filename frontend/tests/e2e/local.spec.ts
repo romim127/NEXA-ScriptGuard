@@ -278,7 +278,7 @@ test('modern explorer filters, sorts and navigates to expandable evidence', asyn
   }
 });
 
-test('independent static consumer explores and downloads only synthetic reports', async ({ page }) => {
+test('static demo shares the local design and downloads only synthetic reports', async ({ page }) => {
   const origin = 'https://demo.example.invalid';
   const location = join(root, 'frontend/demo/dist');
   const requests: string[] = [];
@@ -294,13 +294,38 @@ test('independent static consumer explores and downloads only synthetic reports'
   await expect(page.getByRole('note')).toHaveText('DEMO MODE — SYNTHETIC DATA');
   await expect(page.locator('input[type=file]')).toHaveCount(0);
   await expect(page.getByRole('article')).toHaveCount(2);
+  const instance = await service();
+  const local = await page.context().newPage();
+  try {
+    await local.goto(instance.url.href);
+    await local.getByLabel('ARCHIVO DE SCRIPT PARA ANALIZAR').setInputFiles(join(root, 'tests/corpus/python_gui_example.py'));
+    await local.getByRole('button', { name: 'Analizar archivo' }).click();
+    await expect(local.getByRole('article')).toHaveCount(4);
+    const styles = () => ['body', 'main', 'header', 'h1 b', '.shield', '.summary', '.finding', '.flag', '[aria-label="Exportaciones"] button']
+      .map(selector => {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error(`Missing element: ${selector}`);
+        const css = getComputedStyle(element);
+        return [css.backgroundImage, css.backgroundColor, css.color, css.fontSize, css.padding,
+          css.borderColor, css.borderRadius, css.boxShadow, css.maxWidth];
+      });
+    for (const width of [780, 1440]) {
+      const viewport = { width, height: 800 };
+      await page.setViewportSize(viewport);
+      await local.setViewportSize(viewport);
+      expect(await page.evaluate(styles)).toEqual(await local.evaluate(styles));
+    }
+  } finally {
+    await local.close();
+    await instance.stop();
+  }
   await page.getByLabel('Criticidad').selectOption('MEDIUM');
   await expect(page.getByRole('article')).toHaveCount(1);
-  await page.getByText('Evidencia sintética').click();
+  await page.getByText('EVIDENCIA COMPARTIBLE').click();
   await expect(page.locator('.ngi-disclosure[open] p')).toBeVisible();
   for (const format of ['JSON', 'HTML', 'SARIF']) {
     const download = page.waitForEvent('download');
-    await page.getByRole('button', { name: `Descargar ${format} sintético` }).click();
+    await page.getByRole('button', { name: `Exportar ${format}` }).click();
     const contents = await readFile(await (await download).path(), 'utf-8');
     expect(contents).toContain('DEMO MODE — SYNTHETIC DATA');
     expect(contents).not.toContain('synthetic_example');

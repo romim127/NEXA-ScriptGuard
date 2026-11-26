@@ -5,7 +5,11 @@ import {
 import shield from '../../nexa_scriptguard/gui_assets/infinity-shield.svg?url';
 import { FindingExplorer } from './features/analysis/FindingExplorer';
 import { downloadReport } from './features/reports/download';
-import { createClient, type Analysis, type ExportFormat } from './services/api';
+import type { createClient, Analysis, ExportFormat } from './services/api';
+import type { Report } from './types/report';
+import '../../nexa_scriptguard/gui_assets/app.css';
+import '@nextgenai/ui/theme.css';
+import './results.css';
 
 const formats = [
   { id: 'json', label: 'Exportar JSON' },
@@ -13,24 +17,33 @@ const formats = [
   { id: 'sarif', label: 'Exportar SARIF' },
 ] as const;
 
-function languageFor(file: File | null) {
-  if (!file) return '—';
-  if (/\.sh$/i.test(file.name)) return 'Bash';
-  if (/\.py$/i.test(file.name)) return 'Python';
+function languageFor(name?: string) {
+  if (!name) return '—';
+  if (/\.sh$/i.test(name)) return 'Bash';
+  if (/\.py$/i.test(name)) return 'Python';
   return 'No compatible';
 }
 
-export function App({ client, maxInputBytes }: {
+type AppProps = {
+  mode?: 'local';
   client: ReturnType<typeof createClient>;
   maxInputBytes?: number;
-}) {
+} | {
+  mode: 'demo';
+  report: Report;
+  exportSample: (format: ExportFormat) => Blob;
+};
+
+export function App(props: AppProps) {
+  const demo = props.mode === 'demo';
+  const maxInputBytes = demo ? undefined : props.maxInputBytes;
   const [file, setFile] = useState<File | null>(null);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [pending, setPending] = useState<'analyze' | 'export' | null>(null);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState('');
-  const report = analysis?.report;
-  const language = report?.parser === 'python-ast' ? 'Python' : languageFor(file);
+  const report = demo ? props.report : analysis?.report;
+  const language = report?.parser === 'python-ast' ? 'Python' : languageFor(report?.file ?? file?.name);
   const tooLarge = file != null && maxInputBytes != null && file.size > maxInputBytes;
 
   function select(next: File | null) {
@@ -40,18 +53,18 @@ export function App({ client, maxInputBytes }: {
     if (next && maxInputBytes != null && next.size > maxInputBytes) {
       setError('El archivo supera el límite de entrada.');
     } else {
-      setError(languageFor(next) === 'No compatible' ? 'Seleccione un archivo Bash (.sh) o Python (.py).' : '');
+      setError(languageFor(next?.name) === 'No compatible' ? 'Seleccione un archivo Bash (.sh) o Python (.py).' : '');
     }
   }
 
   async function analyze() {
-    if (!file || pending || tooLarge || language === 'No compatible') return;
+    if (demo || !file || pending || tooLarge || language === 'No compatible') return;
     setPending('analyze');
     setAnalysis(null);
     setSaved('');
     setError('');
     try {
-      setAnalysis(await client.analyze(file));
+      setAnalysis(await props.client.analyze(file));
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'No se pudo analizar el archivo.');
     } finally {
@@ -60,12 +73,15 @@ export function App({ client, maxInputBytes }: {
   }
 
   async function exportResult(format: ExportFormat) {
-    if (!analysis || pending) return;
+    const result = analysis;
+    const exportBlob = demo ? () => props.exportSample(format)
+      : result ? () => props.client.export(format, result.resultId) : null;
+    if (pending || !exportBlob) return;
     setPending('export');
     setSaved('');
     setError('');
     try {
-      downloadReport(await client.export(format, analysis.resultId), format);
+      downloadReport(await exportBlob(), format, demo ? 'synthetic' : undefined);
       setSaved(`Descarga ${format.toUpperCase()} iniciada.`);
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'No se pudo exportar el reporte.');
@@ -79,7 +95,9 @@ export function App({ client, maxInputBytes }: {
     return count ? ` · ${severity} ${count}` : '';
   });
 
-  return <Dashboard header={<>
+  return <>
+    {demo && <p className="demo-banner" role="note">DEMO MODE — SYNTHETIC DATA</p>}
+    <Dashboard header={<>
     <InfinityShield src={shield} alt="Escudo Infinity de NextGenAI" />
     <div>
       <h1>NEXA <b>ScriptGuard</b></h1>
@@ -92,12 +110,13 @@ export function App({ client, maxInputBytes }: {
     </div>
   </>}>
     <section className="top" id="archivo" aria-label="Archivo y exportaciones">
+      {demo ? <p className="notice">Explorá un reporte precomputado con datos sintéticos.</p> :
       <FileUploader label="ARCHIVO DE SCRIPT PARA ANALIZAR" accept=".sh,.py" disabled={pending !== null} onSelect={select}>
         <button type="button" onClick={analyze} disabled={!file || pending !== null || tooLarge || language === 'No compatible'}>
           Analizar archivo
         </button>
-      </FileUploader>
-      <div>ARCHIVO SELECCIONADO · <strong className="path">{file?.name ?? 'Ninguno'}</strong></div>
+      </FileUploader>}
+      <div>{demo ? 'ARCHIVO SINTÉTICO' : 'ARCHIVO SELECCIONADO'} · <strong className="path">{demo ? report?.file : file?.name ?? 'Ninguno'}</strong></div>
       <div>LENGUAJE DETECTADO · <strong>{language}</strong></div>
       <StatusIndicator tone={pending ? 'loading' : report ? report.complete ? 'success' : 'warning' : 'idle'}>
         {pending === 'analyze' ? 'ANALIZANDO · El script no se ejecuta.'
@@ -124,5 +143,6 @@ export function App({ client, maxInputBytes }: {
       {report?.findings.length === 0 && <p className="notice">Sin coincidencias detectadas.</p>}
       {!!report?.findings.length && <FindingExplorer findings={report.findings} />}
     </section>
-  </Dashboard>;
+    </Dashboard>
+  </>;
 }

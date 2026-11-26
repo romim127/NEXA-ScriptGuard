@@ -19,5 +19,6 @@ un archivo al consumidor. `ExportPanel` entrega el formato seleccionado.
 Ninguno de los dos realiza solicitudes de red. El tema define tokens de
 color y los controles conservan semántica nativa y foco visible.
 
-El [consumidor independiente](../../frontend/demo/index.html) usa fixtures
-sintéticos y la API pública. El workspace permanece privado.
+Las [pruebas de componentes](../../frontend/tests/unit/components.test.tsx)
+ejercitan la API pública con datos sintéticos. La [demo](../../frontend/demo/index.html)
+reutiliza el diseño completo de ScriptGuard. El workspace permanece privado.
