@@ -94,6 +94,24 @@ class ReportSchemaTests(unittest.TestCase):
         invalid_sarif["runs"][0]["results"][0]["level"] = "not-a-sarif-level"
         self.assertFalse(self.sarif_validator.is_valid(invalid_sarif))
 
+    def test_all_sarif_rule_links_point_to_documented_anchors(self):
+        from nexa_scriptguard.reports import RULE_DOCUMENTATION, render_sarif
+
+        doc = (ROOT / "docs" / "RULES.md").read_text(encoding="utf-8")
+        report, _ = self.run_scan("echo safe\n")
+        rules = []
+        for catalog in ("bash.json", "python_rules.json"):
+            rules.extend(json.loads((ROOT / "nexa_scriptguard" / catalog).read_text(encoding="utf-8")))
+        sarif = render_sarif(report, rules)
+        self.sarif_validator.validate(sarif)
+        driver = sarif["runs"][0]["tool"]["driver"]
+        self.assertEqual(driver["informationUri"], RULE_DOCUMENTATION)
+        for descriptor in driver["rules"]:
+            with self.subTest(rule=descriptor["id"]):
+                anchor = descriptor["id"].lower()
+                self.assertEqual(descriptor["helpUri"], f"{RULE_DOCUMENTATION}#{anchor}")
+                self.assertIn(f'<a name="{anchor}"></a>{descriptor["id"]}', doc)
+
     def test_python_complete_and_incomplete_report_schemas(self):
         for source in ("import pickle\npickle.loads(data)\n", "def broken(:\n"):
             with self.subTest(source=source):

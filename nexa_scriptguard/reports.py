@@ -68,6 +68,9 @@ def validate_report(report):
     return True
 
 
+RULE_DOCUMENTATION = "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md"
+
+
 def render_sarif(report, rules):
     levels = {
         "CRITICAL": "error",
@@ -81,6 +84,7 @@ def render_sarif(report, rules):
             "id": rule["id"],
             "shortDescription": {"text": rule["title"]},
             "fullDescription": {"text": rule["why"]},
+            "helpUri": f"{RULE_DOCUMENTATION}#{rule['id'].lower()}",
             "defaultConfiguration": {"level": levels[rule["severity"]]},
             "properties": {"version": "1.0.0"},
         }
@@ -131,6 +135,7 @@ def render_sarif(report, rules):
             "tool": {
                 "driver": {
                     "name": report["tool"],
+                    "informationUri": RULE_DOCUMENTATION,
                     "version": report["version"],
                     "rules": descriptors,
                 },

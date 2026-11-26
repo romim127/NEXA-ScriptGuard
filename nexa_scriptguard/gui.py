@@ -129,6 +129,13 @@ class GuiHandler(BaseHTTPRequestHandler):
             and hmac.compare_digest(supplied, self.server.token)
         )
 
+    def respond_asset(self, asset, content_type):
+        content = asset.read_bytes()
+        if content_type.startswith("text/html"):
+            attributes = f'<body data-max-input-bytes="{self.server.limits.max_input_bytes}">'.encode("ascii")
+            content = content.replace(b"<body>", attributes, 1)
+        return self.respond(200, content, content_type)
+
     def do_GET(self):
         if not self.allowed_host():
             return self.error_response(403, "Host no autorizado.")
@@ -143,7 +150,7 @@ class GuiHandler(BaseHTTPRequestHandler):
             name, content_type = modern[path]
             asset = resources.joinpath("modern", name)
             if asset.is_file():
-                return self.respond(200, asset.read_bytes(), content_type)
+                return self.respond_asset(asset, content_type)
         assets = {
             "/": ("index.html", "text/html; charset=utf-8"),
             "/legacy": ("index.html", "text/html; charset=utf-8"),
@@ -154,7 +161,7 @@ class GuiHandler(BaseHTTPRequestHandler):
         }
         if path in assets:
             name, content_type = assets[path]
-            return self.respond(200, resources.joinpath(name).read_bytes(), content_type)
+            return self.respond_asset(resources.joinpath(name), content_type)
         if path.startswith("/export/"):
             if not self.authorized():
                 return self.error_response(403, "Solicitud no autorizada.")
@@ -202,7 +209,10 @@ class GuiHandler(BaseHTTPRequestHandler):
             return self.reject_post(411, "Se requiere un tamaño de entrada válido.")
         if length < 0 or length > self.server.limits.max_input_bytes:
             return self.reject_post(413, "El archivo supera el límite de entrada.")
-        name = unquote(self.headers.get("X-Nexa-Filename", ""))
+        try:
+            name = unquote(self.headers.get("X-Nexa-Filename", ""), errors="strict")
+        except UnicodeDecodeError:
+            return self.reject_post(400, "El nombre de archivo no está codificado en UTF-8.")
         if (
             not name or len(name) > 255 or "/" in name or "\\" in name
             or any(ord(char) < 32 or ord(char) == 127 for char in name)
