@@ -147,7 +147,7 @@ class GuiIntegrationTests(unittest.TestCase):
         self.assertNotIn(b"innerHTML", body)
 
     def test_infinity_shield_is_available_to_the_interface(self):
-        status, page = self.request("GET", "/")
+        status, page = self.request("GET", "/legacy")
         self.assertEqual(status, 200)
         self.assertIn(b'src="/infinity-shield.svg"', page)
         status, shield = self.request("GET", "/infinity-shield.svg")
@@ -155,6 +155,22 @@ class GuiIntegrationTests(unittest.TestCase):
         self.assertIn(b"<svg", shield)
         self.assertIn(b"Infinity</text>", shield)
         self.assertIn(b"NEXTGENAI</text>", shield)
+
+    def test_modern_bundle_uses_existing_csp_and_approved_shield(self):
+        connection = http.client.HTTPConnection("127.0.0.1", self.server.server_port, timeout=5)
+        self.addCleanup(connection.close)
+        connection.request("GET", "/")
+        response = connection.getresponse()
+        self.assertEqual(response.status, 200)
+        self.assertIn("script-src 'self';", response.getheader("Content-Security-Policy"))
+        self.assertIn(b'./phase4.js', response.read())
+        for asset in ("phase4.js", "phase4.css"):
+            self.assertEqual(self.request("GET", "/" + asset)[0], 200)
+        self.assertEqual(
+            self.request("GET", "/phase4-infinity-shield.svg"),
+            self.request("GET", "/infinity-shield.svg"),
+        )
+        self.assertEqual(self.request("GET", "/modern/../app.js")[0], 404)
 
     def test_python_selection_and_sarif_export(self):
         status, body = self.upload(b"import pickle as p\np.loads(data)\n", "example.py")

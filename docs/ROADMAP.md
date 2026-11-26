@@ -37,6 +37,9 @@ Este roadmap registra trabajo incompleto, no capacidades anunciadas como termina
 El estándar de arranque local conserva los lanzadores y el comando `RUN`
 durante la evolución del frontend. [NGI-STD-002](governance/NGI-STD-002_LOCAL_APPLICATION_LAUNCH_STANDARD.md)
 
+La Fase 4 empaqueta la interfaz compilada en la distribución Python.
+[ADR 0004](decisions/ADR-0004-REACT-LOOPBACK.md)
+
 La decisión actual es conservar el producto local-first. No se añadió
 configuración ni se desplegó NEXA en Vercel. El análisis del runtime Python,
 los límites de payload/filesystem, los costos publicados, la condición de uso

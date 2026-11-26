@@ -1,0 +1,28 @@
+{
+  "name": "@nextgenai/scriptguard-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@nextgenai/ui": "0.1.0",
+    "react": "^19",
+    "react-dom": "^19",
+    "zod": "^4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56",
+    "@testing-library/react": "^16",
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "jsdom": "^27",
+    "typescript": "~5.9.3",
+    "vite": "^8",
+    "vitest": "^4"
+  }
+}
