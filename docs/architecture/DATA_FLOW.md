@@ -8,3 +8,9 @@
 6. La GUI vincula exportaciones al informe vigente y el navegador administra el destino. La CLI publica de forma exclusiva en las rutas solicitadas.
 
 El archivo, su nombre, los fragmentos y los diagnósticos cruzan la frontera como datos no confiables. El token y el informe activo se mantienen en memoria local. Cualquier servicio web introduciría una frontera de red y requeriría consentimiento explícito y los controles del [modelo de seguridad](SECURITY_MODEL.md).
+
+La GUI React retira el fragmento de sesión de la barra de direcciones y
+conserva el token en `sessionStorage` de la pestaña para recargas. Tras
+recibir el reporte valida el esquema consumido antes de renderizarlo como
+texto. Para exportar solicita los bytes al servidor y entrega un enlace Blob
+temporal al navegador.

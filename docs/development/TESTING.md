@@ -27,3 +27,17 @@ report.
 and SARIF against the official OASIS schema. This does not substitute for
 testing a real SARIF consumer. Fuzz testing is not a sustained, coverage-guided
 campaign; current smoke tests must not be described as such.
+
+## Frontend de Fase 4
+
+Desde la raíz, `npm ci` instala el lockfile y `npm run typecheck`,
+`npm run lint`, `npm test` y `npm run build` verifican fuentes y bundle.
+`npm audit --audit-level=moderate` comprueba las dependencias.
+`npx playwright install chromium` prepara el navegador de prueba y
+`npm run e2e` ejecuta los casos de navegador. Usá `NEXA_PYTHON` para
+seleccionar el intérprete y `NEXA_RUN` con la ruta absoluta al lanzador
+instalado por pipx para verificar la distribución.
+
+El caso operativo intercepta y rechaza tráfico fuera de loopback. El
+caso estático comprueba que el shell de Vite carga bajo un subdirectorio
+y que analizar sin sesión local no transmite el archivo.

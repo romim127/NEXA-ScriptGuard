@@ -10,3 +10,8 @@ directorio externo y el manejo de apertura y cierre en Windows, Linux y macOS.
 En Linux también verifica dos procesos simultáneos, el traspaso a un navegador
 de prueba y el cierre de ambos puertos por señal.
 [NGI-STD-002](../governance/NGI-STD-002_LOCAL_APPLICATION_LAUNCH_STANDARD.md)
+
+Fase 4 aporta React y NextGenAI UI, cliente TypeScript y comprobación de la
+rueda mediante pipx. El servidor y los motores mantienen los contratos
+existentes. La referencia anterior se sirve en `/legacy`.
+[ADR 0004](../decisions/ADR-0004-REACT-LOOPBACK.md)

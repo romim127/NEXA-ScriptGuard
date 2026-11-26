@@ -9,7 +9,11 @@ Local-first, security by design, human verification, backwards compatibility, mo
 ## Preferred stack
 React + TypeScript (TSX) + Vite; CSS/CSS Modules; Python + FastAPI for APIs where needed; Pydantic, OpenAPI and JSON Schema; Rust for justified specialized processing; PostgreSQL or SQLite when persistence is required; pytest/unittest, Vitest, Playwright; ESLint, TypeScript, rustfmt, Clippy; SCA, SAST, secret scanning; Git/GitHub Actions; Docker where justified; Vercel or GitHub Pages for compatible frontend deployments, local/Render/compatible Vercel functions for backend; local AI models when appropriate. These are preferences, not mandatory dependencies for every project. HTML remains appropriate for standalone reports.
 
-## Shared design system (planned)
+## Shared design system
+
+The first implementation lives in `packages/nextgenai-ui`. The directory
+layout below describes the target as consumers and shared assets expand.
+[ADR 0004](../decisions/ADR-0004-REACT-LOOPBACK.md)
 ```
 nextgenai-ui/
 ├── components/

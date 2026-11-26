@@ -14,3 +14,8 @@ El comando instalado `RUN` invoca la misma función. La GUI valida el motor
 Bash, abre el navegador y conserva loopback, puerto dinámico y token por sesión.
 El punto de entrada es estable para la futura evolución del frontend.
 [NGI-STD-002](../governance/NGI-STD-002_LOCAL_APPLICATION_LAUNCH_STANDARD.md)
+
+La Fase 4 sirve el frontend React desde los recursos de la distribución
+Python. TypeScript valida el contrato consumido y NextGenAI UI presenta
+controles y resultados. Vite se usa durante la compilación. La referencia
+anterior queda disponible en `/legacy`. [ADR 0004](../decisions/ADR-0004-REACT-LOOPBACK.md)

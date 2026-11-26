@@ -15,6 +15,7 @@ available.
 | Analyze installer binaries or execute scripts | Not implemented | Deliberately outside current scope |
 | Provide hosted Vercel analysis | Not implemented | Evaluation only; no deployment or endpoint |
 | Launch the local GUI from any working directory | Implemented | Platform launchers and an explicitly installed `RUN` command. [NGI-STD-002](../governance/NGI-STD-002_LOCAL_APPLICATION_LAUNCH_STANDARD.md) |
+| Serve a keyboard-accessible frontend in the Python distribution | Implemented | React and NextGenAI UI. Packaged assets serve locally without a second server. |
 
 Rule coverage and semantics are documented in
 [`../RULES.md`](../RULES.md) and

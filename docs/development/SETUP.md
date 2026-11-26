@@ -61,3 +61,13 @@ funcionan offline una vez instalado el proyecto. Para actualizar desde el
 repositorio, ejecutá `pipx reinstall nexa-scriptguard`. Para retirar el comando,
 ejecutá `pipx uninstall nexa-scriptguard`.
 [Configuración de PATH de pipx](https://pipx.pypa.io/latest/how-to/configure-paths.html)
+
+## Desarrollo del frontend
+
+Con Node.js 24, desde la raíz, ejecutá `npm ci`, `npm run typecheck`,
+`npm run lint`, `npm test` y `npm run build`. El bundle se genera en
+`nexa_scriptguard/gui_assets/modern` y se versiona junto con su fuente.
+Iniciá Python con el lanzador habitual para probarlo. Las instalaciones con
+bundle funcionan sin Node.js ni servidor Vite. Para comparar la GUI anterior,
+abrí `/legacy` en la pestaña de sesión o agregá el fragmento privado de la URL
+que imprimió el proceso actual.

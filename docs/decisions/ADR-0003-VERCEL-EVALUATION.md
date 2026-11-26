@@ -90,6 +90,15 @@ never execute inspected code, escape output, and exclude scripts, evidence,
 tokens and secrets from logs. Keep source in memory when feasible and remove
 any scratch data on every exit path.
 
+## Phase 4 update
+
+The Vite build produces relative static asset links and can be served as static
+files by Vercel. The analyzer uses same-origin `/analyze` and `/export/*`
+endpoints and a local-session token, so static hosting exposes a shell only.
+A separate experimental serverless adapter would still need its own trust
+boundary and verification. The existing synthetic demo remains the candidate
+for a public demonstration. [Vercel Vite documentation](https://vercel.com/docs/frameworks/frontend/vite)
+
 ## Official sources
 
 Reviewed 2026-11-25:

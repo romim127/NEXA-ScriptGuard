@@ -8,3 +8,5 @@
 - Mantener un arranque local estable, sin privilegios administrativos,
   con loopback, puerto dinámico y token. El PATH de usuario solo cambia
   mediante acción explícita. [NGI-STD-002](NGI-STD-002_LOCAL_APPLICATION_LAUNCH_STANDARD.md)
+- Mantener la distribución local operativa sin Node.js ni servicios de red
+  después de instalarla. Tratar evidencias como texto y conservar la CSP.
