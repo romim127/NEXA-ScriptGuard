@@ -3,6 +3,15 @@
 .ngi-navigation a { color: var(--ngi-link); }
 :focus-visible { outline: 2px solid var(--ngi-cyan); outline-offset: 4px; }
 .ngi-evidence { white-space: pre-wrap; overflow-wrap: anywhere; }
+pre.ngi-code {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.detail > .ngi-code { margin: 7px 0; color: #e9edfa; font: inherit; }
 .ngi-disclosure summary { cursor: pointer; color: var(--ngi-link); }
 .ngi-status-error { border-color: var(--ngi-error); color: #ffb4bc; }
 .ngi-status-warning { border-color: var(--ngi-warning); color: var(--ngi-warning); }

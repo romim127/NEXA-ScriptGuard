@@ -3,7 +3,8 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
+import { build } from 'vite';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const probe = fileURLToPath(new URL('./browser_probe.py', import.meta.url)).replaceAll('\\', '/');
@@ -87,15 +88,37 @@ test('local GUI analyzes Bash and Python offline and saves physical reports', as
     expect((await request.get(second.url.origin)).ok()).toBe(true);
     const input = page.getByLabel('ARCHIVO DE SCRIPT PARA ANALIZAR');
     const analyze = page.getByRole('button', { name: 'Analizar archivo' });
+    const exportJson = page.getByRole('button', { name: 'Exportar JSON' });
+    await expect(page.getByRole('navigation', { name: 'Navegación del reporte' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Capacidades del producto' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Hallazgos', exact: true })).toBeVisible();
+    await expect(exportJson).toBeDisabled();
+    await expect(page.locator('.dashboard-metrics')).toHaveCount(0);
+    if (process.env.NEXA_VISUAL_DIR) {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.screenshot({ path: join(process.env.NEXA_VISUAL_DIR, 'local-inicio.png'), fullPage: true });
+      await page.setViewportSize({ width: 360, height: 640 });
+    }
 
     await input.setInputFiles({ name: 'invalid.txt', mimeType: 'text/plain', buffer: Buffer.from('text') });
     await expect(page.getByRole('alert')).toContainText('Seleccione un archivo');
     await expect(analyze).toBeDisabled();
-    await input.setInputFiles(join(root, 'demo_example.sh'));
+    const chooser = page.waitForEvent('filechooser');
+    await expect(input).toBeVisible();
+    await input.press('Enter');
+    await (await chooser).setFiles(join(root, 'demo_example.sh'));
+    await expect(page.getByText('demo_example.sh', { exact: true })).toBeVisible();
     await analyze.focus();
     await page.keyboard.press('Enter');
     await expect(page.getByRole('status')).toContainText('ANÁLISIS COMPLETO');
     await expect(page.getByRole('article')).toHaveCount(2);
+    await expect(exportJson).toBeEnabled();
+    await expect(page.locator('.dashboard-metrics dd')).toHaveText(['2', '2']);
+    if (process.env.NEXA_VISUAL_DIR) {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.screenshot({ path: join(process.env.NEXA_VISUAL_DIR, 'local-reporte.png'), fullPage: true });
+      await page.setViewportSize({ width: 360, height: 640 });
+    }
     await page.getByRole('link', { name: 'Hallazgos', exact: true }).click();
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
@@ -109,7 +132,7 @@ test('local GUI analyzes Bash and Python offline and saves physical reports', as
     await page.route('**/analyze', route => route.fulfill({ status: 500, json: { error: '<script>malicious</script>' } }), { times: 1 });
     await analyze.click();
     await expect(page.getByRole('alert')).toHaveText('Error del servidor (HTTP 500).');
-    await expect(page.getByRole('button', { name: 'Exportar JSON' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Exportar JSON' })).toBeDisabled();
 
     await input.setInputFiles(join(root, 'tests/corpus/python_gui_example.py'));
     await analyze.click();
@@ -192,7 +215,8 @@ test('modern and legacy have semantic parity across complete and incomplete repo
         await analyze.focus();
         await page.keyboard.press('Enter');
         await expect(page.getByRole('status').first()).toContainText(`ANÁLISIS ${status}`);
-        await expect(page.getByText(language, { exact: true })).toBeVisible();
+        const languageArea = route === '/' ? page.locator('#archivo') : page.locator('main');
+        await expect(languageArea.getByText(language, { exact: true })).toBeVisible();
         const json = page.waitForEvent('download');
         await page.getByRole('button', { name: 'Exportar JSON' }).click();
         const report = JSON.parse(await readFile(await (await json).path(), 'utf-8'));
@@ -272,15 +296,18 @@ test('modern explorer filters, sorts and navigates to expandable evidence', asyn
     await page.getByRole('link', { name: /PY-005/ }).click();
     await expect(page).toHaveURL(/#finding-0$/);
     await page.getByText('EVIDENCIA COMPARTIBLE').first().click();
-    await expect(page.locator('.ngi-disclosure[open] p')).toBeVisible();
+    await expect(page.locator('.ngi-disclosure[open] .ngi-code')).toBeVisible();
   } finally {
     await instance.stop();
   }
 });
 
-test('independent static consumer explores and downloads only synthetic reports', async ({ page }) => {
+test('premium demo fits each viewport and downloads only synthetic reports', async ({ page }) => {
   const origin = 'https://demo.example.invalid';
   const location = join(root, 'frontend/demo/dist');
+  const deploy = JSON.parse(await readFile(join(root, 'vercel.json'), 'utf-8'));
+  expect(deploy.outputDirectory).toBe('frontend/demo/dist');
+  expect(deploy.buildCommand).toBe('npm run build:demo');
   const requests: string[] = [];
   await page.route('**/*', async route => {
     const url = new URL(route.request().url());
@@ -288,22 +315,240 @@ test('independent static consumer explores and downloads only synthetic reports'
       requests.push(url.pathname);
       return route.abort();
     }
-    await route.fulfill({ path: join(location, url.pathname === '/' ? 'index.html' : url.pathname.slice(1)) });
+    await route.fulfill({ path: join(location, url.pathname === '/' ? 'index.html' : url.pathname.slice(1)),
+      headers: Object.fromEntries(deploy.headers[0].headers.map(({ key, value }: { key: string; value: string }) => [key, value])) });
   });
   await page.goto(origin);
   await expect(page.getByRole('note')).toHaveText('DEMO MODE — SYNTHETIC DATA');
   await expect(page.locator('input[type=file]')).toHaveCount(0);
+  await expect(page.getByText('¿Querés analizar tu archivo?', { exact: true })).toHaveCount(0);
+  expect(await page.locator('html').evaluate(element => getComputedStyle(element).overflowY)).toBe('scroll');
   await expect(page.getByRole('article')).toHaveCount(2);
+  await expect(page.locator('.dashboard-metrics dd')).toHaveText(['2', '1', '1']);
+  await expect(page.getByRole('list', { name: 'Motores disponibles en la aplicación local' })).toContainText('Rust');
+  await expect(page.getByRole('button', { name: 'Analizar archivo' })).toHaveCount(0);
+  const contrast = await page.locator('.demo-banner, .dashboard-metrics > div, .ngi-navigation a, .dashboard-panel button')
+    .evaluateAll(elements => elements.map(element => {
+      function luminance(color: string) {
+        const channels = color.match(/\d+(?:\.\d+)?/g)?.slice(0, 3).map(Number) ?? [];
+        return channels.reduce((total, channel, index) => {
+          const value = channel / 255;
+          const linear = value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+          return total + linear * [0.2126, 0.7152, 0.0722][index];
+        }, 0);
+      }
+      const style = getComputedStyle(element);
+      const [low, high] = [luminance(style.color), luminance(style.backgroundColor)].sort((a, b) => a - b);
+      return (high + 0.05) / (low + 0.05);
+    }));
+  expect(Math.min(...contrast)).toBeGreaterThanOrEqual(4.5);
+
+  for (const viewport of [
+    { name: 'escritorio', width: 1440, height: 1000 },
+    { name: 'tablet', width: 820, height: 1060 },
+    { name: 'movil', width: 390, height: 844 },
+    { name: 'movil-estrecho', width: 320, height: 740 },
+  ]) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    const dimensions = await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth,
+      viewport: document.documentElement.clientWidth,
+    }));
+    expect(dimensions.width).toBeLessThanOrEqual(dimensions.viewport);
+    const cards = await page.getByRole('article').evaluateAll(elements => elements.map(element => ({
+      x: element.getBoundingClientRect().x,
+      border: getComputedStyle(element).borderTopColor,
+    })));
+    expect(cards[0].border).not.toBe(cards[1].border);
+    if (viewport.width > 750) expect(cards[1].x).toBeGreaterThan(cards[0].x);
+    else expect(cards[1].x).toBe(cards[0].x);
+    if (process.env.NEXA_VISUAL_DIR && viewport.width >= 390) {
+      await page.screenshot({ path: join(process.env.NEXA_VISUAL_DIR, viewport.name + '.png'), fullPage: true });
+    }
+  }
+  await page.keyboard.press('Tab');
+  const firstLink = page.getByRole('link', { name: 'Resumen' });
+  await expect(firstLink).toBeFocused();
+  expect(await firstLink.evaluate(element => getComputedStyle(element).outlineStyle)).not.toBe('none');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Hallazgos', exact: true })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/#hallazgos$/);
+  await expect.poll(() => page.getByRole('note').evaluate(element => element.getBoundingClientRect().top)).toBe(0);
   await page.getByLabel('Criticidad').selectOption('MEDIUM');
   await expect(page.getByRole('article')).toHaveCount(1);
-  await page.getByText('Evidencia sintética').click();
-  await expect(page.locator('.ngi-disclosure[open] p')).toBeVisible();
+  await page.getByText('EVIDENCIA COMPARTIBLE').press('Enter');
+  await expect(page.locator('.ngi-disclosure[open] .ngi-code')).toBeVisible();
   for (const format of ['JSON', 'HTML', 'SARIF']) {
     const download = page.waitForEvent('download');
-    await page.getByRole('button', { name: `Descargar ${format} sintético` }).click();
+    await page.getByRole('button', { name: `Exportar ${format}` }).click();
     const contents = await readFile(await (await download).path(), 'utf-8');
     expect(contents).toContain('DEMO MODE — SYNTHETIC DATA');
     expect(contents).not.toContain('synthetic_example');
   }
   expect(requests).toEqual([]);
+});
+
+const scrollViewports = [360, 390, 768, 1366, 1920];
+const longInstruction = 'eval(\n    "' + '0123456789  '.repeat(70) + '"\n)';
+const fixtureEvidence = '\t  primera línea\n' + longInstruction + '\n  última línea  ';
+
+async function verifyCodeScroll(page: Page, block: Locator, expected: string) {
+  await expect(block).toBeVisible();
+  expect(await block.textContent()).toBe(expected);
+  await block.scrollIntoViewIfNeeded();
+  await block.evaluate(element => { element.scrollLeft = 0; });
+  const dimensions = await block.evaluate(element => {
+    const style = getComputedStyle(element);
+    const node = element.firstChild!;
+    const text = node.textContent!;
+    const longest = text.split('\n').reduce((a, b) => a.length > b.length ? a : b);
+    const start = text.indexOf(longest);
+    const range = document.createRange();
+    range.setStart(node, start);
+    range.setEnd(node, start + longest.length);
+    return { clientWidth: element.clientWidth, scrollWidth: element.scrollWidth, lines: range.getClientRects().length,
+      before: element.scrollLeft, whiteSpace: style.whiteSpace };
+  });
+  expect(dimensions.scrollWidth).toBeGreaterThan(dimensions.clientWidth);
+  expect(dimensions.whiteSpace).toBe('pre');
+  expect(dimensions.lines).toBe(1);
+  await block.focus();
+  await expect(block).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(() => block.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+  return { ...dimensions, after: await block.evaluate(element => element.scrollLeft) };
+}
+
+async function verifyTouchScroll(page: Page, block: Locator) {
+  await block.evaluate(element => {
+    element.scrollIntoView({ block: 'center' });
+    element.scrollLeft = 0;
+  });
+  const box = await block.boundingBox();
+  expect(box).not.toBeNull();
+  const touch = await page.context().newCDPSession(page);
+  try {
+    await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true });
+    const x = Math.floor(box!.x + box!.width * 0.8);
+    const y = Math.floor(box!.y + box!.height / 2);
+    expect(await block.evaluate((element, point) =>
+      element.contains(document.elementFromPoint(point.x, point.y)), { x, y })).toBe(true);
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+    for (const distance of [20, 45, 75, 105, 140, 175]) {
+      await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x - distance, y }] });
+    }
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect.poll(() => block.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+    return await block.evaluate(element => element.scrollLeft);
+  } finally {
+    await touch.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+    await touch.detach();
+  }
+}
+
+async function verifyScrollMatrix(page: Page, mode: 'local' | 'demo', expectedInstruction: string, expectedEvidence: string) {
+  const card = page.getByRole('article').filter({ has: page.locator('.rule').filter({ hasText: /^PY-001$/ }) });
+  const instruction = card.getByRole('region', { name: 'Instrucción detectada' });
+  await card.locator('summary').filter({ hasText: 'EVIDENCIA COMPARTIBLE' }).click();
+  const evidence = card.getByRole('region', { name: 'EVIDENCIA COMPARTIBLE' });
+  for (const width of scrollViewports) {
+    await page.setViewportSize({ width, height: 720 });
+    const code = await verifyCodeScroll(page, instruction, expectedInstruction);
+    const shared = await verifyCodeScroll(page, evidence, expectedEvidence);
+    const horizontalPage = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(horizontalPage).toBeLessThanOrEqual(0);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect.poll(() => page.evaluate(() =>
+      Math.abs(document.documentElement.scrollHeight - innerHeight - scrollY))).toBeLessThanOrEqual(2);
+    expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
+    const touch = width === 390 ? await verifyTouchScroll(page, evidence) : null;
+    console.log('SG-UI-001 ' + JSON.stringify({ mode, width, code, evidence: shared, horizontalPage, touch }));
+    if (process.env.NEXA_SCROLL_VISUAL_DIR && [390, 1366].includes(width)) {
+      await instruction.evaluate(element => { element.scrollLeft = 100; });
+      await evidence.evaluate(element => { element.scrollLeft = 100; });
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({ path: join(process.env.NEXA_SCROLL_VISUAL_DIR, `${mode}-${width}.png`), fullPage: true });
+    }
+  }
+}
+
+test('SG-UI-001: installed local dashboard preserves long code and does not execute samples', async ({ page }) => {
+  test.setTimeout(90000);
+  const instance = await service();
+  const temp = await mkdtemp(join(tmpdir(), 'nexa-acceptance-'));
+  const marker = join(temp, 'executed.txt').replaceAll(String.fromCharCode(92), '/');
+  let posts = 0;
+  page.on('request', req => {
+    if (req.method() === 'POST' && new URL(req.url()).pathname === '/analyze') posts++;
+  });
+  try {
+    await page.goto(instance.url.href);
+    const input = page.getByLabel('ARCHIVO DE SCRIPT PARA ANALIZAR');
+    const analyze = page.getByRole('button', { name: 'Analizar archivo' });
+    await expect(input).toBeVisible();
+    expect(await input.evaluate((el: HTMLInputElement) => el.files?.length)).toBe(0);
+    await expect(analyze).toBeDisabled();
+    const chooser = page.waitForEvent('filechooser');
+    await input.press('Enter');
+    await (await chooser).setFiles({ name: 'acceptance.py', mimeType: 'text/plain',
+      buffer: Buffer.from(`open(${JSON.stringify(marker)}, "w").write("test")\nvalue = ${longInstruction}\n`) });
+    await expect(analyze).toBeEnabled();
+    await expect(page.getByRole('article')).toHaveCount(0);
+    expect(posts).toBe(0);
+    await analyze.click();
+    await expect(page.getByRole('status').first()).toContainText('ANÁLISIS COMPLETO');
+    await expect(page.locator('.flag')).toContainText('HIGH');
+    await expect(page.locator('.metadata')).toContainText('Línea 2 · Columna 9');
+    await verifyScrollMatrix(page, 'local', '0002 │ ' + longInstruction, longInstruction);
+    const shellPath = "'" + marker.replaceAll("'", "'\\''") + "'";
+    await input.setInputFiles({ name: 'acceptance.sh', mimeType: 'text/plain',
+      buffer: Buffer.from(`printf test > ${shellPath}\neval 'echo sample'\n`) });
+    expect(posts).toBe(1);
+    await analyze.click();
+    await expect(page.locator('.rule')).toHaveText('SG-005');
+    expect(posts).toBe(2);
+    expect(new URL(page.url()).origin).toBe(instance.url.origin);
+    await expect(readFile(marker)).rejects.toMatchObject({ code: 'ENOENT' });
+  } finally {
+    await instance.stop();
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test('SG-UI-001: static demo preserves synthetic evidence at the same viewports', async ({ page }, testInfo) => {
+  test.setTimeout(90000);
+  const output = testInfo.outputPath('demo-scroll');
+  await build({
+    configFile: join(root, 'frontend/demo/vite.config.ts'),
+    build: { outDir: output, emptyOutDir: false },
+    logLevel: 'error',
+    plugins: [{
+      name: 'nexa-test-long-evidence',
+      enforce: 'pre',
+      transform(code, id) {
+        if (!id.endsWith('/public/reports/synthetic.json')) return;
+        const report = JSON.parse(code);
+        report.findings[0].instruction = longInstruction;
+        report.findings[0].evidence.shared = fixtureEvidence;
+        return JSON.stringify(report);
+      },
+    }],
+  });
+  const origin = 'https://demo-scroll.example.invalid';
+  const unexpected: string[] = [];
+  await page.route('**/*', async route => {
+    const url = new URL(route.request().url());
+    if (url.origin !== origin || !/^\/(?:assets\/[a-zA-Z0-9_.-]+)?$/.test(url.pathname)) {
+      unexpected.push(url.pathname);
+      return route.abort();
+    }
+    await route.fulfill({ path: join(output, url.pathname === '/' ? 'index.html' : url.pathname.slice(1)) });
+  });
+  await page.goto(origin);
+  await expect(page.getByRole('note')).toHaveText('DEMO MODE — SYNTHETIC DATA');
+  await expect(page.locator('input[type=file]')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Analizar archivo' })).toHaveCount(0);
+  await verifyScrollMatrix(page, 'demo', '0002 │ ' + longInstruction, fixtureEvidence);
+  expect(unexpected).toEqual([]);
 });

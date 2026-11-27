@@ -3,7 +3,7 @@ import { severities } from '@nextgenai/ui';
 import type { Finding } from '../../types/report';
 import { AnalysisFinding } from './AnalysisFinding';
 
-export function FindingExplorer({ findings }: { findings: Finding[] }) {
+export function FindingExplorer({ findings, compact = false }: { findings: Finding[]; compact?: boolean }) {
   const [severity, setSeverity] = useState('');
   const [rule, setRule] = useState('');
   const [search, setSearch] = useState('');
@@ -46,8 +46,10 @@ export function FindingExplorer({ findings }: { findings: Finding[] }) {
         <a href={`#finding-${index}`}>Línea {finding.location.start.line}, columna {finding.location.start.column} · {finding.rule_id}</a>
       </li>)}</ul>
     </details>}
-    {visible.map((finding, index) => <section id={`finding-${index}`} tabIndex={-1} key={finding.id}>
-      <AnalysisFinding finding={finding} />
-    </section>)}
+    <div className="findings-grid">
+      {visible.map((finding, index) => <section id={`finding-${index}`} tabIndex={-1} key={finding.id}>
+        <AnalysisFinding finding={finding} compact={compact} />
+      </section>)}
+    </div>
   </>;
 }

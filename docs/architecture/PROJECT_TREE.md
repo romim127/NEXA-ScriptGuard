@@ -56,7 +56,6 @@ docs/requirements/REQUIREMENTS_TRACEABILITY.md
 docs/ROADMAP.md
 docs/RULES.md
 eslint.config.mjs
-frontend/demo/demo.css
 frontend/demo/generate_reports.py
 frontend/demo/index.html
 frontend/demo/main.tsx
@@ -70,6 +69,7 @@ frontend/index.html
 frontend/package.json
 frontend/playwright.config.ts
 frontend/src/App.tsx
+frontend/src/dashboard.css
 frontend/src/features/analysis/AnalysisFinding.tsx
 frontend/src/features/analysis/FindingExplorer.tsx
 frontend/src/features/reports/download.ts
