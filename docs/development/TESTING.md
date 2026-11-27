@@ -41,3 +41,22 @@ instalado por pipx para verificar la distribución.
 El caso operativo intercepta y rechaza tráfico fuera de loopback. El
 caso estático comprueba que el shell de Vite carga bajo un subdirectorio
 y que analizar sin sesión local no transmite el archivo.
+
+## SG-UI-001 · Desplazamiento de código y evidencia
+
+Las reglas `pre-wrap` y `overflow-wrap: anywhere` partían las instrucciones
+y la evidencia. `CodeBlock` usa `white-space: pre` y scroll horizontal
+propio en un bloque enfocable. `EvidenceViewer` lo usa para contenido de
+código y conserva el flujo responsive para el texto descriptivo.
+
+Playwright verifica la aplicación local y la demo en 360, 390, 768, 1366 y
+1920 px. Los casos miden `clientWidth`, `scrollWidth` y el cambio de
+`scrollLeft` por teclado. En 390 px también emulan un gesto táctil de
+Chromium. Se compara el texto completo, se comprueba que una línea larga
+ocupa un único renglón y se verifica el scroll vertical del documento.
+
+El caso local analiza archivos sintéticos con un marcador que permanecerá
+ausente si se inspeccionan como datos. La demo usa una variante de su
+fixture solo en el build de prueba. `NEXA_SCROLL_VISUAL_DIR` permite
+guardar capturas de ambos casos en 390 y 1366 px.
+[Capturas de la corrección](../reports/sg-ui-001)

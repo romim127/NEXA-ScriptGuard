@@ -7,3 +7,4 @@ export { InfinityShield } from './components/InfinityShield';
 export { SeverityBadge, severities, type Severity } from './components/SeverityBadge';
 export { Sidebar } from './components/Sidebar';
 export { StatusIndicator } from './components/StatusIndicator';
+export { CodeBlock } from './components/CodeBlock';

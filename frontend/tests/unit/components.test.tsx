@@ -5,6 +5,16 @@ import { EvidenceViewer, ExportPanel, FileUploader, InfinityShield, Sidebar, Sta
 afterEach(cleanup);
 
 describe('NextGenAI UI', () => {
+  it('preserves whitespace and exposes code evidence as a focusable text region', () => {
+    const evidence = '\n\t  <b>literal</b>  \n';
+    const { container } = render(<EvidenceViewer label="Evidencia" value={evidence} format="code" />);
+    const region = screen.getByRole('region', { name: 'Evidencia' });
+    expect(region.tagName).toBe('PRE');
+    expect(region.tabIndex).toBe(0);
+    expect(region.textContent).toBe(evidence);
+    expect(container.querySelector('b')).toBeNull();
+  });
+
   it('uses a native disclosure without interpreting markup as evidence', () => {
     const { container } = render(<EvidenceViewer label="Detalles" value="<b>literal</b>" expandable />);
     const details = container.querySelector('details');

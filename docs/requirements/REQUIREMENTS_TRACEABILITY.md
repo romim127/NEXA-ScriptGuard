@@ -10,6 +10,7 @@
 | Reproducibilidad y compatibilidad | `pyproject.toml`, `Cargo.lock`, `.github/workflows` | Suites de [CI y pruebas](../development/TESTING.md) asociadas al SHA evaluado. |
 | Arranque local estable | Lanzadores, `RUN`, `gui.main` | `test_launch.py`. Inicio desde otro directorio, navegador, loopback, puertos independientes y cierre. |
 | Interfaz tipada, reutilizable y offline | `frontend`, `packages/nextgenai-ui`, bundle Python | Typecheck, ESLint, Vitest, auditoría npm y Playwright con instalación pipx. Se prueba navegación, scroll, estados, evidencia no confiable, análisis y exportación. |
+| UX-002 · SG-UI-001 | `CodeBlock`, `EvidenceViewer`, `AnalysisFinding` | Líneas de código íntegras y scroll horizontal independiente con teclado y tacto, sin desbordamiento de página. [Verificación en cinco viewports](../development/TESTING.md#sg-ui-001--desplazamiento-de-código-y-evidencia) |
 
 Ver [criterios de aceptación](ACCEPTANCE_CRITERIA.md), [requisitos funcionales](FUNCTIONAL_REQUIREMENTS.md) y [no funcionales](NONFUNCTIONAL_REQUIREMENTS.md).
 

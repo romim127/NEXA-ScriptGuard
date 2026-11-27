@@ -92,7 +92,7 @@
 .findings-grid .finding h2 { font-size: clamp(20px, 2vw, 26px); line-height: 1.25; }
 .findings-grid .instruction { padding: 12px; }
 .findings-grid .detail { margin-top: 12px; padding-top: 10px; }
-.findings-grid .detail[open] > p { padding: 10px; border-radius: 8px; background: #080e1c; }
+.findings-grid .detail[open] > :is(p, .ngi-code) { padding: 10px; border-radius: 8px; background: #080e1c; }
 @media (max-width: 750px) {
   .dashboard-overview, .findings-grid { grid-template-columns: minmax(0, 1fr); }
   .scriptguard-dashboard .finding-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
