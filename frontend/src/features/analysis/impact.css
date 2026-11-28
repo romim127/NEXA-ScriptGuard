@@ -9,6 +9,26 @@
 .sita h3, .sita h4, .sita h5 { margin-block: .65rem .25rem; }
 .sita p { margin-block: .4rem; }
 .sita small { display: block; }
+.sita-disclaimer { color: #b4cadb; font-size: .78rem; letter-spacing: .04em; }
+.sita-coverage { display: flex; flex-wrap: wrap; gap: .25rem 1rem; }
+.sita-coverage span, .sita-limitations, .sita-references small { color: #b4cadb; }
+.sita-surface, .sita-cia { display: grid; gap: .5rem; margin-block: .7rem; }
+.sita-surface { grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
+.sita-cia { grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); }
+.sita-surface > div, .sita-cia > div {
+  min-width: 0;
+  padding: .45rem .65rem;
+  border: 1px solid #294354;
+  border-radius: .5rem;
+}
+.sita dt { color: #b4cadb; font-size: .85rem; }
+.sita dd { margin-inline-start: 0; }
+.sita-limitations, .sita-references, .sita-reason ul { padding-inline-start: 1.35rem; }
+.sita-limitations { margin-block: .4rem; font-size: .85rem; }
+.sita-details { margin-block-start: .75rem; padding-block-start: .6rem; border-top: 1px solid #294354; }
+.sita-details summary { cursor: pointer; }
+.sita-reason + .sita-reason { border-top: 1px solid #294354; }
+.sita-references li + li { margin-block-start: .4rem; }
 .sita-reference {
   color: #a6edff;
   background: transparent;

@@ -64,3 +64,21 @@ once criterios funcionales y una comprobación local adicional con el
 archivo de aceptación, que no se versionó. Las dos solicitudes de análisis
 recibieron HTTP 200 en la misma sesión y se verificaron las referencias
 SITA y las descargas JSON, HTML y SARIF.
+
+## SG-SITA-UX-002
+
+Capturas del panel compartido sobre informes de prueba. La versión local
+usa un archivo sintético de la suite. La demo usa su reporte precomputado.
+
+| Vista | Local | Demo |
+| --- | --- | --- |
+| Compacta, escritorio | [1366 px](local-1366-compact.png) | [1366 px](demo-1366-compact.png) |
+| Expandida, escritorio | [1366 px](local-1366.png) | [1366 px](demo-1366.png) |
+| Compacta, móvil | [390 px](local-390-compact.png) | [390 px](demo-390-compact.png) |
+| Expandida, móvil | [390 px](local-390.png) | [390 px](demo-390.png) |
+
+Se verificó con teclado que el destino exacto enfoca y resalta `eval`, y
+que localizar la línea enfoca el bloque y retira el resaltado. Vitest
+cubre las referencias externas sin botón y los rangos descartados cuando
+el texto no coincide o está truncado. Las pruebas de SG-UI-001 recorren
+360, 390, 768, 1366 y 1920 px en local y demo.

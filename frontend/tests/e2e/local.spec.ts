@@ -67,7 +67,7 @@ test('local acceptance file completes analysis and exports in the same session',
     const firstResult = page.waitForResponse(response => response.url().endsWith('/analyze'));
     await analyze.click();
     expect((await firstResult).status()).toBe(200);
-    await verifyImpactNavigation(page, 'local');
+    await verifyImpactNavigation(page, 'local', false);
     for (const format of ['JSON', 'HTML', 'SARIF']) {
       const download = page.waitForEvent('download');
       await page.getByRole('button', { name: `Exportar ${format}` }).click();
@@ -420,23 +420,34 @@ test('premium demo fits each viewport and downloads only synthetic reports', asy
 
 const scrollViewports = [360, 390, 768, 1366, 1920];
 
-async function verifyImpactNavigation(page: Page, mode: 'local' | 'demo') {
+async function verifyImpactNavigation(page: Page, mode: 'local' | 'demo', capture = true) {
   const finding = page.getByRole('article').filter({ hasText: 'PY-001' }).first();
   const sita = finding.locator('.sita');
   const details = sita.getByText('Ver impacto, confianza y evidencia');
   const target = sita.getByRole('button', { name: /Destino sensible/ }).first();
   await expect(sita).toContainText('IMPACTO NO OBSERVADO');
   await expect(sita.getByText('Cobertura sintáctica', { exact: true })).toBeVisible();
+  await expect(sita.getByText('Confidencialidad', { exact: true })).toBeVisible();
+  await expect(target).not.toBeVisible();
   await details.press('Enter');
-  await expect(sita.getByRole('heading', { name: 'Confidencialidad', exact: true })).toBeVisible();
+  await expect(sita.getByRole('heading', { name: 'Referencias de evidencia' })).toBeVisible();
   await target.press('Enter');
   await expect(finding.getByRole('region', { name: 'Instrucción detectada' })).toBeFocused();
   await expect(finding.locator('mark')).toHaveText('eval');
+  await sita.getByRole('button', { name: /Localizar línea, sin rango exacto/ }).first().press('Enter');
+  await expect(finding.getByRole('region', { name: 'Instrucción detectada' })).toBeFocused();
+  await expect(finding.locator('mark')).toHaveCount(0);
   for (const width of scrollViewports) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-    if (process.env.NEXA_SITA_VISUAL_DIR && [390, 1366].includes(width)) {
-      await sita.screenshot({ path: join(process.env.NEXA_SITA_VISUAL_DIR, `${mode}-${width}.png`) });
+    if (capture && process.env.NEXA_SITA_VISUAL_DIR && [390, 1366].includes(width)) {
+      const folder = process.env.NEXA_SITA_VISUAL_DIR;
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({ path: join(folder, `${mode}-${width}.png`), fullPage: true });
+      await details.click();
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({ path: join(folder, `${mode}-${width}-compact.png`), fullPage: true });
+      await details.click();
     }
   }
   await details.click();

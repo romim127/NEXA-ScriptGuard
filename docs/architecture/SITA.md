@@ -143,3 +143,23 @@ conservan las conclusiones y la incertidumbre del motor.
 de estos campos. La completitud del escaneo, severidad, confianza y
 conclusiones CIA conservan su significado. Los reportes previos a
 esta corrección carecen de la marca explícita de omisión.
+
+## Presentación y alcance de PY-004 (SG-SITA-UX-002)
+
+El panel común resume recursos, límites, CIA, cobertura, confianza y
+condiciones. Las justificaciones idénticas se agrupan y cada conclusión
+conserva sus números de referencia. La referencia exacta puede resaltar
+texto si el rango sigue siendo válido sobre la instrucción mostrada.
+Una ubicación que coincide con la primera línea de esa instrucción puede
+llevar el foco al bloque sin resaltar. Las demás ubicaciones se muestran
+con su limitación y sin control de navegación.
+
+PY-004 reconoce una llamada de red directa y una variable asignada desde
+esa expresión. Con `response = requests.get(...)`, seguido de
+`payload = response.text` y `eval(payload)`, el segundo valor se obtiene
+de un nombre intermedio que la resolución de `network()` no sigue.
+Con y sin importación explícita, el caso produce PY-001. Con la
+importación y la asignación directa de `requests.get(...).text` a
+`payload`, produce PY-001 y PY-004. El comportamiento coincide con
+`462189b`. La resolución de cadenas de asignación y atributos en Python
+queda como evolución separada del motor.

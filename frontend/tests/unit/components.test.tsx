@@ -50,6 +50,31 @@ describe('NextGenAI UI', () => {
     expect(reportSchema.safeParse({ ...report, findings: [{ ...omitted, impact_analysis: impact }] }).success).toBe(false);
   });
 
+  it('offers only verified evidence destinations for redacted, truncated and external references', () => {
+    const finding = reportSchema.parse(fixture).findings[0];
+    const impact = finding.impact_analysis!;
+    const external = {
+      ...impact.references[0],
+      id: 'external',
+      role: 'source' as const,
+      location: { start: { line: 20, column: 1 }, end: { line: 20, column: 2 } },
+      limitation: 'Origen fuera del fragmento.',
+    };
+    const withExternal = { ...finding, impact_analysis: { ...impact, references: [...impact.references, external] } };
+    const { rerender } = render(<AnalysisFinding finding={withExternal} />);
+    expect(screen.getByRole('button', { name: /Resaltar fragmento/, hidden: true })).toBeTruthy();
+    expect(screen.getByText(/Origen · Línea 20.*Sin destino verificable/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Origen · Línea 20/, hidden: true })).toBeNull();
+    for (const evidence of [
+      { ...finding.evidence, shared: '[REDACTED]' },
+      { ...finding.evidence, truncated: true },
+    ]) {
+      rerender(<AnalysisFinding finding={{ ...withExternal, evidence }} />);
+      expect(screen.queryByRole('button', { name: /Resaltar fragmento/, hidden: true })).toBeNull();
+      expect(screen.getAllByRole('button', { name: /Localizar línea/, hidden: true })).toHaveLength(2);
+    }
+  });
+
   it('preserves whitespace and exposes code evidence as a focusable text region', () => {
     const evidence = '\n\t  <b>literal</b>  \n';
     const { container } = render(<EvidenceViewer label="Evidencia" value={evidence} format="code" />);
