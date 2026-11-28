@@ -29,7 +29,10 @@ class GuiLaunchTests(unittest.TestCase):
                 server = stack.enter_context(mock.patch.object(gui, "GuiServer")).return_value
                 server.origin = "http://127.0.0.1:54321"
                 server.token = "private-token"
-                server.serve_forever.side_effect = KeyboardInterrupt
+                ready = stack.enter_context(mock.patch.object(gui, "_check_application"))
+                worker = stack.enter_context(mock.patch.object(gui.threading, "Thread")).return_value
+                worker.is_alive.return_value = True
+                worker.join.side_effect = [KeyboardInterrupt, None] if browser_result is True else None
                 browser = stack.enter_context(mock.patch.object(gui.webbrowser, "open"))
                 if isinstance(browser_result, Exception):
                     browser.side_effect = browser_result
@@ -37,12 +40,23 @@ class GuiLaunchTests(unittest.TestCase):
                     browser.return_value = browser_result
                 output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
                 errors = stack.enter_context(contextlib.redirect_stderr(io.StringIO()))
-                self.assertEqual(gui.main([]), 0)
+                self.assertEqual(gui.main(["scriptguard"]), 0 if browser_result is True else 1)
                 url = f"{server.origin}/#{server.token}"
                 browser.assert_called_once_with(url)
-                self.assertIn(url, output.getvalue())
-                self.assertEqual("manualmente" in errors.getvalue(), browser_result is not True)
+                ready.assert_called_once_with(server)
+                self.assertNotIn(server.token, output.getvalue() + errors.getvalue())
+                self.assertEqual("Estado: RUNNING" in output.getvalue(), browser_result is True)
                 server.server_close.assert_called_once()
+
+    def test_readiness_failure_closes_listener_without_opening_browser(self):
+        with mock.patch.object(gui, "_check_application", side_effect=RuntimeError("HTTP 404")):
+            with mock.patch.object(gui.webbrowser, "open") as browser:
+                with contextlib.redirect_stdout(io.StringIO()) as output:
+                    with contextlib.redirect_stderr(io.StringIO()) as errors:
+                        self.assertEqual(gui.main([]), 1)
+                self.assertNotIn("RUNNING", output.getvalue())
+                self.assertIn("HTTP 404", errors.getvalue())
+                browser.assert_not_called()
 
     def test_startup_errors_do_not_open_browser(self):
         for stage in ("parse_bash", "GuiServer"):

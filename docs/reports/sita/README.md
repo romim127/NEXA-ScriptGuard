@@ -41,3 +41,26 @@ plataforma, seis pruebas Rust, nueve Vitest y siete Playwright aprobadas.
 SG-UI-001 conservó los cinco anchos y el gesto táctil a 390 px desplazó
 194 px en local y demo. Las capturas se regeneraron con la etiqueta de
 cobertura visible.
+
+## SG-RUN-001
+
+Durante el diagnóstico, VS Code conservaba una pestaña de ScriptGuard en
+`127.0.0.1:49497` sin un proceso escuchando. Otra instancia en el puerto
+50365 seguía operativa, servía el bundle actual y rechazaba peticiones sin
+sesión con HTTP 403. La pestaña sin servidor explica el fallo de conexión
+en ese origen. La solicitud original no se conservó para inspección.
+
+El entry point existente admite `RUN scriptguard` y `RUN`. Comprueba por
+HTTP la interfaz, sus recursos y la sesión antes de entregar la URL al
+navegador. El proceso permanece en primer plano y termina con Ctrl+C.
+La terminal identifica el paquete y el intérprete y muestra solo la
+dirección base.
+
+En Windows se instaló la rueda del proyecto en `.venv` y se registró su
+`RUN.exe` en una carpeta dedicada del PATH de usuario. Se probó desde la
+raíz y desde TEMP en PowerShell integrado de VS Code. Ctrl+C devolvió el
+control y cerró el puerto de la instancia de prueba. Playwright pasó los
+once criterios funcionales y una comprobación local adicional con el
+archivo de aceptación, que no se versionó. Las dos solicitudes de análisis
+recibieron HTTP 200 en la misma sesión y se verificaron las referencias
+SITA y las descargas JSON, HTML y SARIF.

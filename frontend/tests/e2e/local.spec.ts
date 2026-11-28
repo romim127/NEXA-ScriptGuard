@@ -16,7 +16,7 @@ async function service() {
   const run = process.env.NEXA_RUN;
   const browser = `"${python.replaceAll('\\', '/')}" "${probe}" %s`;
   const processPath = run && process.platform !== 'win32' ? folder : process.env.PATH;
-  const child = spawn(run ?? python, run ? [] : ['-m', 'nexa_scriptguard.gui'], {
+  const child = spawn(run ?? python, run ? ['scriptguard'] : ['-m', 'nexa_scriptguard.gui'], {
     cwd: run ? folder : root,
     env: { ...process.env, PATH: processPath, PYTHONIOENCODING: 'utf-8', BROWSER: browser, NEXA_BROWSER_CAPTURE: capture },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -25,7 +25,7 @@ async function service() {
     child.once('error', reject);
     child.once('close', resolve);
   });
-  // Consume the private URL from stdout without logging it.
+  // Drain diagnostics. The browser probe receives the private URL separately.
   child.stdout.resume();
   child.stderr.resume();
   let stopped = false;
@@ -54,6 +54,33 @@ async function service() {
     throw error;
   }
 }
+
+test('local acceptance file completes analysis and exports in the same session', async ({ page }) => {
+  const sample = process.env.NEXA_ACCEPTANCE_FILE;
+  test.skip(!sample, 'Optional acceptance file stays outside the test fixtures.');
+  const instance = await service();
+  try {
+    await page.goto(instance.url.href);
+    const file = page.getByLabel('ARCHIVO DE SCRIPT PARA ANALIZAR');
+    const analyze = page.getByRole('button', { name: 'Analizar archivo' });
+    await file.setInputFiles(sample!);
+    const firstResult = page.waitForResponse(response => response.url().endsWith('/analyze'));
+    await analyze.click();
+    expect((await firstResult).status()).toBe(200);
+    await verifyImpactNavigation(page, 'local');
+    for (const format of ['JSON', 'HTML', 'SARIF']) {
+      const download = page.waitForEvent('download');
+      await page.getByRole('button', { name: `Exportar ${format}` }).click();
+      expect(await (await download).failure()).toBeNull();
+    }
+    await file.setInputFiles({ name: 'second.py', mimeType: 'text/plain', buffer: Buffer.from('value = 1\n') });
+    const secondResult = page.waitForResponse(response => response.url().endsWith('/analyze'));
+    await analyze.click();
+    expect((await secondResult).status()).toBe(200);
+  } finally {
+    await instance.stop();
+  }
+});
 
 test('local GUI analyzes Bash and Python offline and saves physical reports', async ({ page, request }) => {
   const first = await service();
