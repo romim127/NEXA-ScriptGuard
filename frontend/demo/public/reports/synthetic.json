@@ -68,7 +68,107 @@
         "Name resolution and network correlation are conservative approximations, not control-flow or execution proof.",
         "Parsing is not preemptible and memory use is estimated, not a hard quota."
       ],
-      "engine": "python"
+      "engine": "python",
+      "impact_analysis": {
+        "coverage": "syntax",
+        "confidence": "medium",
+        "cia": {
+          "confidentiality": {
+            "status": "not_established",
+            "justification": "La señal disponible no establece un efecto en esta dimensión.",
+            "conditions": [],
+            "evidence": []
+          },
+          "integrity": {
+            "status": "not_established",
+            "justification": "La señal disponible no establece un efecto en esta dimensión.",
+            "conditions": [],
+            "evidence": []
+          },
+          "availability": {
+            "status": "not_established",
+            "justification": "La señal disponible no establece un efecto en esta dimensión.",
+            "conditions": [],
+            "evidence": []
+          }
+        },
+        "limitations": [
+          "La señal estática no demuestra ejecución, acceso ni efecto observado."
+        ],
+        "provenance": "python-ast/python/PY-001",
+        "version": "1.0",
+        "resources": [
+          {
+            "status": "conditional",
+            "justification": "La llamada evalúa datos como código.",
+            "conditions": [
+              "La llamada debe ejecutarse con un argumento interpretable."
+            ],
+            "evidence": [
+              "instruction",
+              "target"
+            ],
+            "id": "SYS-13",
+            "label": "Memoria y ejecución dinámica",
+            "operation": "ejecución",
+            "scope": "direct"
+          }
+        ],
+        "boundaries": [
+          {
+            "status": "conditional",
+            "justification": "La llamada evalúa datos como código.",
+            "conditions": [
+              "La llamada debe ejecutarse con un argumento interpretable."
+            ],
+            "evidence": [
+              "instruction",
+              "target"
+            ],
+            "id": "TB-02",
+            "origin": "Datos",
+            "destination": "Intérprete de código"
+          }
+        ],
+        "flows": [],
+        "references": [
+          {
+            "id": "instruction",
+            "role": "instruction",
+            "location": {
+              "start": {
+                "line": 2,
+                "column": 9
+              },
+              "end": {
+                "line": 2,
+                "column": 20
+              }
+            },
+            "range": null,
+            "limitation": "La ubicación no tiene un rango verificable en la evidencia visible."
+          },
+          {
+            "id": "target",
+            "role": "sink",
+            "location": {
+              "start": {
+                "line": 2,
+                "column": 9
+              },
+              "end": {
+                "line": 2,
+                "column": 13
+              }
+            },
+            "range": {
+              "start": 0,
+              "end": 4
+            },
+            "limitation": ""
+          }
+        ]
+      }
     },
     {
       "id": "bb66675e3fa80f20bb8b",
@@ -121,7 +221,76 @@
         "Name resolution and network correlation are conservative approximations, not control-flow or execution proof.",
         "Parsing is not preemptible and memory use is estimated, not a hard quota."
       ],
-      "engine": "python"
+      "engine": "python",
+      "impact_analysis": {
+        "coverage": "syntax",
+        "confidence": "medium",
+        "cia": {
+          "confidentiality": {
+            "status": "potential",
+            "justification": "Una variable de nombre sensible recibe un literal.",
+            "conditions": [
+              "El literal tendría que ser un secreto válido."
+            ],
+            "evidence": [
+              "instruction"
+            ]
+          },
+          "integrity": {
+            "status": "not_established",
+            "justification": "La señal disponible no establece un efecto en esta dimensión.",
+            "conditions": [],
+            "evidence": []
+          },
+          "availability": {
+            "status": "not_established",
+            "justification": "La señal disponible no establece un efecto en esta dimensión.",
+            "conditions": [],
+            "evidence": []
+          }
+        },
+        "limitations": [
+          "La señal estática no demuestra ejecución, acceso ni efecto observado."
+        ],
+        "provenance": "python-ast/python/PY-005",
+        "version": "1.0",
+        "resources": [
+          {
+            "status": "potential",
+            "justification": "Una variable de nombre sensible recibe un literal.",
+            "conditions": [
+              "El literal tendría que ser un secreto válido."
+            ],
+            "evidence": [
+              "instruction"
+            ],
+            "id": "SYS-06",
+            "label": "Credenciales y secretos",
+            "operation": "presencia",
+            "scope": "direct"
+          }
+        ],
+        "boundaries": [],
+        "flows": [],
+        "references": [
+          {
+            "id": "instruction",
+            "role": "instruction",
+            "location": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 32
+              }
+            },
+            "range": null,
+            "limitation": "La ubicación no tiene un rango verificable en la evidencia visible."
+          }
+        ]
+      }
     }
   ],
   "demo": "DEMO MODE — SYNTHETIC DATA"

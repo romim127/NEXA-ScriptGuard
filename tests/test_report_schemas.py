@@ -94,6 +94,25 @@ class ReportSchemaTests(unittest.TestCase):
         invalid_sarif["runs"][0]["results"][0]["level"] = "not-a-sarif-level"
         self.assertFalse(self.sarif_validator.is_valid(invalid_sarif))
 
+    def test_sita_extension_preserves_schema_10_compatibility(self):
+        report, sarif = self.run_scan('eval("1+1")\n', suffix=".py")
+        self.nexa_validator.validate(report)
+        self.sarif_validator.validate(sarif)
+        impact = report["findings"][0]["impact_analysis"]
+        self.assertEqual(sarif["runs"][0]["results"][0]["properties"]["impactAnalysis"], impact)
+
+        old_contract = copy.deepcopy(self.nexa_validator.schema)
+        del old_contract["$defs"]["finding"]["properties"]["impact_analysis"]
+        del old_contract["$defs"]["impact"]
+        Draft202012Validator(old_contract).validate(report)
+
+        old_report = copy.deepcopy(report)
+        del old_report["findings"][0]["impact_analysis"]
+        self.nexa_validator.validate(old_report)
+
+        del impact["cia"]["availability"]
+        self.assertFalse(self.nexa_validator.is_valid(report))
+
     def test_all_sarif_rule_links_point_to_documented_anchors(self):
         from nexa_scriptguard.reports import RULE_DOCUMENTATION, render_sarif
 

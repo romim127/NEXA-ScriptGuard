@@ -30,7 +30,8 @@ const finding = z.object({
   verification_commands: strings,
   limitations: strings,
   impact_analysis: impactSchema.optional(),
-});
+}).refine(finding => finding.impact_analysis?.references.every(reference =>
+  !reference.range || reference.range.end <= Array.from(finding.evidence.shared).length) ?? true);
 
 // Validate the fields consumed by the GUI. The Python serializer owns the full report schema.
 export const reportSchema = z.object({
