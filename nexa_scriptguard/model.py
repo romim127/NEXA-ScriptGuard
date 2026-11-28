@@ -1,5 +1,6 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any
+from .impact import ImpactAnalysis
 
 
 SCHEMA_VERSION = "1.0"
@@ -39,6 +40,8 @@ class Finding:
     engine: str = "python"
     finding_id: str = ""
     evidence_truncated: bool = False
+    impact_analysis: ImpactAnalysis | None = None
+    impact_target: Location | None = None
 
     def to_dict(self, file_path: str, sha256: str, limitations: list[str]):
         return {
@@ -74,6 +77,7 @@ class Finding:
             "verification_commands": self.verification_commands,
             "limitations": limitations,
             "engine": self.engine,
+            **({"impact_analysis": asdict(self.impact_analysis)} if self.impact_analysis else {}),
         }
 
 

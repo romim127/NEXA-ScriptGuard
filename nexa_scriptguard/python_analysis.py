@@ -83,6 +83,7 @@ class Inspector:
             confidence_reason="Coincidencia AST estática; la ejecución y el contexto requieren revisión.",
             correlation=correlations or [],
             evidence_truncated=truncated,
+            impact_target=_location(node.func, self.lines) if isinstance(node, ast.Call) else None,
         ))
 
     def inspect(self, tree):

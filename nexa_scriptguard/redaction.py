@@ -50,8 +50,15 @@ def prepare_report(report, redact_secrets=True):
         return value
 
     result = visit(result)
-    for finding in result.get("findings", []):
+    for original, finding in zip(report.get("findings", []), result.get("findings", [])):
         evidence = finding.get("evidence")
+        impact = finding.get("impact_analysis")
+        if impact and (finding["instruction"] != original["instruction"]
+                       or evidence.get("original") != original["evidence"].get("original")):
+            for reference in impact["references"]:
+                if reference["range"] is not None:
+                    reference["range"] = None
+                    reference["limitation"] = "La preparación del reporte cambió la evidencia visible."
         if isinstance(evidence, dict) and isinstance(evidence.get("original"), str):
             evidence["shared"] = evidence["original"]
             evidence["original_available_in_this_report"] = not redact_secrets
