@@ -5,3 +5,5 @@
 - Evaluar el retiro de `/legacy` en una revisión posterior.
 - Validar NextGenAI UI 0.2.0 con otro producto antes de publicar la biblioteca. El consumidor sintético cubre la reutilización interna.
 - Publicar la demo con conexión autorizada y realizar una auditoría integral de accesibilidad.
+
+SITA mantiene pendientes los rangos exactos en evidencia multilineal y fuera de contexto, las ubicaciones de propagación y la cobertura de dominios reservados. [Límites](../architecture/SITA.md).

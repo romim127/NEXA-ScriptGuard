@@ -126,6 +126,13 @@ def _make_finding(rule, node, source_lines, detail, correlation=None, limits=Non
     truncated = truncated or any(item[1] for item in before_pairs + after_pairs)
     before = [item[0] for item in before_pairs]
     after = [item[0] for item in after_pairs]
+    name_node = next((child for child in node.children if child.kind == "command_name"), None)
+    impact_target = None
+    if name_node and rule.id in {"SG-004", "SG-005", "SG-006", "SG-FLOW-001", "SG-FLOW-002"}:
+        words = _words(node)
+        name = _command_name(node)
+        if name and name == _normalized_name(name, words):
+            impact_target = name_node.location
     return Finding(
         rule_id=rule.id,
         title=rule.title,
@@ -141,6 +148,7 @@ def _make_finding(rule, node, source_lines, detail, correlation=None, limits=Non
         context_after=after,
         correlation=correlation or [],
         evidence_truncated=truncated,
+        impact_target=impact_target,
     )
 
 

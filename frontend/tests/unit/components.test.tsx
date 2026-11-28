@@ -1,10 +1,36 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EvidenceViewer, ExportPanel, FileUploader, InfinityShield, Sidebar, StatusIndicator } from '@nextgenai/ui';
+import { CodeBlock, EvidenceViewer, ExportPanel, FileUploader, InfinityShield, Sidebar, StatusIndicator } from '@nextgenai/ui';
+import fixture from '../../demo/public/reports/synthetic.json';
+import { AnalysisFinding } from '../../src/features/analysis/AnalysisFinding';
+import { reportSchema } from '../../src/types/report';
 
 afterEach(cleanup);
 
 describe('NextGenAI UI', () => {
+  it('highlights Unicode code points while preserving literal markup and whitespace', () => {
+    const value = '\t😀<b>\n';
+    const { container, rerender } = render(<CodeBlock label="Código" value={value}
+      highlight={{ start: 2, end: 5, role: 'sink', label: 'Destino sensible' }} />);
+    expect(container.querySelector('mark')?.textContent).toBe('<b>');
+    expect(container.querySelector('b')).toBeNull();
+    expect(screen.getByRole('region').textContent).toBe(value);
+    rerender(<CodeBlock label="Código" value={value}
+      highlight={{ start: 2, end: 99, role: 'sink', label: 'Destino sensible' }} />);
+    expect(container.querySelector('mark')).toBeNull();
+    expect(screen.getByRole('region').textContent).toBe(value);
+  });
+
+  it('accepts report 1.0 without SITA and presents the missing coverage', () => {
+    const oldReport = {
+      ...fixture,
+      findings: fixture.findings.map(finding => ({ ...finding, impact_analysis: undefined })),
+    };
+    const parsed = reportSchema.parse(oldReport);
+    render(<AnalysisFinding finding={parsed.findings[0]} />);
+    expect(screen.getByText('Análisis de impacto no disponible.')).toBeTruthy();
+  });
+
   it('preserves whitespace and exposes code evidence as a focusable text region', () => {
     const evidence = '\n\t  <b>literal</b>  \n';
     const { container } = render(<EvidenceViewer label="Evidencia" value={evidence} format="code" />);

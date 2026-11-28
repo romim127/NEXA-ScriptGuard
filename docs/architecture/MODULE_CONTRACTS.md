@@ -22,3 +22,5 @@ El explorador React usa campos existentes de reporte (`file`, `lines`) y hallazg
 El atributo `data-max-input-bytes` del HTML local anuncia el límite vigente
 para validar la selección en ambas GUI. El límite sigue bajo control de
 Python y se comprueba también en `POST /analyze`.
+
+El contrato opcional de impacto 1.0 por hallazgo y sus límites se especifican en [SITA](SITA.md).

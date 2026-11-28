@@ -1,7 +1,8 @@
 """Describe possible effects using existing findings, without inspecting runtime state."""
 
+import json
 import time
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Literal, TypedDict
 
 
@@ -101,8 +102,8 @@ class Signal:
 # Map only what the matcher establishes. A path somewhere in a command does
 # not establish how the command uses it. An execute() attribute is not a DB type.
 SIGNALS = {
-    "SG-001": Signal("SYS-13", "ejecución", "Una tubería conecta una descarga con un intérprete.",
-                     "La tubería debe ejecutarse y entregar datos interpretables.", boundary="TB-02"),
+    "SG-001": Signal("SYS-13", "ejecución", "Una misma tubería contiene una herramienta de red y un intérprete.",
+                     "Hay que verificar el orden, las redirecciones y la entrega de datos.", status="indeterminate"),
     "SG-002": Signal("SYS-07", "transferencia", "Hay una opción de carga y una referencia sensible.",
                      "La opción debe consumir datos y alcanzar el destino.", ("confidentiality",)),
     "SG-003": Signal("SYS-08", "modificación", "El comando chmod solicita permisos amplios.",
@@ -149,6 +150,22 @@ SIGNALS = {
 }
 FLOW_RULES = {"SG-FLOW-001", "SG-FLOW-002", "PY-004"}
 MAX_RELATIONS = 4
+MAX_EXTENSION_BYTES = 1024 * 1024
+
+
+def enrich_report(report, deadline, limits):
+    remaining = min(MAX_EXTENSION_BYTES, limits.max_output_bytes // 8, limits.max_memory_bytes // 32)
+    for finding in report.findings:
+        if time.monotonic() >= deadline:
+            report.limitations.append("SITA quedó parcial: se agotó el plazo compartido.")
+            break
+        impact = enrich(finding, report.parser, deadline)
+        size = len(json.dumps(asdict(impact), ensure_ascii=False, indent=2).encode("utf-8"))
+        if size > remaining:
+            report.limitations.append("SITA quedó parcial: se agotó el presupuesto de reporte.")
+            break
+        finding.impact_analysis = impact
+        remaining -= size
 
 
 def _visible_range(finding, location):
@@ -194,13 +211,19 @@ def enrich(finding, parser, deadline):
         if not source or not sink or not source.get("location") or not sink.get("location"):
             continue
         source_id, sink_id = f"source-{index}", f"sink-{index}"
-        source_span = _visible_range(finding, source["location"]) if parser == "python-ast" else None
+        source_span = _visible_range(finding, source["location"])
+        sink_span = _visible_range(finding, sink["location"]) if parser == "tree-sitter-bash" else None
+        if sink_span and sink_span == {"start": 0, "end": len(finding.instruction)}:
+            sink_span = None
         result.references.extend([
             Reference(source_id, "source", source["location"], source_span, "" if source_span else
                       "El origen no está posicionado en la evidencia visible."),
-            Reference(sink_id, "sink", sink["location"]),
+            Reference(sink_id, "sink", sink["location"], sink_span, "" if sink_span else
+                      "El destino correlacionado no tiene un rango independiente."),
         ])
-        relationship = "indeterminate" if relation.get("relationship") != "possible" else "possible"
+        relationship = "indeterminate" if (
+            relation.get("relationship") != "possible" or finding.rule_id == "SG-001"
+        ) else "possible"
         result.flows.append(Flow(source_id, sink_id, relationship, len(relation.get("assignment_chain", []))))
     if result.flows:
         result.coverage = "correlated"

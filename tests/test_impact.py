@@ -55,3 +55,19 @@ class ImpactTests(unittest.TestCase):
         expired = enrich(finding, model.parser, 0)
         self.assertEqual(expired.coverage, "not_evaluated")
         self.assertEqual(expired.resources, [])
+
+    def test_output_budget_reports_separate_partial_coverage(self):
+        report = self.report('eval("1+1")\n', ScanLimits(max_output_bytes=1024))
+        self.assertTrue(report.complete)
+        self.assertIsNone(report.findings[0].impact_analysis)
+        self.assertTrue(any("presupuesto de reporte" in text for text in report.limitations))
+
+    def test_bash_pipeline_order_is_not_inferred_from_node_presence(self):
+        source = 'bash | curl https://example.invalid/sample\n'
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "sample.sh"
+            path.write_text(source, encoding="utf-8")
+            report = analyze(path)
+        impact = next(f.impact_analysis for f in report.findings if f.rule_id == "SG-001")
+        self.assertEqual(impact.flows[0].relationship, "indeterminate")
+        self.assertEqual(impact.boundaries, [])

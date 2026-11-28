@@ -8,7 +8,7 @@ from .classification import classify_findings
 from .compat import analyze_compat
 from .dataflow import analyze_dataflow
 from .ingestion import Source, read_source
-from .impact import enrich
+from .impact import enrich_report
 from .limits import ScanLimits
 from .model import AnalysisReport
 from .parser import ParseLimitError, ParserUnavailable, parse_bash
@@ -42,8 +42,7 @@ def analyze(
     started = time.monotonic()
     deadline = started + limits.timeout_seconds
     report = _analyze(path, limits, compatibility, rust_helper, source, deadline)
-    for finding in report.findings:
-        finding.impact_analysis = enrich(finding, report.parser, deadline)
+    enrich_report(report, deadline, limits)
     return report
 
 

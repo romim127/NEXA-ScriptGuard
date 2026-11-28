@@ -60,3 +60,5 @@ ausente si se inspeccionan como datos. La demo usa una variante de su
 fixture solo en el build de prueba. `NEXA_SCROLL_VISUAL_DIR` permite
 guardar capturas de ambos casos en 390 y 1366 px.
 [Capturas de la corrección](../reports/sg-ui-001)
+
+SITA agrega aserciones de CIA, incertidumbre, límites, redacción, Unicode, compatibilidad 1.0 y evidencia navegable en cinco anchos. [Contrato](../architecture/SITA.md).

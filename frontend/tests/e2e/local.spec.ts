@@ -386,10 +386,33 @@ test('premium demo fits each viewport and downloads only synthetic reports', asy
     expect(contents).toContain('DEMO MODE — SYNTHETIC DATA');
     expect(contents).not.toContain('synthetic_example');
   }
+  await page.getByLabel('Criticidad').selectOption('');
+  await verifyImpactNavigation(page, 'demo');
   expect(requests).toEqual([]);
 });
 
 const scrollViewports = [360, 390, 768, 1366, 1920];
+
+async function verifyImpactNavigation(page: Page, mode: 'local' | 'demo') {
+  const finding = page.getByRole('article').filter({ hasText: 'PY-001' }).first();
+  const sita = finding.locator('.sita');
+  const details = sita.getByText('Ver impacto, confianza y evidencia');
+  const target = sita.getByRole('button', { name: /Destino sensible/ }).first();
+  await expect(sita).toContainText('IMPACTO NO OBSERVADO');
+  await details.press('Enter');
+  await expect(sita.getByRole('heading', { name: 'Confidencialidad', exact: true })).toBeVisible();
+  await target.press('Enter');
+  await expect(finding.getByRole('region', { name: 'Instrucción detectada' })).toBeFocused();
+  await expect(finding.locator('mark')).toHaveText('eval');
+  for (const width of scrollViewports) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    if (process.env.NEXA_SITA_VISUAL_DIR && [390, 1366].includes(width)) {
+      await sita.screenshot({ path: join(process.env.NEXA_SITA_VISUAL_DIR, `${mode}-${width}.png`) });
+    }
+  }
+  await details.click();
+}
 const longInstruction = 'eval(\n    "' + '0123456789  '.repeat(70) + '"\n)';
 const fixtureEvidence = '\t  primera línea\n' + longInstruction + '\n  última línea  ';
 
@@ -501,6 +524,7 @@ test('SG-UI-001: installed local dashboard preserves long code and does not exec
     await expect(page.locator('.flag')).toContainText('HIGH');
     await expect(page.locator('.metadata')).toContainText('Línea 2 · Columna 9');
     await verifyScrollMatrix(page, 'local', '0002 │ ' + longInstruction, longInstruction);
+    await verifyImpactNavigation(page, 'local');
     const shellPath = "'" + marker.replaceAll("'", "'\\''") + "'";
     await input.setInputFiles({ name: 'acceptance.sh', mimeType: 'text/plain',
       buffer: Buffer.from(`printf test > ${shellPath}\neval 'echo sample'\n`) });

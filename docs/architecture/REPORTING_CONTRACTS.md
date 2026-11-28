@@ -26,3 +26,5 @@ compatibility documentation together.
 
 By default, shareable reports use redacted evidence and preserve a distinction
 between original and shared evidence. Redaction remains best-effort.
+
+JSON 1.0 admite `impact_analysis` opcional. SARIF lo conserva en `result.properties.impactAnalysis`. Véase el [ADR 0006](../decisions/ADR-0006-SITA.md).

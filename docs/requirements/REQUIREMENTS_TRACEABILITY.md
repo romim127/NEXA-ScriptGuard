@@ -15,3 +15,5 @@
 Ver [criterios de aceptación](ACCEPTANCE_CRITERIA.md), [requisitos funcionales](FUNCTIONAL_REQUIREMENTS.md) y [no funcionales](NONFUNCTIONAL_REQUIREMENTS.md).
 
 Fase 5 verifica equivalencia de campos, límites, teclado y descargas en [la matriz de paridad](../development/PHASE_5_PARITY.md). Las anclas `helpUri` del catálogo se cubren en `test_report_schemas.py`. El consumidor independiente se valida con Playwright.
+
+SITA-01 a SITA-03 se trazan a `tests/test_impact.py`, `tests/test_report_schemas.py` y `frontend/tests/e2e/local.spec.ts`. [Matriz](../architecture/SITA.md#matriz-de-reglas).
