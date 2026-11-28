@@ -1,0 +1,22 @@
+.sita {
+  margin-block: 1rem;
+  padding: clamp(.75rem, 2vw, 1.25rem);
+  border: 1px solid #2c5269;
+  border-radius: .75rem;
+  background: #0c1723a6;
+  overflow-wrap: anywhere;
+}
+.sita h3, .sita h4, .sita h5 { margin-block: .65rem .25rem; }
+.sita p { margin-block: .4rem; }
+.sita small { display: block; }
+.sita-reference {
+  color: #a6edff;
+  background: transparent;
+  border: 0;
+  padding: .3rem .1rem;
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+  text-align: start;
+}
+.sita-reference:focus-visible { outline: 2px solid #44def8; outline-offset: 2px; }

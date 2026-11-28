@@ -1,5 +1,6 @@
 import { severities } from '@nextgenai/ui';
 import { z } from 'zod';
+import { impactSchema } from './impact';
 
 z.config({ jitless: true });
 
@@ -28,6 +29,7 @@ const finding = z.object({
   recommendation: z.string(),
   verification_commands: strings,
   limitations: strings,
+  impact_analysis: impactSchema.optional(),
 });
 
 // Validate the fields consumed by the GUI. The Python serializer owns the full report schema.
