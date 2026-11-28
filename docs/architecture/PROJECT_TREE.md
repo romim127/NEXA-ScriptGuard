@@ -162,3 +162,5 @@ vercel.json
 ## Arquitectura proyectada
 
 Los futuros adaptadores web y los motores adicionales tendrán módulos y corpus propios. Su incorporación depende de los contratos y criterios de la [arquitectura maestra](MASTER_ARCHITECTURE.md) y del [ADR de Vercel](../decisions/ADR-0003-VERCEL-EVALUATION.md).
+
+SITA reside en `nexa_scriptguard/impact.py` y en `frontend/src/features/analysis/ImpactPanel.tsx`. [Arquitectura](SITA.md).

@@ -8,6 +8,8 @@ import sys
 import threading
 import time
 import webbrowser
+from contextlib import closing
+from http.client import HTTPConnection, HTTPException
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 from pathlib import Path
@@ -246,8 +248,30 @@ class GuiHandler(BaseHTTPRequestHandler):
             self.server.lock.release()
 
 
+def _check_application(server):
+    """Verify the served entry point and the assets it actually uses."""
+    assets = files("nexa_scriptguard").joinpath("gui_assets")
+    modern = assets.joinpath("modern", "index.html").is_file()
+    paths = ("/phase4.js", "/phase4.css", "/phase4-infinity-shield.svg") if modern else (
+        "/app.js", "/app.css", "/infinity-shield.svg",
+    )
+    with closing(HTTPConnection("127.0.0.1", server.server_port, timeout=3)) as connection:
+        for path in ("/", *paths):
+            connection.request("GET", path)
+            with connection.getresponse() as response:
+                if response.status != 200 or not response.read():
+                    raise RuntimeError(f"Interfaz no disponible en {path} (HTTP {response.status}).")
+        connection.request("GET", "/export/json", headers={"X-Nexa-Token": server.token})
+        with connection.getresponse() as response:
+            if response.status != 409:
+                raise RuntimeError(f"No se pudo verificar la sesión local (HTTP {response.status}).")
+            response.read()
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Interfaz local NEXA ScriptGuard")
+    parser.add_argument("product", nargs="?", choices=("scriptguard",),
+                        help="Producto local (opcional por compatibilidad)")
     parser.add_argument("--rust-helper", type=Path, help="Ejecutable Rust opcional de confianza")
     args = parser.parse_args(argv)
     if args.rust_helper is not None:
@@ -269,21 +293,50 @@ def main(argv=None):
     except OSError as exc:
         print(f"NEXA ScriptGuard: no se pudo iniciar el servidor local ({exc}).", file=sys.stderr)
         return 1
-    url = f"{server.origin}/#{server.token}"
-    print("NEXA ScriptGuard: servidor local activo. Ctrl+C para detener.", flush=True)
-    print("Abra esta URL privada si el navegador no se inicia:", url, flush=True)
-    try:
+    worker_error = []
+
+    def serve():
         try:
-            opened = webbrowser.open(url)
+            server.serve_forever()
+        except Exception as exc:
+            worker_error.append(type(exc).__name__)
+
+    worker = threading.Thread(target=serve, name="scriptguard-loopback", daemon=True)
+    print("NEXA ScriptGuard\nNextGenAI Infinity", flush=True)
+    print(f"[OK] Proyecto localizado: {Path(__file__).resolve().parent}", flush=True)
+    print(f"[OK] Entorno Python verificado: {sys.executable}", flush=True)
+    worker.start()
+    try:
+        _check_application(server)
+        if not worker.is_alive():
+            raise RuntimeError("El servidor se detuvo durante el arranque.")
+        print("[OK] Recursos de interfaz disponibles", flush=True)
+        print("[OK] Servidor local iniciado", flush=True)
+        print("[OK] Aplicación preparada", flush=True)
+        try:
+            opened = webbrowser.open(f"{server.origin}/#{server.token}")
         except (webbrowser.Error, OSError):
             opened = False
         if not opened:
-            print("NEXA ScriptGuard: abra manualmente la URL privada indicada arriba.",
-                  file=sys.stderr, flush=True)
-        server.serve_forever()
+            raise RuntimeError("No se pudo abrir el navegador con la sesión local.")
+        if not worker.is_alive():
+            raise RuntimeError("El servidor se detuvo durante la apertura del navegador.")
+        print("[OK] Navegador abierto (solicitud aceptada)", flush=True)
+        print(f"\nServidor: {server.origin}\nModo: Local / Static Analysis\n"
+              "Estado: RUNNING\n\nCtrl+C para detener el servidor.", flush=True)
+        while worker.is_alive():
+            worker.join(timeout=0.25)
+        raise RuntimeError("El servidor se detuvo inesperadamente"
+                           + (f" ({worker_error[0]})." if worker_error else "."))
     except KeyboardInterrupt:
         print("\nServidor detenido.", flush=True)
+    except (OSError, HTTPException, RuntimeError) as exc:
+        print(f"NEXA ScriptGuard: {exc}", file=sys.stderr, flush=True)
+        return 1
     finally:
+        if worker.is_alive():
+            server.shutdown()
+            worker.join()
         server.server_close()
     return 0
 

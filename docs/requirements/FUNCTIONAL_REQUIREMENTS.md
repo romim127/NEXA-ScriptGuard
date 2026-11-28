@@ -22,3 +22,5 @@ Rule coverage and semantics are documented in
 [`../ARCHITECTURE.md`](../ARCHITECTURE.md).
 
 Phase 5 adds finding filters, search, sorting, collapsible evidence, navigation to locations, file summary and engine metadata. Export continues to include the complete current report. [Parity matrix](../development/PHASE_5_PARITY.md)
+
+SITA-01 requiere recursos, límites, relaciones y dimensiones CIA trazables a evidencia. SITA-02 requiere navegar sus referencias en el dashboard moderno. [Contrato](../architecture/SITA.md).

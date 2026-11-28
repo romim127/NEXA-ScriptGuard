@@ -16,6 +16,108 @@
           <h3>INSTRUCCIÓN</h3><pre>eval(&quot;1+1&quot;)</pre>
           <h3>CONTEXTO</h3><div><strong>Instrucción correlacionada:</strong></div>
           <h3>FLUJO / CORRELACIÓN</h3><pre>[]</pre>
+          <details><summary>Impacto en el sistema y límites de confianza</summary><pre>ANÁLISIS ESTÁTICO · SIN EJECUCIÓN · IMPACTO NO OBSERVADO
+Cobertura sintáctica
+{
+  &quot;coverage&quot;: &quot;syntax&quot;,
+  &quot;confidence&quot;: &quot;medium&quot;,
+  &quot;cia&quot;: {
+    &quot;confidentiality&quot;: {
+      &quot;status&quot;: &quot;not_established&quot;,
+      &quot;justification&quot;: &quot;La señal disponible no establece un efecto en esta dimensión.&quot;,
+      &quot;conditions&quot;: [],
+      &quot;evidence&quot;: []
+    },
+    &quot;integrity&quot;: {
+      &quot;status&quot;: &quot;not_established&quot;,
+      &quot;justification&quot;: &quot;La señal disponible no establece un efecto en esta dimensión.&quot;,
+      &quot;conditions&quot;: [],
+      &quot;evidence&quot;: []
+    },
+    &quot;availability&quot;: {
+      &quot;status&quot;: &quot;not_established&quot;,
+      &quot;justification&quot;: &quot;La señal disponible no establece un efecto en esta dimensión.&quot;,
+      &quot;conditions&quot;: [],
+      &quot;evidence&quot;: []
+    }
+  },
+  &quot;limitations&quot;: [
+    &quot;La señal estática no demuestra ejecución, acceso ni efecto observado.&quot;
+  ],
+  &quot;provenance&quot;: &quot;python-ast/python/PY-001&quot;,
+  &quot;version&quot;: &quot;1.0&quot;,
+  &quot;resources&quot;: [
+    {
+      &quot;status&quot;: &quot;conditional&quot;,
+      &quot;justification&quot;: &quot;La llamada evalúa datos como código.&quot;,
+      &quot;conditions&quot;: [
+        &quot;La llamada debe ejecutarse con un argumento interpretable.&quot;
+      ],
+      &quot;evidence&quot;: [
+        &quot;instruction&quot;,
+        &quot;target&quot;
+      ],
+      &quot;id&quot;: &quot;SYS-13&quot;,
+      &quot;label&quot;: &quot;Memoria y ejecución dinámica&quot;,
+      &quot;operation&quot;: &quot;ejecución&quot;,
+      &quot;scope&quot;: &quot;direct&quot;
+    }
+  ],
+  &quot;boundaries&quot;: [
+    {
+      &quot;status&quot;: &quot;conditional&quot;,
+      &quot;justification&quot;: &quot;La llamada evalúa datos como código.&quot;,
+      &quot;conditions&quot;: [
+        &quot;La llamada debe ejecutarse con un argumento interpretable.&quot;
+      ],
+      &quot;evidence&quot;: [
+        &quot;instruction&quot;,
+        &quot;target&quot;
+      ],
+      &quot;id&quot;: &quot;TB-02&quot;,
+      &quot;origin&quot;: &quot;Datos&quot;,
+      &quot;destination&quot;: &quot;Intérprete de código&quot;
+    }
+  ],
+  &quot;flows&quot;: [],
+  &quot;references&quot;: [
+    {
+      &quot;id&quot;: &quot;instruction&quot;,
+      &quot;role&quot;: &quot;instruction&quot;,
+      &quot;location&quot;: {
+        &quot;start&quot;: {
+          &quot;line&quot;: 2,
+          &quot;column&quot;: 9
+        },
+        &quot;end&quot;: {
+          &quot;line&quot;: 2,
+          &quot;column&quot;: 20
+        }
+      },
+      &quot;range&quot;: null,
+      &quot;limitation&quot;: &quot;La ubicación no tiene un rango verificable en la evidencia visible.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;target&quot;,
+      &quot;role&quot;: &quot;sink&quot;,
+      &quot;location&quot;: {
+        &quot;start&quot;: {
+          &quot;line&quot;: 2,
+          &quot;column&quot;: 9
+        },
+        &quot;end&quot;: {
+          &quot;line&quot;: 2,
+          &quot;column&quot;: 13
+        }
+      },
+      &quot;range&quot;: {
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 4
+      },
+      &quot;limitation&quot;: &quot;&quot;
+    }
+  ]
+}</pre></details>
           <h3>ANÁLISIS</h3><p>Una llamada a eval o exec puede interpretar código no confiable; la sintaxis no demuestra que se ejecute ni el origen del argumento.</p>
           <h3>RECOMENDACIÓN</h3><p>Evitar la evaluación dinámica; revisar procedencia y usar alternativas específicas para datos.</p>
           <h3>VERIFICACIÓN — NO EJECUTADA</h3><ul><li><code>Inspeccionar el argumento y su procedencia sin ejecutar el archivo.</code></li></ul>
@@ -28,6 +130,77 @@
           <h3>INSTRUCCIÓN</h3><pre>api_token = &quot;[REDACTED]&quot;</pre>
           <h3>CONTEXTO</h3><div><strong>Instrucción correlacionada:</strong></div>
           <h3>FLUJO / CORRELACIÓN</h3><pre>[]</pre>
+          <details><summary>Impacto en el sistema y límites de confianza</summary><pre>ANÁLISIS ESTÁTICO · SIN EJECUCIÓN · IMPACTO NO OBSERVADO
+Cobertura sintáctica
+{
+  &quot;coverage&quot;: &quot;syntax&quot;,
+  &quot;confidence&quot;: &quot;medium&quot;,
+  &quot;cia&quot;: {
+    &quot;confidentiality&quot;: {
+      &quot;status&quot;: &quot;potential&quot;,
+      &quot;justification&quot;: &quot;Una variable de nombre sensible recibe un literal.&quot;,
+      &quot;conditions&quot;: [
+        &quot;El literal tendría que ser un secreto válido.&quot;
+      ],
+      &quot;evidence&quot;: [
+        &quot;instruction&quot;
+      ]
+    },
+    &quot;integrity&quot;: {
+      &quot;status&quot;: &quot;not_established&quot;,
+      &quot;justification&quot;: &quot;La señal disponible no establece un efecto en esta dimensión.&quot;,
+      &quot;conditions&quot;: [],
+      &quot;evidence&quot;: []
+    },
+    &quot;availability&quot;: {
+      &quot;status&quot;: &quot;not_established&quot;,
+      &quot;justification&quot;: &quot;La señal disponible no establece un efecto en esta dimensión.&quot;,
+      &quot;conditions&quot;: [],
+      &quot;evidence&quot;: []
+    }
+  },
+  &quot;limitations&quot;: [
+    &quot;La señal estática no demuestra ejecución, acceso ni efecto observado.&quot;
+  ],
+  &quot;provenance&quot;: &quot;python-ast/python/PY-005&quot;,
+  &quot;version&quot;: &quot;1.0&quot;,
+  &quot;resources&quot;: [
+    {
+      &quot;status&quot;: &quot;potential&quot;,
+      &quot;justification&quot;: &quot;Una variable de nombre sensible recibe un literal.&quot;,
+      &quot;conditions&quot;: [
+        &quot;El literal tendría que ser un secreto válido.&quot;
+      ],
+      &quot;evidence&quot;: [
+        &quot;instruction&quot;
+      ],
+      &quot;id&quot;: &quot;SYS-06&quot;,
+      &quot;label&quot;: &quot;Credenciales y secretos&quot;,
+      &quot;operation&quot;: &quot;presencia&quot;,
+      &quot;scope&quot;: &quot;direct&quot;
+    }
+  ],
+  &quot;boundaries&quot;: [],
+  &quot;flows&quot;: [],
+  &quot;references&quot;: [
+    {
+      &quot;id&quot;: &quot;instruction&quot;,
+      &quot;role&quot;: &quot;instruction&quot;,
+      &quot;location&quot;: {
+        &quot;start&quot;: {
+          &quot;line&quot;: 1,
+          &quot;column&quot;: 1
+        },
+        &quot;end&quot;: {
+          &quot;line&quot;: 1,
+          &quot;column&quot;: 32
+        }
+      },
+      &quot;range&quot;: null,
+      &quot;limitation&quot;: &quot;La ubicación no tiene un rango verificable en la evidencia visible.&quot;
+    }
+  ]
+}</pre></details>
           <h3>ANÁLISIS</h3><p>Una variable con nombre asociado a credenciales recibe una cadena literal no vacía; podría ser un ejemplo o un secreto real.</p>
           <h3>RECOMENDACIÓN</h3><p>Verificar si el valor es sensible y, de serlo, retirarlo y rotarlo según el procedimiento correspondiente.</p>
           <h3>VERIFICACIÓN — NO EJECUTADA</h3><ul><li><code>Revisar el valor en un entorno autorizado sin compartirlo.</code></li></ul>

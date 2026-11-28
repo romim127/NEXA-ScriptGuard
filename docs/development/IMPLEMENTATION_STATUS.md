@@ -17,3 +17,5 @@ existentes. La referencia anterior se sirve en `/legacy`.
 [ADR 0004](../decisions/ADR-0004-REACT-LOOPBACK.md)
 
 Fase 5 implementa filtros, búsqueda, orden, evidencia expandible, navegación por línea, metadatos reales del archivo, enlaces SARIF y demo estática. La suite compara React y legacy. El experimento WASM solo mide muestras acotadas de Python y Bash e inspecciona el helper Rust compilado. [Matriz](PHASE_5_PARITY.md) · [ADR 0005](../decisions/ADR-0005-STATIC-DEMO-WASM-PROBE.md)
+
+La rama de Fase 6 integra SITA en el motor Python, el dashboard moderno, el CLI y los reportes sintéticos. [Alcance](../architecture/SITA.md).

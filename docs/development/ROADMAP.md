@@ -7,3 +7,5 @@ El próximo incremento de NextGenAI UI evaluará un segundo consumidor y la
 evolución de la referencia anterior. [ADR 0004](../decisions/ADR-0004-REACT-LOOPBACK.md)
 
 La Fase 5 implementa exploración de hallazgos, mejoras SARIF y un consumidor independiente sintético. La evolución posterior contempla revisar accesibilidad y el adaptador para análisis en el navegador.
+
+Fase 6 incorpora SITA en el dashboard moderno y exportaciones. La [matriz de alcance](../architecture/SITA.md) documenta límites y espacios reservados.

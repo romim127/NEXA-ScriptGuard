@@ -43,3 +43,5 @@ La severidad prioriza impacto potencial si la señal corresponde al comportamien
 ## Pruebas
 
 `tests/corpus/bash_cases.json` contiene casos sintéticos positivos, negativos y ambiguos. `tests/test_parser.py` cubre esa tabla, quoting, comentarios, heredocs, pipes y asignaciones; revisar la suite antes de cambiar severidad o semántica.
+
+La [matriz de SITA](architecture/SITA.md#matriz-de-reglas) enumera asociaciones, condiciones y cobertura sin cambiar el catálogo de detección.

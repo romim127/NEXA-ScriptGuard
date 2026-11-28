@@ -49,7 +49,7 @@ class ReportSchemaTests(unittest.TestCase):
             sarif_schema, format_checker=FormatChecker()
         )
 
-    def run_scan(self, source, *extra, suffix=".sh"):
+    def run_scan(self, source, *extra, suffix=".sh", expected_output=None):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             script = root / ("sample ñ" + suffix)
@@ -63,8 +63,11 @@ class ReportSchemaTests(unittest.TestCase):
                     "--sarif", str(sarif_path), *extra,
                 ],
                 cwd=ROOT, capture_output=True, timeout=30, check=False,
+                env={**os.environ, "PYTHONIOENCODING": "utf-8"},
             )
             self.assertIn(result.returncode, (0, 3), result.stderr.decode("utf-8", "replace"))
+            if expected_output:
+                self.assertIn(expected_output, result.stdout.decode("utf-8"))
             return (
                 json.loads(report_path.read_text(encoding="utf-8")),
                 json.loads(sarif_path.read_text(encoding="utf-8")),
@@ -93,6 +96,42 @@ class ReportSchemaTests(unittest.TestCase):
         invalid_sarif = copy.deepcopy(sarif)
         invalid_sarif["runs"][0]["results"][0]["level"] = "not-a-sarif-level"
         self.assertFalse(self.sarif_validator.is_valid(invalid_sarif))
+
+    def test_sita_extension_preserves_schema_10_compatibility(self):
+        report, sarif = self.run_scan('eval("1+1")\n', suffix=".py", expected_output="Cobertura sintáctica")
+        self.nexa_validator.validate(report)
+        self.sarif_validator.validate(sarif)
+        impact = report["findings"][0]["impact_analysis"]
+        self.assertEqual(sarif["runs"][0]["results"][0]["properties"]["impactAnalysis"], impact)
+
+        old_contract = copy.deepcopy(self.nexa_validator.schema)
+        del old_contract["$defs"]["finding"]["properties"]["impact_analysis"]
+        del old_contract["$defs"]["finding"]["properties"]["impact_omission"]
+        del old_contract["$defs"]["finding"]["not"]
+        del old_contract["$defs"]["impact"]
+        Draft202012Validator(old_contract).validate(report)
+
+        old_report = copy.deepcopy(report)
+        del old_report["findings"][0]["impact_analysis"]
+        self.nexa_validator.validate(old_report)
+
+        del impact["cia"]["availability"]
+        self.assertFalse(self.nexa_validator.is_valid(report))
+
+    def test_sita_budget_omission_survives_cli_and_export_contracts(self):
+        report, sarif = self.run_scan(
+            'eval("1+1")\n', "--max-memory-bytes", "32768", suffix=".py",
+            expected_output="No evaluado por límite de recursos",
+        )
+        self.assertTrue(report["complete"])
+        finding = report["findings"][0]
+        self.assertEqual(finding["impact_omission"], "resource_budget")
+        self.assertNotIn("impact_analysis", finding)
+        self.nexa_validator.validate(report)
+        self.sarif_validator.validate(sarif)
+        self.assertEqual(sarif["runs"][0]["results"][0]["properties"]["impactOmission"], "resource_budget")
+        finding["impact_omission"] = "unsupported"
+        self.assertFalse(self.nexa_validator.is_valid(report))
 
     def test_all_sarif_rule_links_point_to_documented_anchors(self):
         from nexa_scriptguard.reports import RULE_DOCUMENTATION, render_sarif

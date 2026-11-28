@@ -1,5 +1,6 @@
 import { severities } from '@nextgenai/ui';
 import { z } from 'zod';
+import { impactSchema } from './impact';
 
 z.config({ jitless: true });
 
@@ -28,7 +29,11 @@ const finding = z.object({
   recommendation: z.string(),
   verification_commands: strings,
   limitations: strings,
-});
+  impact_analysis: impactSchema.optional(),
+  impact_omission: z.enum(['deadline', 'resource_budget']).optional(),
+}).refine(finding => !(finding.impact_omission && finding.impact_analysis))
+  .refine(finding => finding.impact_analysis?.references.every(reference =>
+    !reference.range || reference.range.end <= Array.from(finding.evidence.shared).length) ?? true);
 
 // Validate the fields consumed by the GUI. The Python serializer owns the full report schema.
 export const reportSchema = z.object({

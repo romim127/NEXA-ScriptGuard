@@ -40,9 +40,12 @@ entorno virtual activo compatible cuando falta ese intérprete. Los argumentos
 se reenvían a la GUI. Usá una ruta absoluta para el helper Rust cuando
 arranques desde otro directorio.
 
-Mantené la terminal abierta durante el uso. La GUI intenta abrir el navegador
-predeterminado y muestra una URL privada para abrirla manualmente si hace
-falta. Cada instancia usa un puerto propio en `127.0.0.1` y su propio token.
+Mantené la terminal abierta durante el uso. La GUI verifica por HTTP la interfaz,
+sus recursos y la sesión antes de abrir el navegador predeterminado. La
+terminal muestra la dirección base, el paquete y el intérprete usados. Cada
+instancia usa un puerto propio en `127.0.0.1` y entrega la sesión al navegador.
+Si falla la apertura, corregí el navegador predeterminado y volvé a ejecutar
+el comando.
 Presioná Ctrl+C para cerrar. Si CMD pregunta si debe terminar el archivo por
 lotes, confirmá el cierre.
 
@@ -52,7 +55,8 @@ Con pipx instalado, ejecutá `pipx install .` desde la raíz del repositorio.
 Usá `pipx environment --value PIPX_BIN_DIR` para consultar la ubicación del
 comando. Podés ejecutarlo por ruta absoluta, o elegir `pipx ensurepath` para
 agregar el directorio al PATH de tu usuario. Abrí otra terminal después de ese
-cambio, verificá con `RUN --help` y ejecutá `RUN` para iniciar. En CMD usá
+cambio, verificá con `RUN --help` y ejecutá `RUN scriptguard` para iniciar.
+`RUN` sin argumentos sigue funcionando. En CMD usá
 `where RUN`, en PowerShell `Get-Command RUN`, y en Bash `command -v RUN` si
 hay otro programa con ese nombre.
 
@@ -69,5 +73,4 @@ Con Node.js 24, desde la raíz, ejecutá `npm ci`, `npm run typecheck`,
 `nexa_scriptguard/gui_assets/modern` y se versiona junto con su fuente.
 Iniciá Python con el lanzador habitual para probarlo. Las instalaciones con
 bundle funcionan sin Node.js ni servidor Vite. Para comparar la GUI anterior,
-abrí `/legacy` en la pestaña de sesión o agregá el fragmento privado de la URL
-que imprimió el proceso actual.
+abrí `/legacy` en la misma pestaña de sesión.

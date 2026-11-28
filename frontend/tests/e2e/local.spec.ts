@@ -16,7 +16,7 @@ async function service() {
   const run = process.env.NEXA_RUN;
   const browser = `"${python.replaceAll('\\', '/')}" "${probe}" %s`;
   const processPath = run && process.platform !== 'win32' ? folder : process.env.PATH;
-  const child = spawn(run ?? python, run ? [] : ['-m', 'nexa_scriptguard.gui'], {
+  const child = spawn(run ?? python, run ? ['scriptguard'] : ['-m', 'nexa_scriptguard.gui'], {
     cwd: run ? folder : root,
     env: { ...process.env, PATH: processPath, PYTHONIOENCODING: 'utf-8', BROWSER: browser, NEXA_BROWSER_CAPTURE: capture },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -25,7 +25,7 @@ async function service() {
     child.once('error', reject);
     child.once('close', resolve);
   });
-  // Consume the private URL from stdout without logging it.
+  // Drain diagnostics. The browser probe receives the private URL separately.
   child.stdout.resume();
   child.stderr.resume();
   let stopped = false;
@@ -54,6 +54,33 @@ async function service() {
     throw error;
   }
 }
+
+test('local acceptance file completes analysis and exports in the same session', async ({ page }) => {
+  const sample = process.env.NEXA_ACCEPTANCE_FILE;
+  test.skip(!sample, 'Optional acceptance file stays outside the test fixtures.');
+  const instance = await service();
+  try {
+    await page.goto(instance.url.href);
+    const file = page.getByLabel('ARCHIVO DE SCRIPT PARA ANALIZAR');
+    const analyze = page.getByRole('button', { name: 'Analizar archivo' });
+    await file.setInputFiles(sample!);
+    const firstResult = page.waitForResponse(response => response.url().endsWith('/analyze'));
+    await analyze.click();
+    expect((await firstResult).status()).toBe(200);
+    await verifyImpactNavigation(page, 'local', false);
+    for (const format of ['JSON', 'HTML', 'SARIF']) {
+      const download = page.waitForEvent('download');
+      await page.getByRole('button', { name: `Exportar ${format}` }).click();
+      expect(await (await download).failure()).toBeNull();
+    }
+    await file.setInputFiles({ name: 'second.py', mimeType: 'text/plain', buffer: Buffer.from('value = 1\n') });
+    const secondResult = page.waitForResponse(response => response.url().endsWith('/analyze'));
+    await analyze.click();
+    expect((await secondResult).status()).toBe(200);
+  } finally {
+    await instance.stop();
+  }
+});
 
 test('local GUI analyzes Bash and Python offline and saves physical reports', async ({ page, request }) => {
   const first = await service();
@@ -386,10 +413,45 @@ test('premium demo fits each viewport and downloads only synthetic reports', asy
     expect(contents).toContain('DEMO MODE — SYNTHETIC DATA');
     expect(contents).not.toContain('synthetic_example');
   }
+  await page.getByLabel('Criticidad').selectOption('');
+  await verifyImpactNavigation(page, 'demo');
   expect(requests).toEqual([]);
 });
 
 const scrollViewports = [360, 390, 768, 1366, 1920];
+
+async function verifyImpactNavigation(page: Page, mode: 'local' | 'demo', capture = true) {
+  const finding = page.getByRole('article').filter({ hasText: 'PY-001' }).first();
+  const sita = finding.locator('.sita');
+  const details = sita.getByText('Ver impacto, confianza y evidencia');
+  const target = sita.getByRole('button', { name: /Destino sensible/ }).first();
+  await expect(sita).toContainText('IMPACTO NO OBSERVADO');
+  await expect(sita.getByText('Cobertura sintáctica', { exact: true })).toBeVisible();
+  await expect(sita.getByText('Confidencialidad', { exact: true })).toBeVisible();
+  await expect(target).not.toBeVisible();
+  await details.press('Enter');
+  await expect(sita.getByRole('heading', { name: 'Referencias de evidencia' })).toBeVisible();
+  await target.press('Enter');
+  await expect(finding.getByRole('region', { name: 'Instrucción detectada' })).toBeFocused();
+  await expect(finding.locator('mark')).toHaveText('eval');
+  await sita.getByRole('button', { name: /Localizar línea, sin rango exacto/ }).first().press('Enter');
+  await expect(finding.getByRole('region', { name: 'Instrucción detectada' })).toBeFocused();
+  await expect(finding.locator('mark')).toHaveCount(0);
+  for (const width of scrollViewports) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    if (capture && process.env.NEXA_SITA_VISUAL_DIR && [390, 1366].includes(width)) {
+      const folder = process.env.NEXA_SITA_VISUAL_DIR;
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({ path: join(folder, `${mode}-${width}.png`), fullPage: true });
+      await details.click();
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({ path: join(folder, `${mode}-${width}-compact.png`), fullPage: true });
+      await details.click();
+    }
+  }
+  await details.click();
+}
 const longInstruction = 'eval(\n    "' + '0123456789  '.repeat(70) + '"\n)';
 const fixtureEvidence = '\t  primera línea\n' + longInstruction + '\n  última línea  ';
 
@@ -501,6 +563,7 @@ test('SG-UI-001: installed local dashboard preserves long code and does not exec
     await expect(page.locator('.flag')).toContainText('HIGH');
     await expect(page.locator('.metadata')).toContainText('Línea 2 · Columna 9');
     await verifyScrollMatrix(page, 'local', '0002 │ ' + longInstruction, longInstruction);
+    await verifyImpactNavigation(page, 'local');
     const shellPath = "'" + marker.replaceAll("'", "'\\''") + "'";
     await input.setInputFiles({ name: 'acceptance.sh', mimeType: 'text/plain',
       buffer: Buffer.from(`printf test > ${shellPath}\neval 'echo sample'\n`) });

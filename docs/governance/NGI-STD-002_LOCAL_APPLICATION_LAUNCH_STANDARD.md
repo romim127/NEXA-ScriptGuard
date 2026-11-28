@@ -9,9 +9,9 @@ estándar complementa [NGI-STD-001](NGI-STD-001_SOFTWARE_DEVELOPMENT.md).
   recuperar el arranque.
 - Ofrecer `RUN` mediante instalación explícita en el ámbito del usuario.
   Cualquier cambio persistente del PATH requiere una acción explícita.
-- Ejecutar la GUI existente en primer plano, comprobar dependencias y abrir
-  la URL local en el navegador predeterminado. Mostrar la URL privada para
-  recuperación si el navegador no se abre. Permitir cierre con Ctrl+C.
+- Ejecutar la GUI existente en primer plano, comprobar dependencias y verificar
+  la aplicación y su sesión antes de abrir el navegador predeterminado.
+  Mostrar solo la dirección base. Permitir cierre con Ctrl+C.
 - Escuchar exclusivamente en loopback con token por sesión y puerto dinámico
   asignado por el sistema. Evitar privilegios administrativos y mantener los
   archivos analizados en el equipo.

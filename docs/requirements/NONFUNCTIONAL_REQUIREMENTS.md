@@ -15,3 +15,5 @@ Exact test results and environment limitations belong in the
 consolidation report, not inferred from these requirements.
 
 Phase 5 keeps local runtime dependencies and limits. Static demo assets use a separate output and a CSP without connections. Browser-side analysis remains experimental. [ADR 0005](../decisions/ADR-0005-STATIC-DEMO-WASM-PROBE.md)
+
+SITA-03 requiere funcionamiento local dentro de los límites compartidos, sin ejecución y con rangos verificados sobre evidencia compartible. [Presupuestos](../architecture/SITA.md#presupuestos-y-validación).

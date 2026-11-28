@@ -3,6 +3,11 @@
 .ngi-navigation a { color: var(--ngi-link); }
 :focus-visible { outline: 2px solid var(--ngi-cyan); outline-offset: 4px; }
 .ngi-evidence { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ngi-code-mark { color: inherit; background: #8395b833; text-decoration: underline; }
+.ngi-code-mark--source { background: #00d9ff33; text-decoration-color: #00d9ff; }
+.ngi-code-mark--propagation { background: #ffc36e33; text-decoration-color: #ffc36e; }
+.ngi-code-mark--sink { background: #ff765c33; text-decoration-color: #ff765c; }
+.ngi-code-mark--validation { background: #8ad5a633; text-decoration-style: double; }
 pre.ngi-code {
   min-width: 0;
   max-width: 100%;

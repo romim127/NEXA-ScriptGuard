@@ -32,6 +32,427 @@
     }
   ],
   "$defs": {
+    "impact": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "coverage": {
+          "type": "string",
+          "enum": [
+            "syntax",
+            "correlated",
+            "partial",
+            "not_evaluated"
+          ]
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium"
+          ]
+        },
+        "provenance": {
+          "type": "string"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cia": {
+          "type": "object",
+          "properties": {
+            "confidentiality": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "potential",
+                    "conditional",
+                    "indeterminate",
+                    "not_established",
+                    "not_evaluated"
+                  ]
+                },
+                "justification": {
+                  "type": "string"
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "evidence": {
+                  "maxItems": 10,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "status",
+                "justification",
+                "conditions",
+                "evidence"
+              ]
+            },
+            "integrity": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "potential",
+                    "conditional",
+                    "indeterminate",
+                    "not_established",
+                    "not_evaluated"
+                  ]
+                },
+                "justification": {
+                  "type": "string"
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "evidence": {
+                  "maxItems": 10,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "status",
+                "justification",
+                "conditions",
+                "evidence"
+              ]
+            },
+            "availability": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "potential",
+                    "conditional",
+                    "indeterminate",
+                    "not_established",
+                    "not_evaluated"
+                  ]
+                },
+                "justification": {
+                  "type": "string"
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "evidence": {
+                  "maxItems": 10,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "status",
+                "justification",
+                "conditions",
+                "evidence"
+              ]
+            }
+          },
+          "required": [
+            "confidentiality",
+            "integrity",
+            "availability"
+          ]
+        },
+        "resources": {
+          "maxItems": 2,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "potential",
+                  "conditional",
+                  "indeterminate",
+                  "not_established",
+                  "not_evaluated"
+                ]
+              },
+              "justification": {
+                "type": "string"
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "evidence": {
+                "maxItems": 10,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^SYS-(0[1-9]|1[0-5])$"
+              },
+              "label": {
+                "type": "string"
+              },
+              "operation": {
+                "type": "string"
+              },
+              "scope": {
+                "type": "string",
+                "enum": [
+                  "direct",
+                  "correlated"
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "justification",
+              "conditions",
+              "evidence",
+              "id",
+              "label",
+              "operation",
+              "scope"
+            ]
+          }
+        },
+        "boundaries": {
+          "maxItems": 1,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "potential",
+                  "conditional",
+                  "indeterminate",
+                  "not_established",
+                  "not_evaluated"
+                ]
+              },
+              "justification": {
+                "type": "string"
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "evidence": {
+                "maxItems": 10,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^TB-(0[1-9]|10)$"
+              },
+              "origin": {
+                "type": "string"
+              },
+              "destination": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "status",
+              "justification",
+              "conditions",
+              "evidence",
+              "id",
+              "origin",
+              "destination"
+            ]
+          }
+        },
+        "flows": {
+          "maxItems": 4,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string"
+              },
+              "sink": {
+                "type": "string"
+              },
+              "relationship": {
+                "type": "string",
+                "enum": [
+                  "possible",
+                  "indeterminate"
+                ]
+              },
+              "assignment_steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "source",
+              "sink",
+              "relationship",
+              "assignment_steps"
+            ]
+          }
+        },
+        "references": {
+          "maxItems": 10,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "instruction",
+                  "source",
+                  "sink",
+                  "propagation",
+                  "validation"
+                ]
+              },
+              "location": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "object",
+                    "properties": {
+                      "line": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "column": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "line",
+                      "column"
+                    ]
+                  },
+                  "end": {
+                    "type": "object",
+                    "properties": {
+                      "line": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "column": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "line",
+                      "column"
+                    ]
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ]
+              },
+              "range": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "start": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "end": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "start",
+                      "end"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "limitation": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "role",
+              "location",
+              "range",
+              "limitation"
+            ]
+          }
+        }
+      },
+      "required": [
+        "version",
+        "coverage",
+        "confidence",
+        "provenance",
+        "limitations",
+        "cia",
+        "resources",
+        "boundaries",
+        "flows",
+        "references"
+      ]
+    },
     "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "strings": {"type": "array", "items": {"type": "string"}},
     "point": {
@@ -54,6 +475,7 @@
     },
     "finding": {
       "type": "object",
+      "not": {"required": ["impact_analysis", "impact_omission"]},
       "required": ["id", "rule", "rule_id", "title", "file", "sha256", "location", "line", "column", "end_line", "end_column", "instruction", "context", "context_before", "context_after", "severity", "confidence", "confidence_reason", "status", "evidence", "explanation", "recommendation", "verification_commands", "limitations", "engine"],
       "properties": {
         "id": {"type": "string", "minLength": 1},
@@ -62,6 +484,8 @@
           "required": ["id", "version"],
           "properties": {"id": {"type": "string", "minLength": 1}, "version": {"type": "string", "minLength": 1}}
         },
+        "impact_analysis": {"$ref": "#/$defs/impact"},
+        "impact_omission": {"enum": ["deadline", "resource_budget"]},
         "rule_id": {"type": "string", "minLength": 1},
         "title": {"type": "string", "minLength": 1},
         "file": {"type": "string", "minLength": 1},

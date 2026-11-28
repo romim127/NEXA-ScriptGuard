@@ -1,10 +1,80 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EvidenceViewer, ExportPanel, FileUploader, InfinityShield, Sidebar, StatusIndicator } from '@nextgenai/ui';
+import { CodeBlock, EvidenceViewer, ExportPanel, FileUploader, InfinityShield, Sidebar, StatusIndicator } from '@nextgenai/ui';
+import fixture from '../../demo/public/reports/synthetic.json';
+import { AnalysisFinding } from '../../src/features/analysis/AnalysisFinding';
+import { reportSchema } from '../../src/types/report';
 
 afterEach(cleanup);
 
 describe('NextGenAI UI', () => {
+  it('highlights Unicode code points while preserving literal markup and whitespace', () => {
+    const value = '\t😀<b>\n';
+    const { container, rerender } = render(<CodeBlock label="Código" value={value}
+      highlight={{ start: 2, end: 5, role: 'sink', label: 'Destino sensible' }} />);
+    expect(container.querySelector('mark')?.textContent).toBe('<b>');
+    expect(container.querySelector('b')).toBeNull();
+    expect(screen.getByRole('region').textContent).toBe(value);
+    rerender(<CodeBlock label="Código" value={value}
+      highlight={{ start: 2, end: 99, role: 'sink', label: 'Destino sensible' }} />);
+    expect(container.querySelector('mark')).toBeNull();
+    expect(screen.getByRole('region').textContent).toBe(value);
+  });
+
+  it('accepts report 1.0 without SITA and presents the missing coverage', () => {
+    const oldReport = {
+      ...fixture,
+      findings: fixture.findings.map(finding => ({ ...finding, impact_analysis: undefined })),
+    };
+    const parsed = reportSchema.parse(oldReport);
+    render(<AnalysisFinding finding={parsed.findings[0]} />);
+    expect(screen.getByText('Análisis de impacto no disponible en este reporte')).toBeTruthy();
+  });
+
+  it('renders the structured coverage state independently from the base report', () => {
+    const report = reportSchema.parse(fixture);
+    const finding = report.findings[0];
+    const impact = finding.impact_analysis!;
+    expect(report.complete).toBe(true);
+    const { rerender } = render(<AnalysisFinding finding={finding} />);
+    expect(screen.getByText('Cobertura sintáctica')).toBeTruthy();
+    rerender(<AnalysisFinding finding={{ ...finding, impact_analysis: { ...impact, coverage: 'partial' } }} />);
+    expect(screen.getByText('Cobertura parcial')).toBeTruthy();
+    expect(screen.getByText(impact.limitations[0])).toBeTruthy();
+    rerender(<AnalysisFinding finding={{ ...finding, impact_analysis: { ...impact, coverage: 'not_evaluated' } }} />);
+    expect(screen.getByText('No evaluado por el motor SITA')).toBeTruthy();
+    const omitted = { ...finding, impact_analysis: undefined, impact_omission: 'resource_budget' };
+    const parsed = reportSchema.parse({ ...report, findings: [omitted] });
+    rerender(<AnalysisFinding finding={parsed.findings[0]} />);
+    expect(screen.getByText('No evaluado por límite de recursos')).toBeTruthy();
+    expect(reportSchema.safeParse({ ...report, findings: [{ ...omitted, impact_analysis: impact }] }).success).toBe(false);
+  });
+
+  it('offers only verified evidence destinations for redacted, truncated and external references', () => {
+    const finding = reportSchema.parse(fixture).findings[0];
+    const impact = finding.impact_analysis!;
+    const external = {
+      ...impact.references[0],
+      id: 'external',
+      role: 'source' as const,
+      location: { start: { line: 20, column: 1 }, end: { line: 20, column: 2 } },
+      limitation: 'Origen fuera del fragmento.',
+    };
+    const withExternal = { ...finding, impact_analysis: { ...impact, references: [...impact.references, external] } };
+    const { rerender } = render(<AnalysisFinding finding={withExternal} />);
+    expect(screen.getByRole('button', { name: /Resaltar fragmento/, hidden: true })).toBeTruthy();
+    expect(screen.getByText(/Origen · Línea 20.*Sin destino verificable/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Origen · Línea 20/, hidden: true })).toBeNull();
+    for (const evidence of [
+      { ...finding.evidence, shared: '[REDACTED]' },
+      { ...finding.evidence, truncated: true },
+    ]) {
+      rerender(<AnalysisFinding finding={{ ...withExternal, evidence }} />);
+      expect(screen.queryByRole('button', { name: /Resaltar fragmento/, hidden: true })).toBeNull();
+      expect(screen.getAllByRole('button', { name: /Localizar línea/, hidden: true })).toHaveLength(2);
+    }
+  });
+
   it('preserves whitespace and exposes code evidence as a focusable text region', () => {
     const evidence = '\n\t  <b>literal</b>  \n';
     const { container } = render(<EvidenceViewer label="Evidencia" value={evidence} format="code" />);

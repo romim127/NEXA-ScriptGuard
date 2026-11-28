@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from urllib.parse import quote
 
+from .impact import IMPACT_OMISSIONS
+
 
 def rules_for_report(report, bash_rules):
     if report["parser"] != "python-ast":
@@ -65,7 +67,39 @@ def validate_report(report):
             raise ValueError("Finding must distinguish shared evidence")
         if report["redaction_applied"] and "original" in evidence:
             raise ValueError("Redacted reports must not contain original evidence")
+        if "impact_analysis" in finding:
+            _validate_impact(finding["impact_analysis"], evidence["shared"])
+        if "impact_omission" in finding and (
+            finding["impact_omission"] not in IMPACT_OMISSIONS or "impact_analysis" in finding
+        ):
+            raise ValueError("Invalid SITA omission reason or conflicting impact analysis")
     return True
+
+
+def _validate_impact(impact, evidence):
+    from .impact import DIMENSIONS
+
+    try:
+        if impact["version"] != "1.0" or set(impact["cia"]) != set(DIMENSIONS):
+            raise ValueError("Unsupported SITA contract or missing CIA dimension")
+        references = impact["references"]
+        ids = {reference["id"] for reference in references}
+        if len(ids) != len(references) or len(ids) > 10 or len(impact["flows"]) > 4:
+            raise ValueError("Invalid SITA reference or flow count")
+        conclusions = [*impact["resources"], *impact["boundaries"], *impact["cia"].values()]
+        if any(not set(conclusion["evidence"]) <= ids for conclusion in conclusions):
+            raise ValueError("SITA conclusion refers to unknown evidence")
+        if any(not {flow["source"], flow["sink"]} <= ids for flow in impact["flows"]):
+            raise ValueError("SITA flow refers to unknown evidence")
+        for reference in references:
+            span = reference["range"]
+            if span is not None and not (
+                type(span["start"]) is int and type(span["end"]) is int
+                and 0 <= span["start"] < span["end"] <= len(evidence)
+            ):
+                raise ValueError("SITA range escapes the visible evidence")
+    except (KeyError, TypeError, AttributeError) as exc:
+        raise ValueError("Invalid SITA contract") from exc
 
 
 RULE_DOCUMENTATION = "https://github.com/romim127/NEXA-ScriptGuard/blob/main/docs/RULES.md"
@@ -125,6 +159,8 @@ def render_sarif(report, rules):
                 "recommendation": finding["recommendation"],
                 "verificationCommands": finding["verification_commands"],
                 "limitations": finding["limitations"],
+                **({"impactAnalysis": finding["impact_analysis"]} if "impact_analysis" in finding else {}),
+                **({"impactOmission": finding["impact_omission"]} if "impact_omission" in finding else {}),
             },
         })
     return {
@@ -176,6 +212,29 @@ def validate_sarif(value):
                 raise ValueError("SARIF end line cannot precede start line")
 
 
+def impact_coverage_label(finding):
+    if finding.get("impact_omission") in IMPACT_OMISSIONS:
+        return "No evaluado por límite de recursos"
+    impact = finding.get("impact_analysis")
+    if impact is None:
+        return "Análisis de impacto no disponible en este reporte"
+    return {
+        "not_evaluated": "No evaluado por el motor SITA",
+        "partial": "Cobertura parcial",
+        "syntax": "Cobertura sintáctica",
+        "correlated": "Cobertura correlacionada",
+    }[impact["coverage"]]
+
+
+def _impact_text(finding):
+    label = impact_coverage_label(finding)
+    impact = finding.get("impact_analysis")
+    if impact is None:
+        return label
+    return ("ANÁLISIS ESTÁTICO · SIN EJECUCIÓN · IMPACTO NO OBSERVADO\n"
+            + label + "\n" + json.dumps(impact, ensure_ascii=False, indent=2))
+
+
 def render_html(report):
     esc = lambda value: html.escape(str(value), quote=True)
     cards = []
@@ -205,6 +264,7 @@ def render_html(report):
           <h3>INSTRUCCIÓN</h3><pre>{esc(finding['instruction'])}</pre>
           <h3>CONTEXTO</h3><div>{before}<strong>Instrucción correlacionada:</strong>{after}</div>
           <h3>FLUJO / CORRELACIÓN</h3><pre>{esc(json.dumps(finding['evidence']['correlation'], ensure_ascii=False))}</pre>
+          <details><summary>Impacto en el sistema y límites de confianza</summary><pre>{esc(_impact_text(finding))}</pre></details>
           <h3>ANÁLISIS</h3><p>{esc(finding['explanation'])}</p>
           <h3>RECOMENDACIÓN</h3><p>{esc(finding['recommendation'])}</p>
           <h3>VERIFICACIÓN — NO EJECUTADA</h3><ul>{checks}</ul>
@@ -260,6 +320,8 @@ def render_terminal(report, console):
             text.append(label + "\n", style="bold bright_cyan")
             text.append(value + "\n\n")
         correlation = finding["evidence"]["correlation"]
+        text.append("IMPACTO EN EL SISTEMA Y LÍMITES DE CONFIANZA\n", style="bold bright_cyan")
+        text.append(_impact_text(finding) + "\n\n")
         if correlation:
             text.append("EVIDENCIA DE FLUJO\n", style="bold bright_cyan")
             for step in correlation:
