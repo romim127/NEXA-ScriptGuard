@@ -7,6 +7,8 @@ from typing import Literal, TypedDict
 
 
 Status = Literal["potential", "conditional", "indeterminate", "not_established", "not_evaluated"]
+ImpactOmission = Literal["deadline", "resource_budget"]
+IMPACT_OMISSIONS = ("deadline", "resource_budget")
 DIMENSIONS = ("confidentiality", "integrity", "availability")
 RESOURCES = dict(zip((f"SYS-{i:02d}" for i in range(1, 16)), (
     "Sistema de archivos", "Procesos y subprocesos", "Registro de Windows",
@@ -155,17 +157,23 @@ MAX_EXTENSION_BYTES = 1024 * 1024
 
 def enrich_report(report, deadline, limits):
     remaining = min(MAX_EXTENSION_BYTES, limits.max_output_bytes // 8, limits.max_memory_bytes // 32)
-    for finding in report.findings:
+    omission: ImpactOmission | None = None
+    for index, finding in enumerate(report.findings):
         if time.monotonic() >= deadline:
             report.limitations.append("SITA quedó parcial: se agotó el plazo compartido.")
+            omission = "deadline"
             break
-        impact = enrich(finding, report.parser, deadline)
+        impact = enrich(finding, report.parser)
         size = len(json.dumps(asdict(impact), ensure_ascii=False, indent=2).encode("utf-8"))
         if size > remaining:
             report.limitations.append("SITA quedó parcial: se agotó el presupuesto de reporte.")
+            omission = "resource_budget"
             break
         finding.impact_analysis = impact
         remaining -= size
+    if omission is not None:
+        for finding in report.findings[index:]:
+            finding.impact_omission = omission
 
 
 def _visible_range(finding, location):
@@ -181,13 +189,11 @@ def _visible_range(finding, location):
     return None
 
 
-def enrich(finding, parser, deadline):
+def enrich(finding, parser):
     provenance = f"{parser}/{finding.engine}/{finding.rule_id}"
     signal = SIGNALS.get(finding.rule_id)
     reason = None
-    if time.monotonic() >= deadline:
-        reason = "Se agotó el tiempo de análisis SITA."
-    elif finding.engine != "python" or parser not in {"python-ast", "tree-sitter-bash"} or not signal:
+    if finding.engine != "python" or parser not in {"python-ast", "tree-sitter-bash"} or not signal:
         reason = "La procedencia o regla carece de cobertura SITA."
     elif finding.rule_id in FLOW_RULES and not finding.correlation:
         reason = "La regla requiere evidencia de correlación."

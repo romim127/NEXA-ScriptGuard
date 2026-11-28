@@ -113,8 +113,9 @@ estimación de salida del enriquecimiento se acota al menor de 1 MiB,
 un octavo del presupuesto de salida y un treintaidosavo del presupuesto de
 memoria. Se mide sobre JSON indentado de cada objeto por separado. Este
 presupuesto es una estimación, y la serialización final mantiene sus límites
-existentes. Al agotarse el presupuesto se omiten objetos restantes y se
-registra cobertura parcial en las limitaciones generales del reporte.
+existentes. Al agotarse el presupuesto se omiten los objetos de análisis
+restantes y se marca cada hallazgo con un motivo compacto en
+`impact_omission`. Las limitaciones generales conservan el resumen.
 
 Una carga artificial de 2000 hallazgos con cuatro flujos cada uno,
 sin aplicar el tope, tomó 393 ms bajo tracemalloc, alcanzó 11 134 664 bytes
@@ -126,3 +127,19 @@ La compatibilidad del esquema se comprueba con el validador anterior y el
 nuevo. La interfaz moderna, la demo precomputada, el CLI y las tres
 exportaciones se verifican de forma independiente. Las propiedades SARIF
 conservan las conclusiones y la incertidumbre del motor.
+
+## Trazabilidad de cobertura (SG-SITA-001)
+
+| Contrato del hallazgo | Presentación |
+| --- | --- |
+| Sin `impact_analysis` ni `impact_omission` | Análisis de impacto no disponible en este reporte |
+| `impact_analysis.coverage: not_evaluated` | No evaluado por el motor SITA |
+| `impact_omission: resource_budget` o `deadline` | No evaluado por límite de recursos |
+| `impact_analysis.coverage: partial` | Cobertura parcial, con las limitaciones del análisis conservado |
+
+`impact_omission` es opcional, excluyente con `impact_analysis` y contiene
+únicamente un valor del catálogo. SARIF conserva el motivo como
+`result.properties.impactOmission`. CLI, HTML y GUI derivan las etiquetas
+de estos campos. La completitud del escaneo, severidad, confianza y
+conclusiones CIA conservan su significado. Los reportes previos a
+esta corrección carecen de la marca explícita de omisión.

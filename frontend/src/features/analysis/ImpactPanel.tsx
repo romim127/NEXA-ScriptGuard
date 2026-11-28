@@ -1,4 +1,5 @@
 import type { Impact } from '../../types/impact';
+import type { Finding } from '../../types/report';
 import './impact.css';
 
 export type EvidenceReference = Impact['references'][number];
@@ -24,8 +25,16 @@ const dimensions = {
   availability: 'Disponibilidad',
 } as const;
 
-export function ImpactPanel({ impact, onEvidence }: {
+const coverageLabels = {
+  syntax: 'Cobertura sintáctica',
+  correlated: 'Cobertura correlacionada',
+  partial: 'Cobertura parcial',
+  not_evaluated: 'No evaluado por el motor SITA',
+};
+
+export function ImpactPanel({ impact, omission, onEvidence }: {
   impact?: Impact;
+  omission?: Finding['impact_omission'];
   onEvidence: (ref: EvidenceReference) => void;
 }) {
   function links(ids: string[]) {
@@ -50,10 +59,11 @@ export function ImpactPanel({ impact, onEvidence }: {
     <h3>IMPACTO EN EL SISTEMA Y LÍMITES DE CONFIANZA</h3>
     <p>System Impact &amp; Trust Analysis — SITA</p>
     <p><strong>ANÁLISIS ESTÁTICO · SIN EJECUCIÓN · IMPACTO NO OBSERVADO</strong></p>
-    {impact ? <details className="ngi-disclosure">
+    <p><strong>{omission ? 'No evaluado por límite de recursos' : impact
+      ? coverageLabels[impact.coverage] : 'Análisis de impacto no disponible en este reporte'}</strong></p>
+    {impact && <details className="ngi-disclosure">
       <summary>Ver impacto, confianza y evidencia</summary>
-      <p>Cobertura: {{ syntax: 'Sintáctica', correlated: 'Correlacionada', partial: 'Parcial', not_evaluated: 'No evaluada' }[impact.coverage]}
-        {' · '}Confianza SITA: {impact.confidence === 'medium' ? 'Media' : 'Baja'}</p>
+      <p>Confianza SITA: {impact.confidence === 'medium' ? 'Media' : 'Baja'}</p>
       {impact.resources.map(resource => <section key={resource.id}>
         <h4>{resource.id} · {resource.label} · {resource.operation}</h4>
         <p>{resource.scope === 'direct' ? 'Señal directa' : 'Asociación correlacionada'}</p>
@@ -76,6 +86,6 @@ export function ImpactPanel({ impact, onEvidence }: {
         <section key={key}><h5>{dimensions[key]}</h5>{conclusion(impact.cia[key])}</section>)}
       <p>Leyenda: origen, propagación, destino sensible y validación identificada.</p>
       <ul>{impact.limitations.map(text => <li key={text}>{text}</li>)}</ul>
-    </details> : <p>Análisis de impacto no disponible.</p>}
+    </details>}
   </section>;
 }

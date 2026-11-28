@@ -26,3 +26,18 @@ scroll independiente a 360, 390, 768, 1366 y 1920 px.
 
 Las comprobaciones de regresión son automatizadas. La revisión visual humana
 sigue pendiente.
+
+## SG-SITA-001
+
+La regresión cubre reportes anteriores, cobertura disponible, procedencia
+sin cobertura, omisión por plazo o presupuesto, y cobertura parcial con
+escaneo base completo. Se verifica el mismo estado en el panel React y
+en los contratos de CLI, JSON, HTML y SARIF. Las pruebas consumen
+`impact_omission` o `impact_analysis.coverage` sin interpretar mensajes
+de limitación.
+
+La repetición local obtuvo 102 pruebas Python aprobadas y dos omitidas por
+plataforma, seis pruebas Rust, nueve Vitest y siete Playwright aprobadas.
+SG-UI-001 conservó los cinco anchos y el gesto táctil a 390 px desplazó
+194 px en local y demo. Las capturas se regeneraron con la etiqueta de
+cobertura visible.

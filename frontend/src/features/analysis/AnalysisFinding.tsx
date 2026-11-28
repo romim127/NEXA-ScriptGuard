@@ -35,7 +35,7 @@ export function AnalysisFinding({ finding, compact = false }: { finding: Finding
     <p aria-live="polite">{selection && `${evidenceRoles[selection.role]} · ${selection.location.start.line}:${selection.location.start.column}${selection.limitation ? ` · ${selection.limitation}` : ''}`}</p>
     <EvidenceViewer label={finding.evidence.truncated ? 'EVIDENCIA COMPARTIBLE · TRUNCADA' : 'EVIDENCIA COMPARTIBLE'}
       value={finding.evidence.shared} format="code" expandable />
-    <ImpactPanel impact={finding.impact_analysis} onEvidence={reference => {
+    <ImpactPanel impact={finding.impact_analysis} omission={finding.impact_omission} onEvidence={reference => {
       setSelection(reference);
       if (reference.range) requestAnimationFrame(() => {
         const code = document.getElementById(codeId);

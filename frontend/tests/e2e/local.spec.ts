@@ -399,6 +399,7 @@ async function verifyImpactNavigation(page: Page, mode: 'local' | 'demo') {
   const details = sita.getByText('Ver impacto, confianza y evidencia');
   const target = sita.getByRole('button', { name: /Destino sensible/ }).first();
   await expect(sita).toContainText('IMPACTO NO OBSERVADO');
+  await expect(sita.getByText('Cobertura sintáctica', { exact: true })).toBeVisible();
   await details.press('Enter');
   await expect(sita.getByRole('heading', { name: 'Confidencialidad', exact: true })).toBeVisible();
   await target.press('Enter');

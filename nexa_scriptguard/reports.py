@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from urllib.parse import quote
 
+from .impact import IMPACT_OMISSIONS
+
 
 def rules_for_report(report, bash_rules):
     if report["parser"] != "python-ast":
@@ -67,6 +69,10 @@ def validate_report(report):
             raise ValueError("Redacted reports must not contain original evidence")
         if "impact_analysis" in finding:
             _validate_impact(finding["impact_analysis"], evidence["shared"])
+        if "impact_omission" in finding and (
+            finding["impact_omission"] not in IMPACT_OMISSIONS or "impact_analysis" in finding
+        ):
+            raise ValueError("Invalid SITA omission reason or conflicting impact analysis")
     return True
 
 
@@ -154,6 +160,7 @@ def render_sarif(report, rules):
                 "verificationCommands": finding["verification_commands"],
                 "limitations": finding["limitations"],
                 **({"impactAnalysis": finding["impact_analysis"]} if "impact_analysis" in finding else {}),
+                **({"impactOmission": finding["impact_omission"]} if "impact_omission" in finding else {}),
             },
         })
     return {
@@ -205,12 +212,27 @@ def validate_sarif(value):
                 raise ValueError("SARIF end line cannot precede start line")
 
 
-def _impact_text(finding):
+def impact_coverage_label(finding):
+    if finding.get("impact_omission") in IMPACT_OMISSIONS:
+        return "No evaluado por límite de recursos"
     impact = finding.get("impact_analysis")
     if impact is None:
-        return "Análisis de impacto no disponible."
+        return "Análisis de impacto no disponible en este reporte"
+    return {
+        "not_evaluated": "No evaluado por el motor SITA",
+        "partial": "Cobertura parcial",
+        "syntax": "Cobertura sintáctica",
+        "correlated": "Cobertura correlacionada",
+    }[impact["coverage"]]
+
+
+def _impact_text(finding):
+    label = impact_coverage_label(finding)
+    impact = finding.get("impact_analysis")
+    if impact is None:
+        return label
     return ("ANÁLISIS ESTÁTICO · SIN EJECUCIÓN · IMPACTO NO OBSERVADO\n"
-            + json.dumps(impact, ensure_ascii=False, indent=2))
+            + label + "\n" + json.dumps(impact, ensure_ascii=False, indent=2))
 
 
 def render_html(report):

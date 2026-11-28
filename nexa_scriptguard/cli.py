@@ -10,6 +10,7 @@ from .ingestion import InputError, OutputError, read_source, write_reports
 from .limits import ScanLimits
 from .redaction import prepare_report
 from .reports import (
+    impact_coverage_label,
     render_html,
     render_json,
     render_sarif,
@@ -155,6 +156,10 @@ def main(argv=None):
                 )
                 rows.append("  " + finding["explanation"])
                 rows.append("  " + finding["recommendation"])
+                rows.append("  " + impact_coverage_label(finding))
+                impact = finding.get("impact_analysis")
+                if impact and impact["coverage"] in {"partial", "not_evaluated"}:
+                    rows.extend("    " + reason for reason in impact["limitations"])
                 rows.extend(
                     "  Verify (not executed): " + command
                     for command in finding["verification_commands"]

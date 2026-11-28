@@ -28,7 +28,26 @@ describe('NextGenAI UI', () => {
     };
     const parsed = reportSchema.parse(oldReport);
     render(<AnalysisFinding finding={parsed.findings[0]} />);
-    expect(screen.getByText('Análisis de impacto no disponible.')).toBeTruthy();
+    expect(screen.getByText('Análisis de impacto no disponible en este reporte')).toBeTruthy();
+  });
+
+  it('renders the structured coverage state independently from the base report', () => {
+    const report = reportSchema.parse(fixture);
+    const finding = report.findings[0];
+    const impact = finding.impact_analysis!;
+    expect(report.complete).toBe(true);
+    const { rerender } = render(<AnalysisFinding finding={finding} />);
+    expect(screen.getByText('Cobertura sintáctica')).toBeTruthy();
+    rerender(<AnalysisFinding finding={{ ...finding, impact_analysis: { ...impact, coverage: 'partial' } }} />);
+    expect(screen.getByText('Cobertura parcial')).toBeTruthy();
+    expect(screen.getByText(impact.limitations[0])).toBeTruthy();
+    rerender(<AnalysisFinding finding={{ ...finding, impact_analysis: { ...impact, coverage: 'not_evaluated' } }} />);
+    expect(screen.getByText('No evaluado por el motor SITA')).toBeTruthy();
+    const omitted = { ...finding, impact_analysis: undefined, impact_omission: 'resource_budget' };
+    const parsed = reportSchema.parse({ ...report, findings: [omitted] });
+    rerender(<AnalysisFinding finding={parsed.findings[0]} />);
+    expect(screen.getByText('No evaluado por límite de recursos')).toBeTruthy();
+    expect(reportSchema.safeParse({ ...report, findings: [{ ...omitted, impact_analysis: impact }] }).success).toBe(false);
   });
 
   it('preserves whitespace and exposes code evidence as a focusable text region', () => {

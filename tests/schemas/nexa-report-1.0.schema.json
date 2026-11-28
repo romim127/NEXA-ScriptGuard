@@ -475,6 +475,7 @@
     },
     "finding": {
       "type": "object",
+      "not": {"required": ["impact_analysis", "impact_omission"]},
       "required": ["id", "rule", "rule_id", "title", "file", "sha256", "location", "line", "column", "end_line", "end_column", "instruction", "context", "context_before", "context_after", "severity", "confidence", "confidence_reason", "status", "evidence", "explanation", "recommendation", "verification_commands", "limitations", "engine"],
       "properties": {
         "id": {"type": "string", "minLength": 1},
@@ -484,6 +485,7 @@
           "properties": {"id": {"type": "string", "minLength": 1}, "version": {"type": "string", "minLength": 1}}
         },
         "impact_analysis": {"$ref": "#/$defs/impact"},
+        "impact_omission": {"enum": ["deadline", "resource_budget"]},
         "rule_id": {"type": "string", "minLength": 1},
         "title": {"type": "string", "minLength": 1},
         "file": {"type": "string", "minLength": 1},
